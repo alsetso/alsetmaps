@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Menu, X, Home, FileText, Search, Settings, Bookmark } from "lucide-react";
+import { Menu, X, Home, FileText, Search, Settings, Bookmark, ChevronRight, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { Link, useParams } from "react-router-dom";
 
 interface DocumentLayoutProps {
   children: React.ReactNode;
@@ -18,6 +19,23 @@ const navigationItems = [
 
 export function DocumentLayout({ children, currentPage = "home" }: DocumentLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const params = useParams();
+  const pageId = params.id;
+
+  // Breadcrumbs for document pages
+  const renderBreadcrumbs = () => {
+    if (!pageId) return null;
+    
+    return (
+      <div className="flex items-center space-x-2 text-sm text-muted-foreground mb-6">
+        <Link to="/" className="hover:text-foreground transition-colors">
+          Home
+        </Link>
+        <ChevronRight className="h-4 w-4" />
+        <span className="capitalize text-foreground">{pageId.replace(/-/g, ' ')}</span>
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-gradient-subtle">
@@ -35,14 +53,17 @@ export function DocumentLayout({ children, currentPage = "home" }: DocumentLayou
           </Button>
           
           <div className="flex items-center space-x-2">
-            <h1 className="font-heading font-semibold text-lg">Knowledge Base</h1>
+            <Link to="/" className="font-heading font-semibold text-lg hover:text-primary transition-colors">
+              Knowledge Base
+            </Link>
           </div>
 
           <div className="ml-auto flex items-center space-x-2">
-            <Button variant="ghost" size="sm" className="focus-ring">
-              <Search className="h-4 w-4" />
-              <span className="sr-only">Search</span>
-            </Button>
+            <Link to="/login">
+              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
+                Login
+              </Button>
+            </Link>
           </div>
         </div>
       </header>
@@ -61,19 +82,20 @@ export function DocumentLayout({ children, currentPage = "home" }: DocumentLayou
               const isActive = item.id === currentPage;
               
               return (
-                <Button
-                  key={item.id}
-                  variant={isActive ? "default" : "ghost"}
-                  size="sm"
-                  className={cn(
-                    "w-12 h-12 p-0 focus-ring",
-                    isActive && "bg-primary text-primary-foreground"
-                  )}
-                  title={item.label}
-                >
-                  <Icon className="h-4 w-4" />
-                  <span className="sr-only">{item.label}</span>
-                </Button>
+                <Link key={item.id} to={item.href}>
+                  <Button
+                    variant={isActive ? "default" : "ghost"}
+                    size="sm"
+                    className={cn(
+                      "w-12 h-12 p-0 focus-ring",
+                      isActive && "bg-primary text-primary-foreground"
+                    )}
+                    title={item.label}
+                  >
+                    <Icon className="h-4 w-4" />
+                    <span className="sr-only">{item.label}</span>
+                  </Button>
+                </Link>
               );
             })}
           </nav>
@@ -82,6 +104,7 @@ export function DocumentLayout({ children, currentPage = "home" }: DocumentLayou
         {/* Main Content */}
         <main className="flex-1 overflow-auto">
           <div className="container max-w-4xl mx-auto px-4 py-8">
+            {renderBreadcrumbs()}
             {children}
           </div>
         </main>
