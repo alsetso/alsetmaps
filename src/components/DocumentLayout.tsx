@@ -72,7 +72,7 @@ export function DocumentLayout({ children, currentPage = "home" }: DocumentLayou
         {/* Sidebar */}
         <aside
           className={cn(
-            "sticky top-14 h-[calc(100vh-3.5rem)] border-r bg-card transition-all duration-300 ease-in-out",
+            "sticky top-14 h-[calc(100vh-3.5rem)] border-r bg-card transition-all duration-300 ease-in-out overflow-hidden",
             sidebarOpen ? "w-16" : "w-0"
           )}
         >
