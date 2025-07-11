@@ -1,8 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Menu, X, Home, FileText, Search, Settings, Bookmark, ChevronRight, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Link, useParams } from "react-router-dom";
+import { UserProfile } from "@/components/UserProfile";
+import { supabase } from "@/integrations/supabase/client";
+import type { User } from "@supabase/supabase-js";
 
 interface DocumentLayoutProps {
   children: React.ReactNode;
@@ -19,8 +22,26 @@ const navigationItems = [
 
 export function DocumentLayout({ children, currentPage = "home" }: DocumentLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [user, setUser] = useState<User | null>(null);
   const params = useParams();
   const pageId = params.id;
+
+  useEffect(() => {
+    // Get current user
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    };
+
+    getUser();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   // Breadcrumbs for document pages
   const renderBreadcrumbs = () => {
@@ -59,11 +80,15 @@ export function DocumentLayout({ children, currentPage = "home" }: DocumentLayou
           </div>
 
           <div className="ml-auto flex items-center space-x-2">
-            <Link to="/login">
-              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
-                Login
-              </Button>
-            </Link>
+            {user ? (
+              <UserProfile />
+            ) : (
+              <Link to="/login">
+                <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
+                  Login
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
       </header>
