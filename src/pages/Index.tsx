@@ -14,12 +14,36 @@ const featuredDocuments = [
     tags: ["API", "Webhooks", "Data Intake"]
   },
   {
-    id: "automation", 
-    emoji: "⚡",
-    title: "Automation Engine",
-    tagline: "Transform Data Into Action. Automatically.",
-    description: "Intelligent processing core that transforms incoming data into meaningful business actions.",
-    tags: ["AI", "Workflows", "Processing"]
+    id: "workflows",
+    emoji: "🔁",
+    title: "Workflows",
+    tagline: "Build Logic. Automate Response. Save Hours.",
+    description: "Low-code automation engine with drag-and-drop logic builder for intelligent sequences.",
+    tags: ["Automation", "Logic", "No-Code"]
+  },
+  {
+    id: "ai-assistants",
+    emoji: "🤖",
+    title: "AI Assistants",
+    tagline: "Talk. Text. Act. Your Team Just Got Smarter.",
+    description: "Voice and text-based digital agents that engage, respond, and execute actions in real-time.",
+    tags: ["AI", "Voice", "Automation"]
+  },
+  {
+    id: "intelligence",
+    emoji: "📊",
+    title: "Intelligence",
+    tagline: "Know What's Working. And What's Not.",
+    description: "Real-time analytics across your entire platform with predictive AI-powered insights.",
+    tags: ["Analytics", "AI Insights", "Metrics"]
+  },
+  {
+    id: "memory",
+    emoji: "🧠",
+    title: "Memory",
+    tagline: "One Timeline. Every Action. For Life.",
+    description: "Persistent knowledge graph tracking every interaction for context-aware automation.",
+    tags: ["Context", "History", "Timeline"]
   }
 ];
 
@@ -40,7 +64,7 @@ const Index = () => {
             Featured Documentation
           </h2>
           
-          <div className="grid gap-6 md:grid-cols-2 not-prose">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 not-prose">
             {featuredDocuments.map((doc) => (
               <Link key={doc.id} to={`/${doc.id}`} className="block group">
                 <Card className="h-full transition-all duration-200 hover:shadow-md hover:scale-[1.02] group-hover:border-primary/20">
