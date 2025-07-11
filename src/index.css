@@ -4,39 +4,73 @@
 
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.
+Document-style blog platform with professional design system.
 */
 
 @layer base {
   :root {
+    /* Base colors - clean, professional palette */
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-
+    --foreground: 215 25% 27%;
+    
+    /* Document-style surfaces */
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-
+    --card-foreground: 215 25% 27%;
+    
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-
+    --popover-foreground: 215 25% 27%;
+    
+    /* Brand colors - professional blue-gray system */
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 100%;
+    --primary-subtle: 217 91% 95%;
+    
+    /* Content hierarchy */
+    --secondary: 215 14% 96%;
+    --secondary-foreground: 215 25% 27%;
+    
+    --muted: 215 14% 96%;
+    --muted-foreground: 215 13% 56%;
+    
+    --accent: 215 14% 96%;
+    --accent-foreground: 215 25% 27%;
+    
+    /* Status colors */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 142 69% 58%;
+    --warning: 38 92% 50%;
+    
+    /* Interactive elements */
+    --border: 215 14% 89%;
+    --input: 215 14% 89%;
+    --ring: 217 91% 60%;
+    
+    /* Design tokens */
     --radius: 0.5rem;
+    
+    /* Document-specific design tokens */
+    --content-max-width: 65ch;
+    --sidebar-width: 280px;
+    --sidebar-collapsed-width: 72px;
+    
+    /* Typography scale */
+    --font-heading: 'Inter', system-ui, sans-serif;
+    --font-body: 'Inter', system-ui, sans-serif;
+    --font-code: 'Fira Code', 'Monaco', monospace;
+    
+    /* Gradients for subtle effects */
+    --gradient-primary: linear-gradient(135deg, hsl(217, 91%, 60%) 0%, hsl(217, 91%, 70%) 100%);
+    --gradient-subtle: linear-gradient(180deg, hsl(0, 0%, 100%) 0%, hsl(215, 14%, 98%) 100%);
+    
+    /* Shadows for depth */
+    --shadow-sm: 0 1px 2px 0 hsl(215 25% 27% / 0.05);
+    --shadow-md: 0 4px 6px -1px hsl(215 25% 27% / 0.1), 0 2px 4px -1px hsl(215 25% 27% / 0.06);
+    --shadow-lg: 0 10px 15px -3px hsl(215 25% 27% / 0.1), 0 4px 6px -2px hsl(215 25% 27% / 0.05);
+    
+    /* Animations */
+    --transition-base: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
 
     --sidebar-background: 0 0% 98%;
 
@@ -100,6 +134,54 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-body antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Typography system for document-style content */
+  .prose {
+    @apply max-w-content mx-auto text-foreground;
+  }
+
+  .prose h1 {
+    @apply text-4xl font-bold tracking-tight font-heading mb-6 text-foreground;
+  }
+
+  .prose h2 {
+    @apply text-2xl font-semibold tracking-tight font-heading mt-8 mb-4 text-foreground;
+  }
+
+  .prose h3 {
+    @apply text-xl font-medium font-heading mt-6 mb-3 text-foreground;
+  }
+
+  .prose p {
+    @apply text-base leading-7 mb-4 text-foreground;
+  }
+
+  .prose .tagline {
+    @apply text-xl text-muted-foreground font-medium mb-6 italic;
+  }
+
+  .prose .description {
+    @apply text-base leading-relaxed text-foreground mb-8;
+  }
+
+  .prose .keywords {
+    @apply text-sm text-muted-foreground leading-relaxed;
+  }
+
+  .prose code {
+    @apply font-code text-sm bg-secondary px-1.5 py-0.5 rounded text-secondary-foreground;
+  }
+
+  /* Smooth scrolling for navigation */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Focus styles for accessibility */
+  .focus-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
   }
 }
