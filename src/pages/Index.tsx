@@ -64,7 +64,7 @@ const Index = () => {
             Featured Documentation
           </h2>
           
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 not-prose">
+          <div className="flex flex-col gap-6 not-prose">
             {featuredDocuments.map((doc) => (
               <Link key={doc.id} to={`/${doc.id}`} className="block group">
                 <Card className="h-full transition-all duration-200 hover:shadow-md hover:scale-[1.02] group-hover:border-primary/20">
