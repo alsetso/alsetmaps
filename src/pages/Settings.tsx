@@ -5,8 +5,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
+import { Moon, Sun } from "lucide-react";
+import { useTheme } from "next-themes";
 
 export default function Settings() {
+  const { theme, setTheme } = useTheme();
+
   return (
     <DocumentLayout currentPage="settings">
       <div className="space-y-6">
@@ -18,6 +22,33 @@ export default function Settings() {
         </div>
 
         <div className="grid gap-6">
+          {/* Appearance Settings */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Appearance</CardTitle>
+              <CardDescription>
+                Customize the appearance of the application.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label>Dark mode</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Toggle between light and dark themes
+                  </p>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Sun className="h-4 w-4" />
+                  <Switch 
+                    checked={theme === 'dark'} 
+                    onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
+                  />
+                  <Moon className="h-4 w-4" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
           {/* Profile Settings */}
           <Card>
             <CardHeader>

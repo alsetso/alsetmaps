@@ -10,7 +10,7 @@ export default function Search() {
         <div>
           <h1 className="text-3xl font-bold mb-2">Search</h1>
           <p className="text-muted-foreground">
-            Find documents, pages, and content across the knowledge base
+            Find documents, pages, and content across alset
           </p>
         </div>
         

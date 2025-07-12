@@ -52,7 +52,7 @@ const Index = () => {
     <DocumentLayout currentPage="home">
       <div className="prose">
         <header className="text-center mb-12">
-          <h1 className="mb-4">Knowledge Base</h1>
+          <h1 className="mb-4">alset</h1>
           <p className="tagline">
             Explore our comprehensive documentation, guides, and resources.
           </p>
@@ -105,7 +105,7 @@ const Index = () => {
         <section>
           <h2>About This Platform</h2>
           <p>
-            This knowledge base serves as a comprehensive resource for understanding our platform's 
+            alset serves as a comprehensive resource for understanding our platform's 
             capabilities, features, and implementation details. Each document is carefully crafted 
             to provide both technical depth and practical guidance.
           </p>

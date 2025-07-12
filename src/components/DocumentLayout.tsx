@@ -75,7 +75,7 @@ export function DocumentLayout({ children, currentPage = "home" }: DocumentLayou
           
           <div className="flex items-center space-x-2">
             <Link to="/" className="font-heading font-semibold text-lg hover:text-primary transition-colors">
-              Knowledge Base
+              alset
             </Link>
           </div>
 
