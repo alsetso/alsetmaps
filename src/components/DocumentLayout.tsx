@@ -59,7 +59,7 @@ export function DocumentLayout({ children, currentPage = "home" }: DocumentLayou
   };
 
   return (
-    <div className="min-h-screen bg-gradient-subtle">
+    <div className="min-h-screen bg-background">
       {/* Top Bar */}
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-14 items-center">
@@ -93,11 +93,11 @@ export function DocumentLayout({ children, currentPage = "home" }: DocumentLayou
         </div>
       </header>
 
-      <div className="flex">
+      <div className="flex min-h-[calc(100vh-3.5rem)]">
         {/* Sidebar */}
         <aside
           className={cn(
-            "sticky top-14 h-[calc(100vh-3.5rem)] border-r bg-card transition-all duration-300 ease-in-out overflow-hidden",
+            "sticky top-14 h-[calc(100vh-3.5rem)] border-r bg-sidebar-background transition-all duration-300 ease-in-out overflow-hidden",
             sidebarOpen ? "w-16" : "w-0"
           )}
         >
@@ -112,8 +112,8 @@ export function DocumentLayout({ children, currentPage = "home" }: DocumentLayou
                     variant={isActive ? "default" : "ghost"}
                     size="sm"
                     className={cn(
-                      "w-12 h-12 p-0 focus-ring",
-                      isActive && "bg-primary text-primary-foreground"
+                      "w-12 h-12 p-0 focus-ring text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                      isActive && "bg-sidebar-primary text-sidebar-primary-foreground"
                     )}
                     title={item.label}
                   >
@@ -127,7 +127,7 @@ export function DocumentLayout({ children, currentPage = "home" }: DocumentLayou
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 overflow-auto">
+        <main className="flex-1 bg-gradient-to-br from-background to-muted/30 overflow-auto">
           <div className="container max-w-4xl mx-auto px-4 py-8">
             {renderBreadcrumbs()}
             {children}
