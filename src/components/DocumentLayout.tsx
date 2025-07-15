@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Link, useParams } from "react-router-dom";
 import { UserProfile } from "@/components/UserProfile";
+import { ResponsiveContainer } from "@/components/layout/ResponsiveContainer";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from "@supabase/supabase-js";
 
@@ -60,48 +61,56 @@ export function DocumentLayout({ children, currentPage = "home" }: DocumentLayou
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Top Bar */}
+      {/* Responsive Header */}
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-14 items-center">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="mr-2 px-2 focus-ring"
-          >
-            {sidebarOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-            <span className="sr-only">Toggle sidebar</span>
-          </Button>
-          
-          <div className="flex items-center space-x-2">
-            <Link to="/" className="font-heading font-semibold text-lg hover:text-primary transition-colors">
+        <ResponsiveContainer size="fluid" className="flex h-header items-center justify-between">
+          <div className="flex items-center gap-fluid-sm">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="btn-responsive px-fluid-sm focus-ring"
+            >
+              {sidebarOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+              <span className="sr-only">Toggle sidebar</span>
+            </Button>
+            
+            <Link 
+              to="/" 
+              className="font-heading font-semibold text-fluid-lg hover:text-primary transition-colors focus-ring rounded-sm"
+            >
               alset
             </Link>
           </div>
 
-          <div className="ml-auto flex items-center space-x-2">
+          <div className="flex items-center gap-fluid-sm">
             {user ? (
               <UserProfile />
             ) : (
               <Link to="/login">
-                <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="btn-responsive text-muted-foreground hover:text-foreground"
+                >
                   Login
                 </Button>
               </Link>
             )}
           </div>
-        </div>
+        </ResponsiveContainer>
       </header>
 
-      <div className="flex min-h-[calc(100vh-3.5rem)]">
-        {/* Sidebar */}
+      <div className="flex min-h-[calc(100vh-var(--header-height))]">
+        {/* Responsive Sidebar */}
         <aside
           className={cn(
-            "sticky top-14 h-[calc(100vh-3.5rem)] border-r bg-sidebar-background transition-all duration-300 ease-in-out overflow-hidden",
-            sidebarOpen ? "w-16" : "w-0"
+            "sticky top-header h-[calc(100vh-var(--header-height))] border-r bg-sidebar-background transition-all duration-300 ease-in-out overflow-hidden",
+            "lg:block",
+            sidebarOpen ? "w-sidebar-collapsed md:w-sidebar" : "w-0"
           )}
         >
-          <nav className="flex flex-col gap-2 p-2">
+          <nav className="flex flex-col gap-fluid-xs p-fluid-sm">
             {navigationItems.map((item) => {
               const Icon = item.icon;
               const isActive = item.id === currentPage;
@@ -112,13 +121,20 @@ export function DocumentLayout({ children, currentPage = "home" }: DocumentLayou
                     variant={isActive ? "default" : "ghost"}
                     size="sm"
                     className={cn(
-                      "w-12 h-12 p-0 focus-ring text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                      isActive && "bg-sidebar-primary text-sidebar-primary-foreground"
+                      "w-full h-12 justify-start gap-fluid-sm px-fluid-sm focus-ring",
+                      "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                      isActive && "bg-sidebar-primary text-sidebar-primary-foreground",
+                      !sidebarOpen && "md:justify-center md:px-0"
                     )}
                     title={item.label}
                   >
-                    <Icon className="h-4 w-4" />
-                    <span className="sr-only">{item.label}</span>
+                    <Icon className="h-4 w-4 flex-shrink-0" />
+                    <span className={cn(
+                      "transition-opacity duration-300",
+                      sidebarOpen ? "opacity-100" : "md:opacity-0 md:sr-only"
+                    )}>
+                      {item.label}
+                    </span>
                   </Button>
                 </Link>
               );
@@ -126,14 +142,37 @@ export function DocumentLayout({ children, currentPage = "home" }: DocumentLayou
           </nav>
         </aside>
 
-        {/* Main Content */}
-        <main className="flex-1 bg-gradient-to-br from-background to-muted/30 overflow-auto">
-          <div className="container max-w-4xl mx-auto px-4 py-8">
-            {renderBreadcrumbs()}
-            {children}
-          </div>
+        {/* Responsive Main Content */}
+        <main className="flex-1 bg-gradient-subtle overflow-auto">
+          <ResponsiveContainer size="wide" className="py-fluid-2xl min-h-full">
+            <div className="space-fluid-y">
+              {renderBreadcrumbs()}
+              {children}
+            </div>
+          </ResponsiveContainer>
         </main>
       </div>
+
+      {/* Responsive Footer */}
+      <footer className="border-t bg-muted/30">
+        <ResponsiveContainer size="container" className="py-fluid-xl">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-fluid-lg text-fluid-sm text-muted-foreground">
+            <div className="flex items-center gap-fluid-sm">
+              <span className="font-heading font-semibold">alset</span>
+              <span>•</span>
+              <span>Professional documentation platform</span>
+            </div>
+            <div className="flex gap-fluid-lg">
+              <Link to="/docs" className="hover:text-foreground transition-colors focus-ring rounded-sm">
+                Documentation
+              </Link>
+              <Link to="/settings" className="hover:text-foreground transition-colors focus-ring rounded-sm">
+                Settings
+              </Link>
+            </div>
+          </div>
+        </ResponsiveContainer>
+      </footer>
     </div>
   );
 }

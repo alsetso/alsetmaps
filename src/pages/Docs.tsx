@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { DocumentLayout } from "@/components/DocumentLayout";
+import { ResponsiveContainer, ResponsiveGrid, ResponsiveCard } from "@/components/layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -179,55 +180,62 @@ export default function Docs() {
 
   return (
     <DocumentLayout currentPage="docs">
-      <div className="space-y-12">
+      <div className="space-fluid-y">
         {/* Hero Section */}
-        <header className="text-center space-y-6">
-          <h1 className="text-5xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+        <header className="text-center space-fluid-y">
+          <h1 className="text-fluid-5xl font-bold bg-gradient-primary bg-clip-text text-transparent leading-tight">
             Platform Documentation
           </h1>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            Comprehensive documentation for alset's AI-powered platform. Get started with our core services 
-            and explore advanced features to transform your industry operations.
-          </p>
+          <ResponsiveContainer size="content">
+            <p className="text-fluid-xl text-muted-foreground leading-relaxed">
+              Comprehensive documentation for alset's AI-powered platform. Get started with our core services 
+              and explore advanced features to transform your industry operations.
+            </p>
+          </ResponsiveContainer>
         </header>
 
         {/* Primary Services Grid */}
-        <section className="space-y-8">
-          <div className="text-center">
-            <h2 className="text-3xl font-bold mb-4">Core Platform Services</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Explore our primary services designed to accelerate your AI transformation journey
-            </p>
+        <section className="space-fluid-y">
+          <div className="text-center space-fluid-y">
+            <h2 className="text-fluid-3xl font-bold">Core Platform Services</h2>
+            <ResponsiveContainer size="narrow">
+              <p className="text-muted-foreground text-fluid-base">
+                Explore our primary services designed to accelerate your AI transformation journey
+              </p>
+            </ResponsiveContainer>
           </div>
           
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <ResponsiveGrid size="lg" minWidth="300px">
             {primaryServices.map((service) => {
               const IconComponent = service.icon;
               return (
                 <Link key={service.id} to={`/${service.slug}`}>
-                  <Card className="h-full group hover:shadow-xl transition-all duration-300 cursor-pointer border-0 bg-gradient-to-br from-card to-card/80 hover:scale-105">
-                    <CardHeader className="pb-4">
-                      <div className={`w-12 h-12 rounded-lg bg-gradient-to-r ${service.gradient} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
+                  <ResponsiveCard 
+                    className="h-full group hover:shadow-xl transition-all duration-300 cursor-pointer border-0 bg-gradient-subtle hover:scale-105"
+                    shadow="md"
+                  >
+                    <div className="space-fluid-y">
+                      <div className={`w-12 h-12 rounded-lg bg-gradient-to-r ${service.gradient} flex items-center justify-center group-hover:scale-110 transition-transform`}>
                         <IconComponent className="h-6 w-6 text-white" />
                       </div>
-                      <CardTitle className="text-xl group-hover:text-primary transition-colors">
-                        {service.title}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-muted-foreground leading-relaxed mb-4">
-                        {service.description}
-                      </p>
-                      <div className="flex items-center text-primary group-hover:translate-x-1 transition-transform">
-                        <span className="text-sm font-medium">Learn more</span>
-                        <ArrowRight className="h-4 w-4 ml-1" />
+                      <div>
+                        <h3 className="text-fluid-xl font-semibold group-hover:text-primary transition-colors mb-fluid-sm">
+                          {service.title}
+                        </h3>
+                        <p className="text-muted-foreground text-fluid-base leading-relaxed">
+                          {service.description}
+                        </p>
                       </div>
-                    </CardContent>
-                  </Card>
+                      <div className="flex items-center text-primary group-hover:translate-x-1 transition-transform pt-fluid-sm">
+                        <span className="text-fluid-sm font-medium">Learn more</span>
+                        <ArrowRight className="h-4 w-4 ml-fluid-xs" />
+                      </div>
+                    </div>
+                  </ResponsiveCard>
                 </Link>
               );
             })}
-          </div>
+          </ResponsiveGrid>
         </section>
 
         {/* Featured Documentation */}

@@ -5,6 +5,7 @@
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.
 Document-style blog platform with professional design system.
+Fully responsive layout system with fluid typography and adaptive containers.
 */
 
 @layer base {
@@ -49,10 +50,46 @@ Document-style blog platform with professional design system.
     /* Design tokens */
     --radius: 0.5rem;
     
-    /* Document-specific design tokens */
+    /* Responsive Layout System */
+    --container-max-width: 1440px;
     --content-max-width: 65ch;
-    --sidebar-width: 280px;
-    --sidebar-collapsed-width: 72px;
+    --narrow-max-width: 768px;
+    --wide-max-width: 1200px;
+    
+    /* Responsive Spacing Scale (4pt base) */
+    --space-xs: clamp(0.25rem, 0.5vw, 0.5rem);
+    --space-sm: clamp(0.5rem, 1vw, 0.75rem);
+    --space-md: clamp(0.75rem, 1.5vw, 1rem);
+    --space-lg: clamp(1rem, 2vw, 1.5rem);
+    --space-xl: clamp(1.5rem, 3vw, 2rem);
+    --space-2xl: clamp(2rem, 4vw, 3rem);
+    --space-3xl: clamp(3rem, 6vw, 4rem);
+    --space-4xl: clamp(4rem, 8vw, 6rem);
+    
+    /* Fluid Typography Scale */
+    --text-xs: clamp(0.75rem, 0.95vw, 0.875rem);
+    --text-sm: clamp(0.875rem, 1.1vw, 1rem);
+    --text-base: clamp(1rem, 1.25vw, 1.125rem);
+    --text-lg: clamp(1.125rem, 1.4vw, 1.25rem);
+    --text-xl: clamp(1.25rem, 1.6vw, 1.5rem);
+    --text-2xl: clamp(1.5rem, 2vw, 1.875rem);
+    --text-3xl: clamp(1.875rem, 2.5vw, 2.25rem);
+    --text-4xl: clamp(2.25rem, 3vw, 3rem);
+    --text-5xl: clamp(3rem, 4vw, 3.75rem);
+    --text-6xl: clamp(3.75rem, 5vw, 4.5rem);
+    
+    /* Line Height Scale */
+    --leading-tight: 1.25;
+    --leading-snug: 1.375;
+    --leading-normal: 1.5;
+    --leading-relaxed: 1.625;
+    --leading-loose: 2;
+    
+    /* Layout Components */
+    --sidebar-width: clamp(240px, 20vw, 320px);
+    --sidebar-collapsed-width: 64px;
+    --header-height: 4rem;
+    --footer-height: auto;
     
     /* Typography scale */
     --font-heading: 'Inter', system-ui, sans-serif;
@@ -62,15 +99,21 @@ Document-style blog platform with professional design system.
     /* Gradients for subtle effects */
     --gradient-primary: linear-gradient(135deg, hsl(217, 91%, 60%) 0%, hsl(217, 91%, 70%) 100%);
     --gradient-subtle: linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--muted)) 100%);
+    --gradient-radial: radial-gradient(circle at center, hsl(var(--background)) 0%, hsl(var(--muted)) 100%);
     
-    /* Shadows for depth */
-    --shadow-sm: 0 1px 2px 0 hsl(215 25% 27% / 0.05);
+    /* Enhanced Shadows with Responsive Scaling */
+    --shadow-xs: 0 1px 2px 0 hsl(215 25% 27% / 0.05);
+    --shadow-sm: 0 1px 3px 0 hsl(215 25% 27% / 0.1), 0 1px 2px 0 hsl(215 25% 27% / 0.06);
     --shadow-md: 0 4px 6px -1px hsl(215 25% 27% / 0.1), 0 2px 4px -1px hsl(215 25% 27% / 0.06);
     --shadow-lg: 0 10px 15px -3px hsl(215 25% 27% / 0.1), 0 4px 6px -2px hsl(215 25% 27% / 0.05);
+    --shadow-xl: 0 20px 25px -5px hsl(215 25% 27% / 0.1), 0 10px 10px -5px hsl(215 25% 27% / 0.04);
+    --shadow-2xl: 0 25px 50px -12px hsl(215 25% 27% / 0.25);
     
-    /* Animations */
+    /* Animations with Performance Optimization */
     --transition-base: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
     --transition-slow: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-fast: all 100ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-spring: all 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
 
     --sidebar-background: 0 0% 98%;
 
@@ -138,41 +181,73 @@ Document-style blog platform with professional design system.
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 
-  /* Typography system for document-style content */
+  /* Responsive Typography System */
   .prose {
     @apply max-w-content mx-auto text-foreground;
   }
 
-  .prose h1 {
-    @apply text-4xl font-bold tracking-tight font-heading mb-6 text-foreground;
+  .prose h1, h1 {
+    font-size: var(--text-4xl);
+    line-height: var(--leading-tight);
+    @apply font-bold tracking-tight font-heading text-foreground;
+    margin-bottom: var(--space-xl);
   }
 
-  .prose h2 {
-    @apply text-2xl font-semibold tracking-tight font-heading mt-8 mb-4 text-foreground;
+  .prose h2, h2 {
+    font-size: var(--text-2xl);
+    line-height: var(--leading-snug);
+    @apply font-semibold tracking-tight font-heading text-foreground;
+    margin-top: var(--space-2xl);
+    margin-bottom: var(--space-lg);
   }
 
-  .prose h3 {
-    @apply text-xl font-medium font-heading mt-6 mb-3 text-foreground;
+  .prose h3, h3 {
+    font-size: var(--text-xl);
+    line-height: var(--leading-snug);
+    @apply font-medium font-heading text-foreground;
+    margin-top: var(--space-xl);
+    margin-bottom: var(--space-md);
   }
 
-  .prose p {
-    @apply text-base leading-7 mb-4 text-foreground;
+  .prose h4, h4 {
+    font-size: var(--text-lg);
+    line-height: var(--leading-normal);
+    @apply font-medium font-heading text-foreground;
+    margin-top: var(--space-lg);
+    margin-bottom: var(--space-sm);
+  }
+
+  .prose p, p {
+    font-size: var(--text-base);
+    line-height: var(--leading-relaxed);
+    @apply text-foreground;
+    margin-bottom: var(--space-lg);
   }
 
   .prose .tagline {
-    @apply text-xl text-muted-foreground font-medium mb-6 italic;
+    font-size: var(--text-xl);
+    line-height: var(--leading-normal);
+    @apply text-muted-foreground font-medium italic;
+    margin-bottom: var(--space-xl);
   }
 
   .prose .description {
-    @apply text-base leading-relaxed text-foreground mb-8;
+    font-size: var(--text-base);
+    line-height: var(--leading-relaxed);
+    @apply text-foreground;
+    margin-bottom: var(--space-2xl);
   }
 
   .prose .keywords {
-    @apply text-sm text-muted-foreground leading-relaxed;
+    font-size: var(--text-sm);
+    line-height: var(--leading-relaxed);
+    @apply text-muted-foreground;
   }
 
-  .prose code {
-    @apply font-code text-sm bg-secondary px-1.5 py-0.5 rounded text-secondary-foreground;
+  .prose code, code {
+    font-size: var(--text-sm);
+    @apply font-code bg-secondary text-secondary-foreground rounded;
+    padding: var(--space-xs) var(--space-sm);
   }
 
   /* Smooth scrolling for navigation */
@@ -183,5 +258,150 @@ Document-style blog platform with professional design system.
   /* Focus styles for accessibility */
   .focus-ring {
     @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
+  }
+}
+
+/* Responsive Layout Components */
+@layer components {
+  /* Container System */
+  .container-fluid {
+    width: 100%;
+    max-width: var(--container-max-width);
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: var(--space-lg);
+    padding-right: var(--space-lg);
+  }
+
+  .container-narrow {
+    width: 100%;
+    max-width: var(--narrow-max-width);
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: var(--space-lg);
+    padding-right: var(--space-lg);
+  }
+
+  .container-content {
+    width: 100%;
+    max-width: var(--content-max-width);
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: var(--space-lg);
+    padding-right: var(--space-lg);
+  }
+
+  .container-wide {
+    width: 100%;
+    max-width: var(--wide-max-width);
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: var(--space-lg);
+    padding-right: var(--space-lg);
+  }
+
+  /* Responsive Grid System */
+  .grid-responsive {
+    display: grid;
+    gap: var(--space-lg);
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+
+  .grid-responsive-sm {
+    display: grid;
+    gap: var(--space-md);
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  }
+
+  .grid-responsive-lg {
+    display: grid;
+    gap: var(--space-xl);
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  }
+
+  /* Flex Utilities */
+  .flex-responsive {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-lg);
+  }
+
+  .flex-responsive > * {
+    flex: 1 1 280px;
+    min-width: 0;
+  }
+
+  /* Card Component */
+  .card-responsive {
+    @apply bg-card text-card-foreground border border-border rounded-lg;
+    padding: var(--space-lg);
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition-base);
+  }
+
+  .card-responsive:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+  }
+
+  /* Spacing Utilities */
+  .space-fluid-y > * + * {
+    margin-top: var(--space-lg);
+  }
+
+  .space-fluid-x > * + * {
+    margin-left: var(--space-lg);
+  }
+
+  /* Responsive Text Sizes */
+  .text-fluid-xs { font-size: var(--text-xs); }
+  .text-fluid-sm { font-size: var(--text-sm); }
+  .text-fluid-base { font-size: var(--text-base); }
+  .text-fluid-lg { font-size: var(--text-lg); }
+  .text-fluid-xl { font-size: var(--text-xl); }
+  .text-fluid-2xl { font-size: var(--text-2xl); }
+  .text-fluid-3xl { font-size: var(--text-3xl); }
+  .text-fluid-4xl { font-size: var(--text-4xl); }
+  .text-fluid-5xl { font-size: var(--text-5xl); }
+  .text-fluid-6xl { font-size: var(--text-6xl); }
+
+  /* Interactive Elements */
+  .btn-responsive {
+    @apply inline-flex items-center justify-center rounded-md font-medium transition-all;
+    padding: var(--space-sm) var(--space-lg);
+    font-size: var(--text-sm);
+    gap: var(--space-xs);
+    min-height: 2.5rem;
+    white-space: nowrap;
+  }
+
+  .btn-responsive:focus {
+    @apply focus-ring;
+  }
+
+  /* Adaptive Animations */
+  @media (prefers-reduced-motion: reduce) {
+    .card-responsive:hover {
+      transform: none;
+    }
+    
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  /* Device-Specific Optimizations */
+  @media (hover: none) and (pointer: coarse) {
+    .card-responsive:hover {
+      transform: none;
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .btn-responsive {
+      min-height: 3rem;
+      padding: var(--space-md) var(--space-xl);
+    }
   }
 }

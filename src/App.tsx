@@ -17,22 +17,26 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <BrowserRouter>
-      <Toaster />
-      <Sonner />
-      <Routes>
-        <Route path="/" element={<Index />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/docs" element={<Docs />} />
-        <Route path="/settings" element={<Settings />} />
-        <Route path="/billing" element={<Billing />} />
-        <Route path="/search" element={<Search />} />
-        <Route path="/bookmarks" element={<Bookmarks />} />
-        <Route path="/:id" element={<DocumentView />} />
-        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </BrowserRouter>
+    <TooltipProvider>
+      <BrowserRouter>
+        <div className="min-h-screen bg-background font-body antialiased">
+          <Toaster />
+          <Sonner />
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/docs" element={<Docs />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/billing" element={<Billing />} />
+            <Route path="/search" element={<Search />} />
+            <Route path="/bookmarks" element={<Bookmarks />} />
+            <Route path="/:id" element={<DocumentView />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </div>
+      </BrowserRouter>
+    </TooltipProvider>
   </QueryClientProvider>
 );
 
