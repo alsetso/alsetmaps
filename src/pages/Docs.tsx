@@ -26,7 +26,7 @@ const primaryServices = [
     title: "Endpoints",
     description: "Secure API endpoints for seamless data integration and real-time communication",
     icon: Database,
-    slug: "endpoints-documentation",
+    slug: "endpoints",
     gradient: "from-blue-500 to-cyan-500"
   },
   {
@@ -34,7 +34,7 @@ const primaryServices = [
     title: "Agents",
     description: "Intelligent AI agents for autonomous task execution and decision making",
     icon: Bot,
-    slug: "ai-agents-guide",
+    slug: "agents",
     gradient: "from-purple-500 to-pink-500"
   },
   {
@@ -42,7 +42,7 @@ const primaryServices = [
     title: "Intelligence",
     description: "Advanced AI models and machine learning capabilities for industry transformation",
     icon: Brain,
-    slug: "intelligence-platform",
+    slug: "intelligence",
     gradient: "from-green-500 to-emerald-500"
   },
   {
@@ -50,7 +50,7 @@ const primaryServices = [
     title: "Data Processing",
     description: "Real-time data processing and analytics for actionable business insights",
     icon: Cpu,
-    slug: "data-processing-engine",
+    slug: "processing",
     gradient: "from-orange-500 to-red-500"
   },
   {
@@ -58,7 +58,7 @@ const primaryServices = [
     title: "Integrations",
     description: "Seamless third-party integrations for enhanced workflow automation",
     icon: Network,
-    slug: "integration-hub",
+    slug: "integrations",
     gradient: "from-indigo-500 to-blue-500"
   }
 ];
@@ -94,6 +94,38 @@ const featuredDocuments = [
     title: "🔗 Integration Hub",
     description: "Connect with third-party services and automate workflows",
     category: "Integrations"
+  }
+];
+
+// News and articles
+const newsArticles = [
+  {
+    id: "ai-transformation-2024",
+    title: "📰 The Future of AI Transformation in 2024",
+    description: "Industry insights and trends shaping the AI landscape",
+    category: "Industry News",
+    date: "2024-01-15"
+  },
+  {
+    id: "case-study-manufacturing",
+    title: "📊 Manufacturing Excellence with AI Agents",
+    description: "How leading manufacturers increased efficiency by 40% using alset's platform",
+    category: "Case Study",
+    date: "2024-01-10"
+  },
+  {
+    id: "endpoint-security-best-practices",
+    title: "🔒 API Security Best Practices for 2024",
+    description: "Essential security measures for protecting your endpoints and data",
+    category: "Security",
+    date: "2024-01-08"
+  },
+  {
+    id: "integration-patterns",
+    title: "🔗 Modern Integration Patterns with AI",
+    description: "Architectural approaches for seamless AI-powered integrations",
+    category: "Technical",
+    date: "2024-01-05"
   }
 ];
 
@@ -331,6 +363,52 @@ export default function Docs() {
           )}
         </section>
 
+        {/* News and Articles */}
+        <section className="space-y-8">
+          <div className="text-center">
+            <h2 className="text-3xl font-bold mb-4">News & Articles</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Stay updated with the latest insights, case studies, and industry developments
+            </p>
+          </div>
+          
+          <div className="grid gap-6 md:grid-cols-2">
+            {newsArticles.map((article) => (
+              <Link key={article.id} to={`/${article.id}`}>
+                <Card className="h-full group hover:shadow-lg transition-all duration-300 cursor-pointer border-l-4 border-l-accent/30 hover:border-l-accent">
+                  <CardHeader>
+                    <div className="flex items-start justify-between mb-2">
+                      <CardTitle className="text-lg group-hover:text-primary transition-colors flex-1">
+                        {article.title}
+                      </CardTitle>
+                      <div className="flex flex-col items-end gap-1 ml-4">
+                        <Badge variant="outline" className="text-xs">
+                          {article.category}
+                        </Badge>
+                        <span className="text-xs text-muted-foreground">
+                          {new Date(article.date).toLocaleDateString('en-US', { 
+                            month: 'short', 
+                            day: 'numeric' 
+                          })}
+                        </span>
+                      </div>
+                    </div>
+                    <CardDescription className="leading-relaxed">
+                      {article.description}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center text-accent group-hover:translate-x-1 transition-transform">
+                      <span className="text-sm font-medium">Read article</span>
+                      <ArrowRight className="h-4 w-4 ml-1" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        </section>
+
         {/* Get Started CTA */}
         <Card className="bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
           <CardContent className="text-center py-12">
@@ -345,7 +423,7 @@ export default function Docs() {
               </p>
               <div className="flex items-center justify-center gap-4 pt-4">
                 <Button asChild size="lg">
-                  <Link to="/endpoints-documentation">
+                  <Link to="/endpoints">
                     <Database className="h-5 w-5 mr-2" />
                     Start with Endpoints
                   </Link>
