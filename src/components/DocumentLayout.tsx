@@ -61,20 +61,10 @@ export function DocumentLayout({ children, currentPage = "home" }: DocumentLayou
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Responsive Header */}
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      {/* Fixed Header */}
+      <header className="fixed top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <ResponsiveContainer size="fluid" className="flex h-header items-center justify-between">
-          <div className="flex items-center gap-fluid-sm">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="btn-responsive px-fluid-sm focus-ring"
-            >
-              {sidebarOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-              <span className="sr-only">Toggle sidebar</span>
-            </Button>
-            
+          <div className="flex items-center gap-fluid-sm ml-16">
             <Link 
               to="/" 
               className="font-heading font-semibold text-fluid-lg hover:text-primary transition-colors focus-ring rounded-sm"
@@ -102,14 +92,8 @@ export function DocumentLayout({ children, currentPage = "home" }: DocumentLayou
       </header>
 
       <div className="flex min-h-[calc(100vh-var(--header-height))]">
-        {/* Responsive Sidebar */}
-        <aside
-          className={cn(
-            "sticky top-header h-[calc(100vh-var(--header-height))] border-r bg-sidebar-background transition-all duration-300 ease-in-out overflow-hidden",
-            "lg:block",
-            sidebarOpen ? "w-sidebar-collapsed md:w-sidebar" : "w-0"
-          )}
-        >
+        {/* Fixed Icon-Only Sidebar */}
+        <aside className="fixed left-0 top-header h-[calc(100vh-var(--header-height))] w-16 border-r bg-sidebar-background z-40">
           <nav className="flex flex-col gap-fluid-xs p-fluid-sm">
             {navigationItems.map((item) => {
               const Icon = item.icon;
@@ -121,20 +105,13 @@ export function DocumentLayout({ children, currentPage = "home" }: DocumentLayou
                     variant={isActive ? "default" : "ghost"}
                     size="sm"
                     className={cn(
-                      "w-full h-12 justify-start gap-fluid-sm px-fluid-sm focus-ring",
+                      "w-full h-12 justify-center px-0 focus-ring",
                       "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                      isActive && "bg-sidebar-primary text-sidebar-primary-foreground",
-                      !sidebarOpen && "md:justify-center md:px-0"
+                      isActive && "bg-sidebar-primary text-sidebar-primary-foreground"
                     )}
                     title={item.label}
                   >
-                    <Icon className="h-4 w-4 flex-shrink-0" />
-                    <span className={cn(
-                      "transition-opacity duration-300",
-                      sidebarOpen ? "opacity-100" : "md:opacity-0 md:sr-only"
-                    )}>
-                      {item.label}
-                    </span>
+                    <Icon className="h-4 w-4" />
                   </Button>
                 </Link>
               );
@@ -142,14 +119,14 @@ export function DocumentLayout({ children, currentPage = "home" }: DocumentLayou
           </nav>
         </aside>
 
-        {/* Responsive Main Content */}
-        <main className="flex-1 bg-gradient-subtle overflow-auto">
-          <ResponsiveContainer size="wide" className="py-fluid-2xl min-h-full">
+        {/* Main Content with 800px max width */}
+        <main className="flex-1 bg-gradient-subtle overflow-auto ml-16 pt-header">
+          <div className="mx-auto max-w-[800px] px-fluid-lg py-fluid-2xl min-h-full">
             <div className="space-fluid-y">
               {renderBreadcrumbs()}
               {children}
             </div>
-          </ResponsiveContainer>
+          </div>
         </main>
       </div>
 
