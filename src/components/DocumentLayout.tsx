@@ -94,7 +94,7 @@ export function DocumentLayout({ children, currentPage = "home" }: DocumentLayou
       <div className="flex min-h-[calc(100vh-var(--header-height))]">
         {/* Fixed Icon-Only Sidebar */}
         <aside className="fixed left-0 top-0 h-screen w-16 border-r bg-sidebar-background z-40">
-          <nav className="flex flex-col gap-fluid-xs p-fluid-sm pt-[calc(var(--header-height)+var(--fluid-sm))]">
+          <nav className="flex flex-col gap-fluid-xs p-fluid-sm justify-center h-full">
             {navigationItems.map((item) => {
               const Icon = item.icon;
               const isActive = item.id === currentPage;
@@ -120,36 +120,36 @@ export function DocumentLayout({ children, currentPage = "home" }: DocumentLayou
         </aside>
 
         {/* Main Content with 800px max width */}
-        <main className="flex-1 bg-gradient-subtle overflow-auto ml-16 pt-header">
-          <div className="mx-auto max-w-[800px] px-fluid-lg py-fluid-2xl min-h-full">
+        <main className="flex-1 bg-gradient-subtle overflow-auto ml-16 pt-header relative">
+          <div className="mx-auto max-w-[800px] px-fluid-lg py-fluid-2xl min-h-full pb-[120px]">
             <div className="space-fluid-y">
               {renderBreadcrumbs()}
               {children}
             </div>
           </div>
+
+          {/* Fixed Footer within main content */}
+          <footer className="fixed bottom-0 left-16 right-0 border-t bg-muted/30">
+            <ResponsiveContainer size="container" className="py-fluid-xl">
+              <div className="flex flex-col md:flex-row justify-between items-center gap-fluid-lg text-fluid-sm text-muted-foreground">
+                <div className="flex items-center gap-fluid-sm">
+                  <span className="font-heading font-semibold">alset</span>
+                  <span>•</span>
+                  <span>Professional documentation platform</span>
+                </div>
+                <div className="flex gap-fluid-lg">
+                  <Link to="/docs" className="hover:text-foreground transition-colors focus-ring rounded-sm">
+                    Documentation
+                  </Link>
+                  <Link to="/settings" className="hover:text-foreground transition-colors focus-ring rounded-sm">
+                    Settings
+                  </Link>
+                </div>
+              </div>
+            </ResponsiveContainer>
+          </footer>
         </main>
       </div>
-
-      {/* Responsive Footer */}
-      <footer className="border-t bg-muted/30">
-        <ResponsiveContainer size="container" className="py-fluid-xl">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-fluid-lg text-fluid-sm text-muted-foreground">
-            <div className="flex items-center gap-fluid-sm">
-              <span className="font-heading font-semibold">alset</span>
-              <span>•</span>
-              <span>Professional documentation platform</span>
-            </div>
-            <div className="flex gap-fluid-lg">
-              <Link to="/docs" className="hover:text-foreground transition-colors focus-ring rounded-sm">
-                Documentation
-              </Link>
-              <Link to="/settings" className="hover:text-foreground transition-colors focus-ring rounded-sm">
-                Settings
-              </Link>
-            </div>
-          </div>
-        </ResponsiveContainer>
-      </footer>
     </div>
   );
 }

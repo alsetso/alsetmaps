@@ -312,6 +312,68 @@ export type Database = {
         }
         Relationships: []
       }
+      chat_conversations: {
+        Row: {
+          created_at: string
+          id: string
+          title: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          title?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          title?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      chat_messages: {
+        Row: {
+          content: string
+          conversation_id: string
+          created_at: string
+          id: string
+          metadata: Json | null
+          role: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          role: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "chat_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contacts: {
         Row: {
           allowed_data_types: string[] | null
@@ -1272,6 +1334,131 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      health_files: {
+        Row: {
+          created_at: string
+          file_size: number | null
+          file_type: string
+          file_url: string | null
+          filename: string
+          id: string
+          parsed_data: Json | null
+          updated_at: string
+          upload_status: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          file_size?: number | null
+          file_type: string
+          file_url?: string | null
+          filename: string
+          id?: string
+          parsed_data?: Json | null
+          updated_at?: string
+          upload_status?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          file_size?: number | null
+          file_type?: string
+          file_url?: string | null
+          filename?: string
+          id?: string
+          parsed_data?: Json | null
+          updated_at?: string
+          upload_status?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      health_metrics: {
+        Row: {
+          category: string | null
+          created_at: string
+          file_id: string | null
+          id: string
+          metric_name: string
+          metric_value: string
+          reference_range: string | null
+          test_date: string | null
+          unit: string | null
+          user_id: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          file_id?: string | null
+          id?: string
+          metric_name: string
+          metric_value: string
+          reference_range?: string | null
+          test_date?: string | null
+          unit?: string | null
+          user_id: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          file_id?: string | null
+          id?: string
+          metric_name?: string
+          metric_value?: string
+          reference_range?: string | null
+          test_date?: string | null
+          unit?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "health_metrics_file_id_fkey"
+            columns: ["file_id"]
+            isOneToOne: false
+            referencedRelation: "health_files"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      health_observations: {
+        Row: {
+          category: string | null
+          created_at: string
+          id: string
+          is_action_required: boolean | null
+          observation_text: string
+          observer_id: string
+          observer_name: string
+          observer_role: string | null
+          patient_id: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          id?: string
+          is_action_required?: boolean | null
+          observation_text: string
+          observer_id: string
+          observer_name: string
+          observer_role?: string | null
+          patient_id: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          id?: string
+          is_action_required?: boolean | null
+          observation_text?: string
+          observer_id?: string
+          observer_name?: string
+          observer_role?: string | null
+          patient_id?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       inbox: {
         Row: {
