@@ -93,8 +93,8 @@ export function DocumentLayout({ children, currentPage = "home" }: DocumentLayou
 
       <div className="flex min-h-[calc(100vh-var(--header-height))]">
         {/* Fixed Icon-Only Sidebar */}
-        <aside className="fixed left-0 top-header h-[calc(100vh-var(--header-height))] w-16 border-r bg-sidebar-background z-40">
-          <nav className="flex flex-col gap-fluid-xs p-fluid-sm">
+        <aside className="fixed left-0 top-0 h-screen w-16 border-r bg-sidebar-background z-40">
+          <nav className="flex flex-col gap-fluid-xs p-fluid-sm pt-[calc(var(--header-height)+var(--fluid-sm))]">
             {navigationItems.map((item) => {
               const Icon = item.icon;
               const isActive = item.id === currentPage;
