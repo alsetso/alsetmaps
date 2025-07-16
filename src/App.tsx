@@ -7,12 +7,10 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import DocumentView from "./pages/DocumentView";
-import DocsTemplate from "./pages/DocsTemplate";
+
 import Login from "./pages/Login";
 import Settings from "./pages/Settings";
 import Billing from "./pages/Billing";
-import AIJourney from "./pages/AIJourney";
-
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,9 +29,6 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/billing" element={<Billing />} />
-              <Route path="/ai-journey" element={<AIJourney />} />
-              
-              <Route path="/docs/:id" element={<DocsTemplate />} />
               <Route path="/:id" element={<DocumentView />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />

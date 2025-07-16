@@ -206,6 +206,50 @@ export default function Dashboard() {
             </CardContent>
           </Card>
         </section>
+
+        {/* Core Services */}
+        <section className="space-y-6">
+          <div>
+            <h2 className="text-2xl font-bold mb-2">Core Services</h2>
+            <p className="text-muted-foreground">
+              Access our comprehensive suite of AI-powered tools and services
+            </p>
+          </div>
+          
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {[
+              { title: "Endpoints", icon: Database, href: "/endpoints" },
+              { title: "Agents", icon: Bot, href: "/agents" },
+              { title: "Workflows", icon: Network, href: "/workflows" },
+              { title: "Data", icon: Cpu, href: "/data" },
+              { title: "Tools", icon: Settings, href: "/tools" }
+            ].map((service) => {
+              const Icon = service.icon;
+              return (
+                <Card key={service.title} className="group hover:shadow-lg transition-all duration-300 hover:scale-105">
+                  <CardContent className="p-6">
+                    <Link to={service.href} className="block space-y-4">
+                      <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                        <Icon className="h-6 w-6 text-primary" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-lg group-hover:text-primary transition-colors">
+                          {service.title}
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          Manage your {service.title.toLowerCase()} and view projects
+                        </p>
+                      </div>
+                      <div className="flex items-center text-primary text-sm font-medium">
+                        View Projects <ArrowRight className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" />
+                      </div>
+                    </Link>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </section>
       </div>
     </DocumentLayout>
   );
