@@ -1,73 +1,131 @@
-# Welcome to your Lovable project
+# Alset - AI Business Transformation Platform
 
-## Project info
+Transform your business with AI-powered automation, intelligent workflows, and autonomous agents. Unlock the power of artificial intelligence for your organization.
 
-**URL**: https://lovable.dev/projects/5056da94-48d7-4c82-bd88-6d0c6c7dc394
+## 🚀 Features
 
-## How can I edit this code?
+- **AI Endpoints**: Universal data intake layer for receiving inputs from any system
+- **Autonomous Agents**: Intelligent AI agents for complex task execution and decision making
+- **Intelligent Workflows**: Low-code automation engine for creating event-driven sequences
+- **Real-time Data Processing**: Advanced analytics and data transformation capabilities
+- **AI-Powered Tools**: Comprehensive suite of productivity utilities
 
-There are several ways of editing your application.
+## 🛠️ Technical Stack
 
-**Use Lovable**
+- **Frontend**: React 18 with TypeScript
+- **Build Tool**: Vite
+- **Database**: Supabase (PostgreSQL)
+- **Authentication**: Supabase Auth
+- **UI Framework**: shadcn/ui + Radix UI
+- **Styling**: Tailwind CSS
+- **State Management**: TanStack React Query
+- **Routing**: React Router DOM
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/5056da94-48d7-4c82-bd88-6d0c6c7dc394) and start prompting.
+## 🏗️ Installation
 
-Changes made via Lovable will be committed automatically to this repo.
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd alset-platform
+   ```
 
-**Use your preferred IDE**
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+3. **Start the development server**
+   ```bash
+   npm run dev
+   ```
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+4. **Build for production**
+   ```bash
+   npm run build
+   ```
 
-Follow these steps:
+## 🔧 Development
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+### Available Scripts
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+- `npm run lint` - Run ESLint
 
-# Step 3: Install the necessary dependencies.
-npm i
+### Project Structure
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+```
+src/
+├── components/          # Reusable UI components
+│   ├── ui/             # Base UI components (shadcn/ui)
+│   └── layout/         # Layout components
+├── pages/              # Page components
+├── hooks/              # Custom React hooks
+├── integrations/       # External service integrations
+├── lib/                # Utility functions
+└── assets/             # Static assets
 ```
 
-**Edit a file directly in GitHub**
+## 📱 Application Pages
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+- **Landing Page** (`/`) - AI transformation showcase
+- **Services** (`/services`) - Core AI services dashboard
+- **Endpoints** (`/endpoints`) - Universal data intake management
+- **Agents** (`/agents`) - AI agent configuration
+- **Workflows** (`/workflows`) - Automation workflow builder
+- **Data** (`/data`) - Data processing and analytics
+- **Tools** (`/tools`) - AI-powered productivity utilities
+- **Search** (`/search`) - Platform-wide search functionality
+- **Settings** (`/settings`) - User preferences and account management
+- **Login** (`/login`) - Authentication
 
-**Use GitHub Codespaces**
+## 🔐 Authentication
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+The platform uses Supabase Auth for secure authentication with:
+- Email/password authentication
+- Session management
+- User profile management
 
-## What technologies are used for this project?
+## 🎨 UI/UX
 
-This project is built with:
+- **Responsive Design**: Mobile-first approach
+- **Dark/Light Mode**: Theme switching support
+- **Accessibility**: ARIA compliant components
+- **Modern Design**: Clean, professional interface
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## 📊 SEO & Performance
 
-## How can I deploy this project?
+- **Optimized Build**: Vite for fast bundling
+- **SEO Ready**: Meta tags and structured data
+- **Performance**: Code splitting and lazy loading
+- **PWA Ready**: Service worker support
 
-Simply open [Lovable](https://lovable.dev/projects/5056da94-48d7-4c82-bd88-6d0c6c7dc394) and click on Share -> Publish.
+## 🚀 Deployment
 
-## Can I connect a custom domain to my Lovable project?
+The application is ready for deployment on:
+- Vercel
+- Netlify
+- GitHub Pages
+- Any static hosting service
 
-Yes, you can!
+## 🤝 Contributing
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Run tests and linting
+5. Submit a pull request
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+## 📄 License
+
+This project is proprietary and confidential.
+
+## 🔗 Links
+
+- [Documentation](./meta.md)
+- [Live Demo](https://alset-platform.vercel.app)
+
+---
+
+Built with ❤️ by the Alset team

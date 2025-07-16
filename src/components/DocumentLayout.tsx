@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Menu, X, Home, FileText, Search, Settings, ChevronRight, Lock, LayoutDashboard } from "lucide-react";
+import { Menu, X, Home, FileText, Search, Settings, ChevronRight, Lock, LayoutDashboard, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Link, useParams } from "react-router-dom";
@@ -14,10 +14,19 @@ interface DocumentLayoutProps {
   currentPage?: string;
 }
 
-const navigationItems = [
+interface NavigationItem {
+  id: string;
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  href: string;
+  requiresAuth?: boolean;
+}
+
+const navigationItems: NavigationItem[] = [
   { id: "home", icon: Home, label: "Home", href: "/" },
-  { id: "dashboard", icon: LayoutDashboard, label: "Dashboard", href: "/dashboard", requiresAuth: true },
+  { id: "services", icon: LayoutDashboard, label: "Services", href: "/services" },
   { id: "search", icon: Search, label: "Search", href: "/search" },
+  { id: "contact", icon: Mail, label: "Contact", href: "/contact" },
   { id: "settings", icon: Settings, label: "Settings", href: "/settings" },
 ];
 
@@ -75,9 +84,13 @@ export function DocumentLayout({ children, currentPage = "home" }: DocumentLayou
             </Button>
             <Link 
               to="/" 
-              className="font-heading font-semibold text-fluid-lg hover:text-primary transition-colors focus-ring rounded-sm"
+              className="flex items-center hover:opacity-80 transition-opacity focus-ring rounded-sm"
             >
-              alset
+              <img 
+                src="/alset-logo.svg" 
+                alt="Alset Logo" 
+                className="h-8 w-auto"
+              />
             </Link>
           </div>
 
@@ -111,8 +124,8 @@ export function DocumentLayout({ children, currentPage = "home" }: DocumentLayou
             
             <nav className="flex flex-col gap-fluid-xs p-fluid-sm">
               {navigationItems.map((item) => {
-                // Hide dashboard if user is not logged in
-                if (item.requiresAuth && !user) return null;
+                // Hide items that require auth if user is not logged in
+                if (item.requiresAuth === true && !user) return null;
                 
                 const Icon = item.icon;
                 const isActive = item.id === currentPage;

@@ -4,14 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { Github, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 
 export default function Login() {
-  const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -41,57 +38,21 @@ export default function Login() {
   const handleEmailAuth = async () => {
     setLoading(true);
     try {
-      if (isSignUp) {
-        const redirectUrl = `${window.location.origin}/`;
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: redirectUrl
-          }
-        });
-        
-        if (error) throw error;
-        
-        toast({
-          title: "Account created successfully",
-          description: "Please check your email to verify your account.",
-        });
-      } else {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-        
-        if (error) throw error;
-      }
-    } catch (error: any) {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      
+      if (error) throw error;
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
       toast({
         title: "Authentication Error",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleSocialAuth = async (provider: 'google' | 'github') => {
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider,
-        options: {
-          redirectTo: `${window.location.origin}/`
-        }
-      });
-      
-      if (error) throw error;
-    } catch (error: any) {
-      toast({
-        title: "Authentication Error",
-        description: error.message,
-        variant: "destructive",
-      });
     }
   };
 
@@ -100,44 +61,12 @@ export default function Login() {
       <div className="max-w-md mx-auto">
         <Card>
           <CardHeader>
-            <CardTitle>{isSignUp ? "Create Account" : "Welcome Back"}</CardTitle>
+            <CardTitle>Welcome Back</CardTitle>
             <CardDescription>
-              {isSignUp 
-                ? "Create your account to get started" 
-                : "Enter your credentials to access your account"
-              }
+              Enter your credentials to access your account
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* Social Login Buttons */}
-            <div className="space-y-2">
-              <Button 
-                variant="outline" 
-                className="w-full" 
-                onClick={() => handleSocialAuth('google')}
-              >
-                <Mail className="mr-2 h-4 w-4" />
-                Continue with Google
-              </Button>
-              <Button 
-                variant="outline" 
-                className="w-full" 
-                onClick={() => handleSocialAuth('github')}
-              >
-                <Github className="mr-2 h-4 w-4" />
-                Continue with GitHub
-              </Button>
-            </div>
-
-            <div className="relative">
-              <Separator />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="bg-background px-2 text-xs text-muted-foreground">
-                  or continue with email
-                </span>
-              </div>
-            </div>
-
             {/* Email/Password Form */}
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
@@ -165,18 +94,11 @@ export default function Login() {
               onClick={handleEmailAuth}
               disabled={loading || !email || !password}
             >
-              {loading ? "Please wait..." : (isSignUp ? "Create Account" : "Sign In")}
+              {loading ? "Please wait..." : "Sign In"}
             </Button>
             
             <div className="text-center text-sm text-muted-foreground">
-              {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
-              <Button 
-                variant="link" 
-                className="p-0 h-auto"
-                onClick={() => setIsSignUp(!isSignUp)}
-              >
-                {isSignUp ? "Sign in" : "Sign up"}
-              </Button>
+              Sign in with your existing account credentials
             </div>
           </CardContent>
         </Card>

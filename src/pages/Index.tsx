@@ -174,18 +174,12 @@ export default function Index() {
                 </p>
               </div>
               
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Link to="/dashboard">
+              <div className="flex justify-center">
+                <Link to="/services">
                   <Button size="lg" className="group">
                     <Rocket className="h-5 w-5 mr-2 group-hover:animate-pulse" />
                     Get Started Now
                     <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                  </Button>
-                </Link>
-                <Link to="/contact">
-                  <Button variant="outline" size="lg">
-                    <Users className="h-5 w-5 mr-2" />
-                    Talk to an Expert
                   </Button>
                 </Link>
               </div>

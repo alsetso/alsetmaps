@@ -114,9 +114,9 @@ Each agent can be customized with specific skills, knowledge bases, and behavior
     lastUpdated: "1 day ago",
     readTime: "4 min"
   },
-  "processing": {
-    emoji: "⚡",
-    title: "Data Processing",
+  "data": {
+    emoji: "📊",
+    title: "Data",
     tagline: "Real-time data processing and analytics for actionable business insights", 
     description: `Our Data Processing engine transforms raw data into actionable insights through advanced analytics, machine learning, and real-time processing capabilities. Handle massive data volumes, complex transformations, and time-sensitive operations with enterprise-grade reliability.
 
@@ -134,25 +134,25 @@ From streaming data analysis to batch processing workflows, our platform ensures
     lastUpdated: "2 days ago",
     readTime: "5 min"
   },
-  "integrations": {
-    emoji: "🔗",
-    title: "Integrations",
-    tagline: "Seamless third-party integrations for enhanced workflow automation",
-    description: `Connect your existing tools and systems through our comprehensive integration platform. With pre-built connectors for popular services and APIs, plus custom integration capabilities, you can create unified workflows that span across your entire technology stack.
+  "tools": {
+    emoji: "🛠️",
+    title: "Tools",
+    tagline: "AI-powered tools and utilities for enhanced productivity",
+    description: `Access a comprehensive suite of AI-powered tools designed to enhance your productivity and streamline your workflows. From text processing utilities to data analysis tools, our platform provides everything you need to work smarter and faster.
 
-Our integration platform handles authentication, data synchronization, error handling, and monitoring automatically. Build complex multi-system workflows with simple drag-and-drop interfaces or programmatic control.`,
+Each tool is designed with AI capabilities to automate repetitive tasks, provide intelligent suggestions, and adapt to your specific needs. Whether you're processing documents, analyzing data, or managing projects, our tools learn from your usage patterns to deliver personalized experiences.`,
     keywords: [
-      "third-party integrations",
-      "API connectivity", 
+      "AI-powered tools",
+      "productivity utilities", 
       "workflow automation",
-      "system integration",
-      "data synchronization",
-      "connector platform",
-      "unified workflows",
-      "enterprise integrations"
+      "intelligent suggestions",
+      "document processing",
+      "data analysis tools",
+      "project management",
+      "personalized experiences"
     ],
-    lastUpdated: "3 days ago",
-    readTime: "4 min"
+    lastUpdated: "1 day ago",
+    readTime: "3 min"
   },
   "memory": {
     emoji: "🧠",

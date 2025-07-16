@@ -1,8 +1,10 @@
 {
-  "name": "vite_react_shadcn_ts",
+  "name": "alset-platform",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
+  "description": "AI-powered business transformation platform with intelligent workflows and autonomous agents",
+  "keywords": ["ai", "automation", "business", "platform", "workflows", "agents"],
   "scripts": {
     "dev": "vite",
     "build": "vite build",

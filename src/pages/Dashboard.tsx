@@ -26,7 +26,7 @@ import type { User } from "@supabase/supabase-js";
 const coreServices = [
   {
     id: "endpoints",
-    title: "API Endpoints",
+    title: "Endpoints",
     description: "Secure data endpoints for seamless integration",
     icon: Database,
     status: "active",
@@ -35,48 +35,39 @@ const coreServices = [
   },
   {
     id: "agents",
-    title: "AI Agents",
-    description: "Intelligent automation and task execution",
+    title: "Agents",
+    description: "Intelligent AI agents for autonomous tasks",
     icon: Bot,
     status: "active",
     href: "/agents",
     color: "from-purple-500 to-pink-500"
   },
   {
-    id: "intelligence",
-    title: "AI Intelligence",
-    description: "Advanced machine learning capabilities",
-    icon: Brain,
+    id: "workflows",
+    title: "Workflows",
+    description: "Build logic and automate responses",
+    icon: Network,
     status: "active",
-    href: "/intelligence",
+    href: "/workflows",
     color: "from-green-500 to-emerald-500"
   },
   {
-    id: "processing",
-    title: "Data Processing",
-    description: "Real-time analytics and processing",
+    id: "data",
+    title: "Data",
+    description: "Real-time data processing and analytics",
     icon: Cpu,
     status: "active",
-    href: "/processing",
+    href: "/data",
     color: "from-orange-500 to-red-500"
   },
   {
-    id: "integrations",
-    title: "Integrations",
-    description: "Third-party service connections",
-    icon: Network,
-    status: "beta",
-    href: "/integrations",
-    color: "from-indigo-500 to-blue-500"
-  },
-  {
-    id: "security",
-    title: "Security Center",
-    description: "Advanced security and compliance tools",
-    icon: Shield,
+    id: "tools",
+    title: "Tools",
+    description: "AI-powered tools and utilities",
+    icon: Settings,
     status: "active",
-    href: "/security",
-    color: "from-red-500 to-pink-500"
+    href: "/tools",
+    color: "from-indigo-500 to-blue-500"
   }
 ];
 
@@ -149,7 +140,7 @@ export default function Dashboard() {
   }
 
   return (
-    <DocumentLayout currentPage="dashboard">
+    <DocumentLayout currentPage="services">
       <div className="space-y-8">
         {/* Header */}
         <div className="space-y-4">
@@ -167,45 +158,10 @@ export default function Dashboard() {
                   Settings
                 </Link>
               </Button>
-              <Button variant="outline" size="sm">
-                <Bell className="h-4 w-4 mr-2" />
-                Notifications
-              </Button>
             </div>
           </div>
 
         </div>
-
-
-        {/* Quick Actions */}
-        <section>
-          <Card className="bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-semibold mb-2">Ready to get started?</h3>
-                  <p className="text-muted-foreground">
-                    Explore our platform capabilities or dive into the documentation
-                  </p>
-                </div>
-                <div className="flex gap-3">
-                  <Button asChild>
-                    <Link to="/docs/quickstart">
-                      <BookOpen className="h-4 w-4 mr-2" />
-                      Quick Start
-                    </Link>
-                  </Button>
-                  <Button variant="outline" asChild>
-                    <Link to="/endpoints">
-                      <Zap className="h-4 w-4 mr-2" />
-                      Create Endpoint
-                    </Link>
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </section>
 
         {/* Core Services */}
         <section className="space-y-6">
@@ -217,13 +173,7 @@ export default function Dashboard() {
           </div>
           
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {[
-              { title: "Endpoints", icon: Database, href: "/endpoints" },
-              { title: "Agents", icon: Bot, href: "/agents" },
-              { title: "Workflows", icon: Network, href: "/workflows" },
-              { title: "Data", icon: Cpu, href: "/data" },
-              { title: "Tools", icon: Settings, href: "/tools" }
-            ].map((service) => {
+            {coreServices.map((service) => {
               const Icon = service.icon;
               return (
                 <Card key={service.title} className="group hover:shadow-lg transition-all duration-300 hover:scale-105">
@@ -237,7 +187,7 @@ export default function Dashboard() {
                           {service.title}
                         </h3>
                         <p className="text-sm text-muted-foreground">
-                          Manage your {service.title.toLowerCase()} and view projects
+                          {service.description}
                         </p>
                       </div>
                       <div className="flex items-center text-primary text-sm font-medium">

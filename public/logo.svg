@@ -1,0 +1,20 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="200" height="200" fill="#f8f9fa"/>
+  
+  <!-- Main logo elements based on the uploaded design -->
+  <!-- Left vertical bar -->
+  <rect x="25" y="48" width="26" height="104" fill="#4ade80"/>
+  
+  <!-- Top horizontal bar -->
+  <rect x="103" y="48" width="72" height="26" fill="#22c55e"/>
+  
+  <!-- Right vertical connector -->
+  <rect x="129" y="74" width="26" height="50" fill="#22c55e"/>
+  
+  <!-- Bottom horizontal bar -->
+  <rect x="25" y="126" width="104" height="26" fill="#4ade80"/>
+  
+  <!-- Bottom right vertical bar -->
+  <rect x="155" y="100" width="20" height="52" fill="#22c55e"/>
+</svg> 
