@@ -270,14 +270,10 @@ const Index = () => {
                 Partner with alset to unlock the full potential of artificial intelligence in your organization. 
                 Let us build the future together.
               </p>
-              <div className="flex items-center justify-center gap-4">
-                <Link to="/contact" className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-lg font-medium hover:bg-primary/90 transition-colors">
+              <div className="flex items-center justify-center">
+                <Link to="/ai-journey" className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-lg font-medium hover:bg-primary/90 transition-colors">
                   <Brain className="h-5 w-5" />
                   Start Your AI Journey
-                </Link>
-                <Link to="/case-studies" className="inline-flex items-center gap-2 bg-muted text-muted-foreground px-6 py-3 rounded-lg font-medium hover:bg-muted/80 transition-colors">
-                  <FileText className="h-5 w-5" />
-                  View Case Studies
                 </Link>
               </div>
             </CardContent>

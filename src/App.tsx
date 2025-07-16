@@ -11,7 +11,7 @@ import DocsTemplate from "./pages/DocsTemplate";
 import Login from "./pages/Login";
 import Settings from "./pages/Settings";
 import Billing from "./pages/Billing";
-import Search from "./pages/Search";
+import AIJourney from "./pages/AIJourney";
 
 import NotFound from "./pages/NotFound";
 
@@ -31,7 +31,7 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/billing" element={<Billing />} />
-              <Route path="/search" element={<Search />} />
+              <Route path="/ai-journey" element={<AIJourney />} />
               
               <Route path="/docs/:id" element={<DocsTemplate />} />
               <Route path="/:id" element={<DocumentView />} />
