@@ -1,6 +1,13 @@
+import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { DocumentLayout } from "@/components/DocumentLayout";
 import { DocumentPage } from "@/components/DocumentPage";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Plus, Settings, Trash2 } from "lucide-react";
 
 const documents = {
   "endpoints": {
@@ -111,8 +118,37 @@ Whether you're revisiting a contract, continuing a client conversation, or analy
   }
 };
 
+// Mock projects data for demonstration
+const mockProjects = [
+  {
+    id: "proj-1",
+    name: "Customer Support Bot",
+    description: "AI chatbot for handling customer inquiries",
+    status: "active",
+    created: "2024-01-15",
+    endpoints: 3
+  },
+  {
+    id: "proj-2", 
+    name: "Data Analytics Pipeline",
+    description: "Real-time data processing and visualization",
+    status: "development",
+    created: "2024-01-20",
+    endpoints: 5
+  },
+  {
+    id: "proj-3",
+    name: "E-commerce Integration",
+    description: "Webhook endpoints for order processing",
+    status: "active",
+    created: "2024-01-10",
+    endpoints: 2
+  }
+];
+
 export default function DocumentView() {
   const { id } = useParams<{ id: string }>();
+  const [activeTab, setActiveTab] = useState("details");
   
   if (!id || !documents[id as keyof typeof documents]) {
     return (
@@ -129,7 +165,78 @@ export default function DocumentView() {
 
   return (
     <DocumentLayout currentPage="docs">
-      <DocumentPage {...document} />
+      <div className="space-y-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="details">Details</TabsTrigger>
+            <TabsTrigger value="projects">Projects</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="details" className="space-y-4">
+            <DocumentPage {...document} />
+          </TabsContent>
+          
+          <TabsContent value="projects" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Projects Manager</CardTitle>
+                    <CardDescription>
+                      Manage projects related to {document.title.toLowerCase()}
+                    </CardDescription>
+                  </div>
+                  <Button>
+                    <Plus className="h-4 w-4 mr-2" />
+                    New Project
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Description</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Created</TableHead>
+                      <TableHead>Endpoints</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {mockProjects.map((project) => (
+                      <TableRow key={project.id}>
+                        <TableCell className="font-medium">{project.name}</TableCell>
+                        <TableCell className="text-muted-foreground">{project.description}</TableCell>
+                        <TableCell>
+                          <Badge 
+                            variant={project.status === "active" ? "default" : "secondary"}
+                          >
+                            {project.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{new Date(project.created).toLocaleDateString()}</TableCell>
+                        <TableCell>{project.endpoints}</TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <Button variant="outline" size="sm">
+                              <Settings className="h-4 w-4" />
+                            </Button>
+                            <Button variant="outline" size="sm">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
     </DocumentLayout>
   );
 }

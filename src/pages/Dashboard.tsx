@@ -3,7 +3,6 @@ import { DocumentLayout } from "@/components/DocumentLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { 
   Database, 
   Bot, 
@@ -12,14 +11,12 @@ import {
   Network, 
   FileText, 
   Users, 
-  Activity, 
   Shield, 
   Zap,
   ArrowRight,
   BookOpen,
   Settings,
-  Bell,
-  TrendingUp
+  Bell
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -33,7 +30,6 @@ const coreServices = [
     description: "Secure data endpoints for seamless integration",
     icon: Database,
     status: "active",
-    usage: 65,
     href: "/endpoints",
     color: "from-blue-500 to-cyan-500"
   },
@@ -42,8 +38,7 @@ const coreServices = [
     title: "AI Agents",
     description: "Intelligent automation and task execution",
     icon: Bot,
-    status: "active", 
-    usage: 45,
+    status: "active",
     href: "/agents",
     color: "from-purple-500 to-pink-500"
   },
@@ -53,7 +48,6 @@ const coreServices = [
     description: "Advanced machine learning capabilities",
     icon: Brain,
     status: "active",
-    usage: 78,
     href: "/intelligence",
     color: "from-green-500 to-emerald-500"
   },
@@ -63,7 +57,6 @@ const coreServices = [
     description: "Real-time analytics and processing",
     icon: Cpu,
     status: "active",
-    usage: 32,
     href: "/processing",
     color: "from-orange-500 to-red-500"
   },
@@ -73,7 +66,6 @@ const coreServices = [
     description: "Third-party service connections",
     icon: Network,
     status: "beta",
-    usage: 20,
     href: "/integrations",
     color: "from-indigo-500 to-blue-500"
   },
@@ -83,7 +75,6 @@ const coreServices = [
     description: "Advanced security and compliance tools",
     icon: Shield,
     status: "active",
-    usage: 90,
     href: "/security",
     color: "from-red-500 to-pink-500"
   }
@@ -183,53 +174,6 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Quick Stats */}
-          <div className="grid gap-4 md:grid-cols-4">
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center space-x-2">
-                  <Activity className="h-4 w-4 text-green-500" />
-                  <div>
-                    <p className="text-sm font-medium">Active Services</p>
-                    <p className="text-2xl font-bold">5</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center space-x-2">
-                  <TrendingUp className="h-4 w-4 text-blue-500" />
-                  <div>
-                    <p className="text-sm font-medium">API Calls Today</p>
-                    <p className="text-2xl font-bold">1,247</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center space-x-2">
-                  <Zap className="h-4 w-4 text-yellow-500" />
-                  <div>
-                    <p className="text-sm font-medium">Processing Jobs</p>
-                    <p className="text-2xl font-bold">23</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center space-x-2">
-                  <Shield className="h-4 w-4 text-purple-500" />
-                  <div>
-                    <p className="text-sm font-medium">Security Score</p>
-                    <p className="text-2xl font-bold">98%</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
         </div>
 
         {/* Core Services Grid */}
@@ -267,14 +211,6 @@ export default function Dashboard() {
                         <p className="text-sm text-muted-foreground mb-3">
                           {service.description}
                         </p>
-                        
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between text-xs">
-                            <span className="text-muted-foreground">Usage</span>
-                            <span className="font-medium">{service.usage}%</span>
-                          </div>
-                          <Progress value={service.usage} className="h-2" />
-                        </div>
                       </div>
 
                       <Button variant="outline" size="sm" className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors" asChild>
