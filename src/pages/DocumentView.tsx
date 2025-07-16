@@ -4,10 +4,9 @@ import { DocumentLayout } from "@/components/DocumentLayout";
 import { DocumentPage } from "@/components/DocumentPage";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Plus, Settings, Trash2 } from "lucide-react";
+import { Plus } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 const documents = {
   "endpoints": {
@@ -95,6 +94,66 @@ With advanced visualizations, historical trend analysis, and feedback loops, thi
     lastUpdated: "5 days ago",
     readTime: "4 min"
   },
+  "agents": {
+    emoji: "🤖",
+    title: "Agents", 
+    tagline: "Intelligent AI agents for autonomous task execution and decision making",
+    description: `AI Agents are intelligent, autonomous digital workers that can execute complex tasks, make decisions, and interact with systems without human intervention. These agents combine advanced AI capabilities with real-world automation to handle everything from customer service interactions to complex data processing workflows.
+
+Each agent can be customized with specific skills, knowledge bases, and behavioral patterns. They learn from interactions, adapt to new situations, and can collaborate with other agents or human team members to achieve optimal outcomes.`,
+    keywords: [
+      "autonomous AI agents",
+      "intelligent automation",
+      "AI task execution",
+      "decision-making AI",
+      "collaborative AI workers",
+      "adaptive AI systems",
+      "AI agent deployment",
+      "autonomous workflow management"
+    ],
+    lastUpdated: "1 day ago",
+    readTime: "4 min"
+  },
+  "processing": {
+    emoji: "⚡",
+    title: "Data Processing",
+    tagline: "Real-time data processing and analytics for actionable business insights", 
+    description: `Our Data Processing engine transforms raw data into actionable insights through advanced analytics, machine learning, and real-time processing capabilities. Handle massive data volumes, complex transformations, and time-sensitive operations with enterprise-grade reliability.
+
+From streaming data analysis to batch processing workflows, our platform ensures your data is processed efficiently, accurately, and securely. Built-in AI capabilities automatically detect patterns, anomalies, and opportunities in your data streams.`,
+    keywords: [
+      "real-time data processing",
+      "analytics engine",
+      "data transformation",
+      "streaming analytics",
+      "batch processing",
+      "AI-powered insights", 
+      "data pipeline automation",
+      "enterprise data processing"
+    ],
+    lastUpdated: "2 days ago",
+    readTime: "5 min"
+  },
+  "integrations": {
+    emoji: "🔗",
+    title: "Integrations",
+    tagline: "Seamless third-party integrations for enhanced workflow automation",
+    description: `Connect your existing tools and systems through our comprehensive integration platform. With pre-built connectors for popular services and APIs, plus custom integration capabilities, you can create unified workflows that span across your entire technology stack.
+
+Our integration platform handles authentication, data synchronization, error handling, and monitoring automatically. Build complex multi-system workflows with simple drag-and-drop interfaces or programmatic control.`,
+    keywords: [
+      "third-party integrations",
+      "API connectivity", 
+      "workflow automation",
+      "system integration",
+      "data synchronization",
+      "connector platform",
+      "unified workflows",
+      "enterprise integrations"
+    ],
+    lastUpdated: "3 days ago",
+    readTime: "4 min"
+  },
   "memory": {
     emoji: "🧠",
     title: "Memory",
@@ -118,37 +177,18 @@ Whether you're revisiting a contract, continuing a client conversation, or analy
   }
 };
 
-// Mock projects data for demonstration
-const mockProjects = [
-  {
-    id: "proj-1",
-    name: "Customer Support Bot",
-    description: "AI chatbot for handling customer inquiries",
-    status: "active",
-    created: "2024-01-15",
-    endpoints: 3
-  },
-  {
-    id: "proj-2", 
-    name: "Data Analytics Pipeline",
-    description: "Real-time data processing and visualization",
-    status: "development",
-    created: "2024-01-20",
-    endpoints: 5
-  },
-  {
-    id: "proj-3",
-    name: "E-commerce Integration",
-    description: "Webhook endpoints for order processing",
-    status: "active",
-    created: "2024-01-10",
-    endpoints: 2
-  }
-];
 
 export default function DocumentView() {
   const { id } = useParams<{ id: string }>();
   const [activeTab, setActiveTab] = useState("details");
+  const { toast } = useToast();
+
+  const handleNewProject = () => {
+    toast({
+      title: "Coming Soon",
+      description: "Check back soon to start new projects with alset",
+    });
+  };
   
   if (!id || !documents[id as keyof typeof documents]) {
     return (
@@ -186,52 +226,18 @@ export default function DocumentView() {
                       Manage projects related to {document.title.toLowerCase()}
                     </CardDescription>
                   </div>
-                  <Button>
+                  <Button onClick={handleNewProject}>
                     <Plus className="h-4 w-4 mr-2" />
                     New Project
                   </Button>
                 </div>
               </CardHeader>
               <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Description</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Created</TableHead>
-                      <TableHead>Endpoints</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {mockProjects.map((project) => (
-                      <TableRow key={project.id}>
-                        <TableCell className="font-medium">{project.name}</TableCell>
-                        <TableCell className="text-muted-foreground">{project.description}</TableCell>
-                        <TableCell>
-                          <Badge 
-                            variant={project.status === "active" ? "default" : "secondary"}
-                          >
-                            {project.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>{new Date(project.created).toLocaleDateString()}</TableCell>
-                        <TableCell>{project.endpoints}</TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            <Button variant="outline" size="sm">
-                              <Settings className="h-4 w-4" />
-                            </Button>
-                            <Button variant="outline" size="sm">
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                <div className="text-center py-12">
+                  <div className="text-muted-foreground">
+                    No projects available yet. Click "New Project" to get started.
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>

@@ -12,7 +12,7 @@ import Login from "./pages/Login";
 import Settings from "./pages/Settings";
 import Billing from "./pages/Billing";
 import Search from "./pages/Search";
-import Bookmarks from "./pages/Bookmarks";
+
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,7 +32,7 @@ function App() {
               <Route path="/settings" element={<Settings />} />
               <Route path="/billing" element={<Billing />} />
               <Route path="/search" element={<Search />} />
-              <Route path="/bookmarks" element={<Bookmarks />} />
+              
               <Route path="/docs/:id" element={<DocsTemplate />} />
               <Route path="/:id" element={<DocumentView />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

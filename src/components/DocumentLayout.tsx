@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Menu, X, Home, FileText, Search, Settings, Bookmark, ChevronRight, Lock, LayoutDashboard } from "lucide-react";
+import { Menu, X, Home, FileText, Search, Settings, ChevronRight, Lock, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Link, useParams } from "react-router-dom";
@@ -18,7 +18,6 @@ const navigationItems = [
   { id: "home", icon: Home, label: "Home", href: "/" },
   { id: "dashboard", icon: LayoutDashboard, label: "Dashboard", href: "/dashboard", requiresAuth: true },
   { id: "search", icon: Search, label: "Search", href: "/search" },
-  { id: "bookmarks", icon: Bookmark, label: "Bookmarks", href: "/bookmarks" },
   { id: "settings", icon: Settings, label: "Settings", href: "/settings" },
 ];
 
