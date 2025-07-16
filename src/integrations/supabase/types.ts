@@ -2307,6 +2307,54 @@ export type Database = {
         }
         Relationships: []
       }
+      uploads: {
+        Row: {
+          content: string | null
+          created_at: string
+          file_path: string | null
+          id: string
+          metadata: Json | null
+          name: string
+          progress: number | null
+          size: number | null
+          source: string
+          status: string
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string
+          file_path?: string | null
+          id?: string
+          metadata?: Json | null
+          name: string
+          progress?: number | null
+          size?: number | null
+          source: string
+          status?: string
+          type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string | null
+          created_at?: string
+          file_path?: string | null
+          id?: string
+          metadata?: Json | null
+          name?: string
+          progress?: number | null
+          size?: number | null
+          source?: string
+          status?: string
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       usage_events: {
         Row: {
           created_at: string | null

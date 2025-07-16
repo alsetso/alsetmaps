@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Menu, X, Home, FileText, Search, Settings, Bookmark, ChevronRight, Lock } from "lucide-react";
+import { Menu, X, Home, FileText, Search, Settings, Bookmark, ChevronRight, Lock, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Link, useParams } from "react-router-dom";
@@ -16,6 +16,7 @@ interface DocumentLayoutProps {
 
 const navigationItems = [
   { id: "home", icon: Home, label: "Home", href: "/" },
+  { id: "dashboard", icon: LayoutDashboard, label: "Dashboard", href: "/dashboard", requiresAuth: true },
   { id: "search", icon: Search, label: "Search", href: "/search" },
   { id: "bookmarks", icon: Bookmark, label: "Bookmarks", href: "/bookmarks" },
   { id: "settings", icon: Settings, label: "Settings", href: "/settings" },
@@ -111,6 +112,9 @@ export function DocumentLayout({ children, currentPage = "home" }: DocumentLayou
             
             <nav className="flex flex-col gap-fluid-xs p-fluid-sm">
               {navigationItems.map((item) => {
+                // Hide dashboard if user is not logged in
+                if (item.requiresAuth && !user) return null;
+                
                 const Icon = item.icon;
                 const isActive = item.id === currentPage;
                 

@@ -4,9 +4,11 @@ import { DocumentLayout } from "@/components/DocumentLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Search, FileText, Calendar, User, Star, Zap, Brain, Cpu, Database, Bot, Network, ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Search, FileText, Calendar, User, Star, Zap, Brain, Cpu, Database, Bot, Network, ArrowRight, LayoutDashboard } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import type { User as SupabaseUser } from "@supabase/supabase-js";
 
 interface Document {
   id: string;
@@ -142,10 +144,26 @@ const Index = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"featured" | "services" | "all">("featured");
+  const [user, setUser] = useState<SupabaseUser | null>(null);
 
   useEffect(() => {
     // Using mock data since documents table doesn't exist
     setLoading(false);
+    
+    // Get current user
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    };
+
+    getUser();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   // No database documents to filter, using empty array
@@ -167,6 +185,33 @@ const Index = () => {
   return (
     <DocumentLayout currentPage="home">
       <div className="space-y-8">
+        {/* Dashboard Banner for Logged-in Users */}
+        {user && (
+          <Card className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-lg bg-primary/20 flex items-center justify-center">
+                    <LayoutDashboard className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold">Welcome back!</h3>
+                    <p className="text-muted-foreground text-sm">
+                      Access your dashboard to manage services and view your activity
+                    </p>
+                  </div>
+                </div>
+                <Button asChild>
+                  <Link to="/dashboard">
+                    <LayoutDashboard className="h-4 w-4 mr-2" />
+                    Open Dashboard
+                  </Link>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Header */}
         <header className="text-center">
           <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
