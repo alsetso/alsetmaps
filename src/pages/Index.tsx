@@ -144,34 +144,12 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState<"featured" | "services" | "all">("featured");
 
   useEffect(() => {
-    fetchDocuments();
+    // Using mock data since documents table doesn't exist
+    setLoading(false);
   }, []);
 
-  const fetchDocuments = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('documents')
-        .select('*')
-        .is('deleted_at', null)
-        .order('updated_at', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching documents:', error);
-        return;
-      }
-
-      setDocuments(data || []);
-    } catch (error) {
-      console.error('Error:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const filteredDocuments = documents.filter(doc =>
-    doc.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (doc.content && doc.content.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  // No database documents to filter, using empty array
+  const filteredDocuments: Document[] = [];
 
   const getPreview = (content: string | null) => {
     if (!content) return "No content available";
