@@ -64,7 +64,15 @@ export function DocumentLayout({ children, currentPage = "home" }: DocumentLayou
       {/* Fixed Header */}
       <header className="fixed top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <ResponsiveContainer size="fluid" className="flex h-header items-center justify-between">
-          <div className="flex items-center gap-fluid-sm ml-16">
+          <div className="flex items-center gap-fluid-sm">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="h-9 w-9 p-0"
+            >
+              <Menu className="h-4 w-4" />
+            </Button>
             <Link 
               to="/" 
               className="font-heading font-semibold text-fluid-lg hover:text-primary transition-colors focus-ring rounded-sm"
@@ -93,7 +101,10 @@ export function DocumentLayout({ children, currentPage = "home" }: DocumentLayou
 
       <div className="flex min-h-[calc(100vh-var(--header-height))]">
         {/* Fixed Icon-Only Sidebar */}
-        <aside className="fixed left-0 top-0 h-screen w-16 border-r bg-sidebar-background z-40">
+        <aside className={cn(
+          "fixed left-0 top-0 h-screen border-r bg-sidebar-background z-40 transition-transform duration-300",
+          sidebarOpen ? "w-16 translate-x-0" : "w-16 -translate-x-full"
+        )}>
           <div className="flex flex-col h-full">
             {/* 80px spacer */}
             <div className="h-20"></div>
@@ -125,7 +136,10 @@ export function DocumentLayout({ children, currentPage = "home" }: DocumentLayou
         </aside>
 
         {/* Main Content with 800px max width */}
-        <main className="flex-1 bg-gradient-subtle overflow-auto ml-16 pt-header">
+        <main className={cn(
+          "flex-1 bg-gradient-subtle overflow-auto pt-header transition-all duration-300",
+          sidebarOpen ? "ml-16" : "ml-0"
+        )}>
           <div className="mx-auto max-w-[800px] px-fluid-lg py-fluid-2xl min-h-full">
             <div className="space-fluid-y">
               {/* 100px spacer above all content */}

@@ -1,15 +1,49 @@
+import { useState, useEffect } from "react";
 import { DocumentLayout } from "@/components/DocumentLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Separator } from "@/components/ui/separator";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
+import { supabase } from "@/integrations/supabase/client";
+import type { User } from "@supabase/supabase-js";
 
 export default function Settings() {
   const { theme, setTheme } = useTheme();
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+      setLoading(false);
+    };
+
+    getUser();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  if (loading) {
+    return (
+      <DocumentLayout currentPage="settings">
+        <div className="space-y-6">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
+            <p className="text-muted-foreground">Loading user information...</p>
+          </div>
+        </div>
+      </DocumentLayout>
+    );
+  }
 
   return (
     <DocumentLayout currentPage="settings">
@@ -49,96 +83,57 @@ export default function Settings() {
               </div>
             </CardContent>
           </Card>
-          {/* Profile Settings */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Profile</CardTitle>
-              <CardDescription>
-                Update your personal information and preferences.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="firstName">First name</Label>
-                  <Input id="firstName" placeholder="Enter your first name" />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="lastName">Last name</Label>
-                  <Input id="lastName" placeholder="Enter your last name" />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" placeholder="Enter your email" />
-              </div>
-              <Button>Save Changes</Button>
-            </CardContent>
-          </Card>
 
-          {/* Notifications */}
+          {/* User Profile from Supabase */}
           <Card>
             <CardHeader>
-              <CardTitle>Notifications</CardTitle>
+              <CardTitle>User Profile</CardTitle>
               <CardDescription>
-                Configure how you receive notifications.
+                Your account information from Supabase Auth.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Email notifications</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Receive notifications via email
-                  </p>
+              {user ? (
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>User ID</Label>
+                    <Input value={user.id} readOnly className="bg-muted" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Email</Label>
+                    <Input value={user.email || ''} readOnly className="bg-muted" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Email Verified</Label>
+                    <Input value={user.email_confirmed_at ? 'Yes' : 'No'} readOnly className="bg-muted" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Created At</Label>
+                    <Input value={new Date(user.created_at).toLocaleString()} readOnly className="bg-muted" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Last Sign In</Label>
+                    <Input value={user.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleString() : 'Never'} readOnly className="bg-muted" />
+                  </div>
+                  {user.user_metadata && Object.keys(user.user_metadata).length > 0 && (
+                    <div className="space-y-2">
+                      <Label>User Metadata</Label>
+                      <div className="bg-muted p-3 rounded-md">
+                        <pre className="text-sm">{JSON.stringify(user.user_metadata, null, 2)}</pre>
+                      </div>
+                    </div>
+                  )}
+                  <Button 
+                    variant="outline" 
+                    onClick={() => supabase.auth.signOut()}
+                    className="w-full"
+                  >
+                    Sign Out
+                  </Button>
                 </div>
-                <Switch />
-              </div>
-              <Separator />
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Push notifications</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Receive push notifications in your browser
-                  </p>
-                </div>
-                <Switch />
-              </div>
-              <Separator />
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Marketing emails</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Receive emails about new features and updates
-                  </p>
-                </div>
-                <Switch />
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Security */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Security</CardTitle>
-              <CardDescription>
-                Manage your account security settings.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="currentPassword">Current password</Label>
-                <Input id="currentPassword" type="password" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="newPassword">New password</Label>
-                <Input id="newPassword" type="password" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm new password</Label>
-                <Input id="confirmPassword" type="password" />
-              </div>
-              <Button variant="outline">Change Password</Button>
+              ) : (
+                <p className="text-muted-foreground">No user logged in</p>
+              )}
             </CardContent>
           </Card>
         </div>
