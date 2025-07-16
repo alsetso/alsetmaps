@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import DocumentView from "./pages/DocumentView";
+import DocsTemplate from "./pages/DocsTemplate";
 import Login from "./pages/Login";
 import Settings from "./pages/Settings";
 import Billing from "./pages/Billing";
@@ -32,6 +33,7 @@ function App() {
               <Route path="/billing" element={<Billing />} />
               <Route path="/search" element={<Search />} />
               <Route path="/bookmarks" element={<Bookmarks />} />
+              <Route path="/docs/:id" element={<DocsTemplate />} />
               <Route path="/:id" element={<DocumentView />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
