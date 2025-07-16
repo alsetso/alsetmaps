@@ -128,6 +128,8 @@ export function DocumentLayout({ children, currentPage = "home" }: DocumentLayou
         <main className="flex-1 bg-gradient-subtle overflow-auto ml-16 pt-header">
           <div className="mx-auto max-w-[800px] px-fluid-lg py-fluid-2xl min-h-full">
             <div className="space-fluid-y">
+              {/* 100px spacer above all content */}
+              <div className="h-[100px]"></div>
               {renderBreadcrumbs()}
               {children}
             </div>
