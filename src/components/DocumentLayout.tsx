@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Menu, X, Home, FileText, Search, Settings, Bookmark, ChevronRight, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -15,7 +16,6 @@ interface DocumentLayoutProps {
 
 const navigationItems = [
   { id: "home", icon: Home, label: "Home", href: "/" },
-  { id: "docs", icon: FileText, label: "Documentation", href: "/docs" },
   { id: "search", icon: Search, label: "Search", href: "/search" },
   { id: "bookmarks", icon: Bookmark, label: "Bookmarks", href: "/bookmarks" },
   { id: "settings", icon: Settings, label: "Settings", href: "/settings" },
@@ -94,60 +94,44 @@ export function DocumentLayout({ children, currentPage = "home" }: DocumentLayou
       <div className="flex min-h-[calc(100vh-var(--header-height))]">
         {/* Fixed Icon-Only Sidebar */}
         <aside className="fixed left-0 top-0 h-screen w-16 border-r bg-sidebar-background z-40">
-          <nav className="flex flex-col gap-fluid-xs p-fluid-sm justify-center h-full">
-            {navigationItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = item.id === currentPage;
-              
-              return (
-                <Link key={item.id} to={item.href}>
-                  <Button
-                    variant={isActive ? "default" : "ghost"}
-                    size="sm"
-                    className={cn(
-                      "w-full h-12 justify-center px-0 focus-ring",
-                      "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                      isActive && "bg-sidebar-primary text-sidebar-primary-foreground"
-                    )}
-                    title={item.label}
-                  >
-                    <Icon className="h-4 w-4" />
-                  </Button>
-                </Link>
-              );
-            })}
-          </nav>
+          <div className="flex flex-col h-full">
+            {/* 80px spacer */}
+            <div className="h-20"></div>
+            
+            <nav className="flex flex-col gap-fluid-xs p-fluid-sm">
+              {navigationItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = item.id === currentPage;
+                
+                return (
+                  <Link key={item.id} to={item.href}>
+                    <Button
+                      variant={isActive ? "default" : "ghost"}
+                      size="sm"
+                      className={cn(
+                        "w-full h-12 justify-center px-0 focus-ring",
+                        "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                        isActive && "bg-sidebar-primary text-sidebar-primary-foreground"
+                      )}
+                      title={item.label}
+                    >
+                      <Icon className="h-4 w-4" />
+                    </Button>
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
         </aside>
 
         {/* Main Content with 800px max width */}
-        <main className="flex-1 bg-gradient-subtle overflow-auto ml-16 pt-header relative">
-          <div className="mx-auto max-w-[800px] px-fluid-lg py-fluid-2xl min-h-full pb-[120px]">
+        <main className="flex-1 bg-gradient-subtle overflow-auto ml-16 pt-header">
+          <div className="mx-auto max-w-[800px] px-fluid-lg py-fluid-2xl min-h-full">
             <div className="space-fluid-y">
               {renderBreadcrumbs()}
               {children}
             </div>
           </div>
-
-          {/* Fixed Footer within main content */}
-          <footer className="fixed bottom-0 left-16 right-0 border-t bg-muted/30">
-            <ResponsiveContainer size="container" className="py-fluid-xl">
-              <div className="flex flex-col md:flex-row justify-between items-center gap-fluid-lg text-fluid-sm text-muted-foreground">
-                <div className="flex items-center gap-fluid-sm">
-                  <span className="font-heading font-semibold">alset</span>
-                  <span>•</span>
-                  <span>Professional documentation platform</span>
-                </div>
-                <div className="flex gap-fluid-lg">
-                  <Link to="/docs" className="hover:text-foreground transition-colors focus-ring rounded-sm">
-                    Documentation
-                  </Link>
-                  <Link to="/settings" className="hover:text-foreground transition-colors focus-ring rounded-sm">
-                    Settings
-                  </Link>
-                </div>
-              </div>
-            </ResponsiveContainer>
-          </footer>
         </main>
       </div>
     </div>

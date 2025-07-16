@@ -1,9 +1,10 @@
+
 import { useState, useEffect } from "react";
 import { DocumentLayout } from "@/components/DocumentLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Search, FileText, Calendar, User, Star, Zap, Brain, Cpu } from "lucide-react";
+import { Search, FileText, Calendar, User, Star, Zap, Brain, Cpu, Database, Bot, Network, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -17,6 +18,84 @@ interface Document {
   emoji: string | null;
   created_by: string | null;
 }
+
+// Primary services that alset offers
+const primaryServices = [
+  {
+    id: "endpoints",
+    title: "Endpoints",
+    description: "Secure API endpoints for seamless data integration and real-time communication",
+    icon: Database,
+    slug: "endpoints",
+    gradient: "from-blue-500 to-cyan-500"
+  },
+  {
+    id: "agents",
+    title: "Agents",
+    description: "Intelligent AI agents for autonomous task execution and decision making",
+    icon: Bot,
+    slug: "agents",
+    gradient: "from-purple-500 to-pink-500"
+  },
+  {
+    id: "intelligence",
+    title: "Intelligence",
+    description: "Advanced AI models and machine learning capabilities for industry transformation",
+    icon: Brain,
+    slug: "intelligence",
+    gradient: "from-green-500 to-emerald-500"
+  },
+  {
+    id: "data-processing",
+    title: "Data Processing",
+    description: "Real-time data processing and analytics for actionable business insights",
+    icon: Cpu,
+    slug: "processing",
+    gradient: "from-orange-500 to-red-500"
+  },
+  {
+    id: "integrations",
+    title: "Integrations",
+    description: "Seamless third-party integrations for enhanced workflow automation",
+    icon: Network,
+    slug: "integrations",
+    gradient: "from-indigo-500 to-blue-500"
+  }
+];
+
+// Featured documentation linking to actual documents
+const featuredDocuments = [
+  {
+    id: "endpoints-documentation",
+    title: "📡 Endpoints Documentation",
+    description: "Complete guide to setting up and managing secure API endpoints",
+    category: "Technical"
+  },
+  {
+    id: "ai-agents-guide",
+    title: "🤖 AI Agents Guide",
+    description: "Learn how to deploy and configure intelligent AI agents",
+    category: "AI Solutions"
+  },
+  {
+    id: "intelligence-platform",
+    title: "🧠 Intelligence Platform",
+    description: "Harness the power of our advanced AI intelligence capabilities",
+    category: "AI Solutions"
+  },
+  {
+    id: "data-processing-engine",
+    title: "⚡ Data Processing Engine",
+    description: "Real-time data processing and analytics documentation",
+    category: "Technical"
+  },
+  {
+    id: "integration-hub",
+    title: "🔗 Integration Hub",
+    description: "Connect with third-party services and automate workflows",
+    category: "Integrations"
+  }
+];
 
 // Featured content showcasing alset's AI capabilities
 const featuredSections = [
@@ -62,7 +141,7 @@ const Index = () => {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"featured" | "all">("featured");
+  const [activeTab, setActiveTab] = useState<"featured" | "services" | "all">("featured");
 
   useEffect(() => {
     fetchDocuments();
@@ -133,6 +212,16 @@ const Index = () => {
               Featured Solutions
             </button>
             <button
+              onClick={() => setActiveTab("services")}
+              className={`px-6 py-2 rounded-lg font-medium transition-colors ${
+                activeTab === "services" 
+                  ? "bg-primary text-primary-foreground" 
+                  : "bg-muted text-muted-foreground hover:bg-muted/80"
+              }`}
+            >
+              Core Services
+            </button>
+            <button
               onClick={() => setActiveTab("all")}
               className={`px-6 py-2 rounded-lg font-medium transition-colors ${
                 activeTab === "all" 
@@ -195,7 +284,7 @@ const Index = () => {
                 </section>
               );
             })}
-            
+
             {/* Call to Action */}
             <Card className="bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
               <CardContent className="text-center py-12">
@@ -216,6 +305,90 @@ const Index = () => {
                 </div>
               </CardContent>
             </Card>
+          </div>
+        )}
+
+        {/* Core Platform Services */}
+        {activeTab === "services" && (
+          <div className="space-y-8">
+            {/* Primary Services Grid */}
+            <section className="space-y-6">
+              <div className="text-center">
+                <h2 className="text-3xl font-bold mb-4">Core Platform Services</h2>
+                <p className="text-muted-foreground max-w-2xl mx-auto">
+                  Explore our primary services designed to accelerate your AI transformation journey
+                </p>
+              </div>
+              
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {primaryServices.map((service) => {
+                  const IconComponent = service.icon;
+                  return (
+                    <Link key={service.id} to={`/${service.slug}`}>
+                      <Card className="h-full group hover:shadow-xl transition-all duration-300 cursor-pointer border-0 bg-gradient-subtle hover:scale-105">
+                        <CardContent className="p-6">
+                          <div className="space-y-4">
+                            <div className={`w-12 h-12 rounded-lg bg-gradient-to-r ${service.gradient} flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                              <IconComponent className="h-6 w-6 text-white" />
+                            </div>
+                            <div>
+                              <h3 className="text-xl font-semibold group-hover:text-primary transition-colors mb-2">
+                                {service.title}
+                              </h3>
+                              <p className="text-muted-foreground leading-relaxed">
+                                {service.description}
+                              </p>
+                            </div>
+                            <div className="flex items-center text-primary group-hover:translate-x-1 transition-transform pt-2">
+                              <span className="text-sm font-medium">Learn more</span>
+                              <ArrowRight className="h-4 w-4 ml-1" />
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  );
+                })}
+              </div>
+            </section>
+
+            {/* Featured Documentation */}
+            <section className="space-y-6">
+              <div className="text-center">
+                <h2 className="text-2xl font-bold mb-4">Featured Documentation</h2>
+                <p className="text-muted-foreground max-w-2xl mx-auto">
+                  Essential guides and documentation for our core platform features
+                </p>
+              </div>
+              
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {featuredDocuments.map((doc) => (
+                  <Link key={doc.id} to={`/${doc.id}`}>
+                    <Card className="h-full group hover:shadow-lg transition-all duration-300 cursor-pointer">
+                      <CardHeader>
+                        <div className="flex items-start justify-between mb-2">
+                          <CardTitle className="text-lg group-hover:text-primary transition-colors">
+                            {doc.title}
+                          </CardTitle>
+                          <Badge variant="outline" className="text-xs">
+                            {doc.category}
+                          </Badge>
+                        </div>
+                        <CardDescription className="leading-relaxed">
+                          {doc.description}
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex items-center text-primary group-hover:translate-x-1 transition-transform">
+                          <span className="text-sm font-medium">Read documentation</span>
+                          <ArrowRight className="h-4 w-4 ml-1" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                ))}
+              </div>
+            </section>
           </div>
         )}
 
