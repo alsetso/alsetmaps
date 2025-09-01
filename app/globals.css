@@ -1,0 +1,198 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Compact, Modern Design System */
+    --background: 0 0% 100%;           /* Pure white */
+    --foreground: 220 13% 18%;         /* Dark grey text */
+    --card: 0 0% 100%;                 /* White cards */
+    --card-foreground: 220 13% 18%;    /* Dark grey text */
+    --popover: 0 0% 100%;              /* White popovers */
+    --popover-foreground: 220 13% 18%; /* Dark grey text */
+    
+    /* Professional Emerald Green Primary */
+    --primary: 160 84% 39%;            /* Soft emerald green (#10b981) */
+    --primary-foreground: 0 0% 100%;   /* White text on primary */
+    
+    /* Light Grey Secondary */
+    --secondary: 220 13% 96%;          /* Very light grey */
+    --secondary-foreground: 220 13% 18%; /* Dark grey text */
+    
+    /* Muted Elements */
+    --muted: 220 13% 96%;              /* Light grey */
+    --muted-foreground: 220 13% 45%;   /* Medium grey text */
+    
+    /* Accent - Very Light Emerald */
+    --accent: 160 84% 97%;             /* Very light emerald (#ecfdf5) */
+    --accent-foreground: 160 84% 25%;  /* Dark emerald text */
+    
+    /* Destructive */
+    --destructive: 0 84% 60%;          /* Red */
+    --destructive-foreground: 0 0% 100%; /* White text */
+    
+    /* Borders and Inputs */
+    --border: 220 13% 90%;             /* Light grey borders */
+    --input: 220 13% 96%;              /* Light grey inputs */
+    --ring: 160 84% 39%;               /* Emerald green focus rings */
+    
+    /* Compact Border Radius */
+    --radius: 0.375rem;                 /* Smaller, modern radius */
+  }
+
+  .dark {
+    --background: 220 13% 8%;          /* Very dark grey */
+    --foreground: 220 13% 95%;         /* Light grey text */
+    --card: 220 13% 12%;               /* Dark grey cards */
+    --card-foreground: 220 13% 95%;    /* Light grey text */
+    --popover: 220 13% 12%;            /* Dark grey popovers */
+    --popover-foreground: 220 13% 95%; /* Light grey text */
+    
+    /* Emerald Green Primary (darker for dark mode) */
+    --primary: 160 84% 35%;            /* Slightly darker emerald green */
+    --primary-foreground: 0 0% 100%;   /* White text */
+    
+    /* Dark Grey Secondary */
+    --secondary: 220 13% 16%;          /* Dark grey */
+    --secondary-foreground: 220 13% 95%; /* Light grey text */
+    
+    /* Accent */
+    --accent: 160 84% 15%;             /* Very dark emerald green */
+    --accent-foreground: 160 84% 85%;  /* Light emerald green text */
+    
+    /* Destructive */
+    --destructive: 0 62% 30%;          /* Dark red */
+    --destructive-foreground: 0 0% 100%; /* White text */
+    
+    /* Borders and Inputs */
+    --border: 220 13% 20%;             /* Dark grey borders */
+    --input: 220 13% 16%;              /* Dark grey inputs */
+    --ring: 160 84% 35%;               /* Emerald green focus rings */
+    
+    /* Compact Border Radius */
+    --radius: 0.375rem;                 /* Consistent radius */
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    padding-top: 64px; /* Account for fixed topbar (h-16) */
+  }
+}
+
+@layer components {
+  /* Compact Component Styles */
+  .compact-card {
+    @apply bg-card border border-border rounded-md shadow-sm;
+  }
+  
+  .compact-input {
+    @apply bg-input border border-border rounded-md px-3 py-2 text-sm;
+  }
+  
+  .compact-button {
+    @apply px-4 py-2 text-sm font-medium rounded-md transition-colors;
+  }
+  
+  /* Glass Morphism Styles */
+  .glass-light {
+    @apply backdrop-blur-md bg-white/80 border border-white/20 shadow-lg;
+  }
+  
+  .glass-dark {
+    @apply backdrop-blur-md bg-black/60 border border-white/20 shadow-lg;
+  }
+  
+  /* Topbar Specific Styles */
+  .topbar-glass {
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  /* Compact spacing utilities */
+  .space-compact > * + * {
+    margin-top: 0.75rem;
+  }
+  
+  .space-compact-sm > * + * {
+    margin-top: 0.5rem;
+  }
+  
+  /* Glass morphism utilities */
+  .backdrop-blur-md {
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+  
+  /* Animation utilities for topbar */
+  .animate-in {
+    animation: animateIn 0.2s ease-out;
+  }
+  
+  .slide-in-from-top-2 {
+    animation: slideInFromTop 0.2s ease-out;
+  }
+  
+  @keyframes animateIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  
+  @keyframes slideInFromTop {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+/* Custom scrollbar - Compact and modern */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground));
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--foreground));
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Ensure topbar is above all other elements */
+.topbar-z {
+  z-index: 9999;
+}
