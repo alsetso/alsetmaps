@@ -385,10 +385,8 @@ export default function BuyPage() {
                             className="w-full"
                             onChange={(e) => {
                               const searchTerm = e.target.value.toLowerCase();
-                              const filteredPins = userPins.filter(pin => 
-                                pin.search_history.search_address.toLowerCase().includes(searchTerm) ||
-                                pin.search_history.search_type.toLowerCase().includes(searchTerm)
-                              );
+                              // TODO: Implement search filtering functionality
+                              console.log('Search term:', searchTerm);
                               // Note: In a real implementation, you'd want to maintain filtered state
                             }}
                           />

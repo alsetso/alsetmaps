@@ -17,7 +17,9 @@
     "start": "next start",
     "lint": "next lint",
     "clean": "rm -rf .next out dist",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "pre-commit": "./scripts/pre-commit.sh",
+    "pre-deploy": "npm run type-check && npm run lint"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
