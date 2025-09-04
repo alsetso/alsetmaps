@@ -146,11 +146,11 @@ export default function MyPinsPage() {
                 Please sign in to view and manage your property pins.
               </p>
               <div className="space-x-4">
-                <Button asChild>
-                  <a href="/login">Sign In</a>
+                <Button onClick={() => window.location.href = '/login'}>
+                  Sign In
                 </Button>
-                <Button variant="outline" asChild>
-                  <a href="/register">Create Account</a>
+                <Button variant="outline" onClick={() => window.location.href = '/register'}>
+                  Create Account
                 </Button>
               </div>
             </div>
@@ -162,11 +162,11 @@ export default function MyPinsPage() {
                 Start by searching for properties or creating your first pin to track real estate opportunities.
               </p>
               <div className="space-x-4">
-                <Button asChild>
-                  <a href="/">Search Properties</a>
+                <Button onClick={() => window.location.href = '/'}>
+                  Search Properties
                 </Button>
-                <Button variant="outline" asChild>
-                  <a href="/dashboard">Go to Dashboard</a>
+                <Button variant="outline" onClick={() => window.location.href = '/dashboard'}>
+                  Go to Dashboard
                 </Button>
               </div>
             </div>

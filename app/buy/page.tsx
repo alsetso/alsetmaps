@@ -223,8 +223,8 @@ export default function BuyPage() {
           <div className="text-center">
             <h1 className="text-2xl font-bold mb-4">Authentication Required</h1>
             <p className="text-gray-600 mb-4">Please log in to submit buy intents.</p>
-            <Button asChild>
-              <a href="/login">Go to Login</a>
+            <Button onClick={() => window.location.href = '/login'}>
+              Go to Login
             </Button>
           </div>
         </div>
