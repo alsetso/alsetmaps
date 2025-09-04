@@ -61,7 +61,7 @@ export class BuyerIntentService {
   /**
    * Get market insights for a location
    */
-  static async getMarketInsights(location: LocationPreference): Promise<MarketInsight | null> {
+  static async getMarketInsights(_location: LocationPreference): Promise<MarketInsight | null> {
     try {
       // TODO: Integrate with real estate data APIs
       const mockInsights: MarketInsight = {

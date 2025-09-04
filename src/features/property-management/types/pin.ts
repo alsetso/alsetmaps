@@ -152,7 +152,7 @@ export interface PinSearchResult {
 }
 
 // Legacy interfaces for backward compatibility
-export interface PropertyData {
+export interface LegacyPropertyData {
   zillow_id?: string;
   price?: number;
   bedrooms?: number;

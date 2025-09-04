@@ -11,7 +11,6 @@ import { z } from 'zod';
 import { 
   HomeIcon, 
   UserIcon, 
-  BuildingOfficeIcon, 
   MapPinIcon,
   CurrencyDollarIcon,
   CalendarIcon,
@@ -19,8 +18,7 @@ import {
   EnvelopeIcon,
   MagnifyingGlassIcon,
   HeartIcon,
-  XMarkIcon,
-  CalculatorIcon
+  XMarkIcon
 } from '@heroicons/react/24/outline';
 import { BuyerIntentData } from '@/features/marketplace-intents/types/buyer-intent';
 import { BuyerIntentService } from '@/features/marketplace-intents/services/buyer-intent-service';
@@ -71,15 +69,22 @@ const enhancedBuyerIntentSchema = z.object({
 
 type EnhancedBuyerIntentFormData = z.infer<typeof enhancedBuyerIntentSchema>;
 
+// Temporarily commented out due to unused variable
+/*
 const buyerTypeOptions: { value: string; label: string; icon: any; description: string }[] = [
   { value: 'family', label: 'Family', icon: HomeIcon, description: 'Looking for a home to live in' },
+  { value: 'investor', label: 'Investor', icon: BuildingOfficeIcon, description: 'Building investment portfolio' },
+  { value: 'wholesaler', label: 'Wholesaler', icon: MagnifyingGlassIcon, description: 'Finding deals for other buyers' },
   { value: 'investor', label: 'Investor', icon: BuildingOfficeIcon, description: 'Building investment portfolio' },
   { value: 'wholesaler', label: 'Wholesaler', icon: MagnifyingGlassIcon, description: 'Finding deals for other buyers' },
   { value: 'developer', label: 'Developer', icon: BuildingOfficeIcon, description: 'Land development projects' },
   { value: 'agent', label: 'Agent', icon: UserIcon, description: 'Representing clients' },
   { value: 'other', label: 'Other', icon: UserIcon, description: 'Other buying purpose' },
 ];
+*/
 
+// Temporarily commented out due to unused variables
+/*
 const locationScopeOptions: { value: string; label: string; description: string }[] = [
   { value: 'specific_address', label: 'Specific Address', description: 'Looking for a particular property or area' },
   { value: 'city_level', label: 'City Level', description: 'Open to properties throughout the city' },
@@ -97,16 +102,17 @@ const urgencyLevelOptions: { value: string; label: string; description: string }
 
 const listingVisibilityOptions: { value: string; label: string; description: string }[] = [
   { value: 'public', label: 'Public', description: 'Visible to everyone' },
-  { value: 'private', label: 'Private', description: 'Only visible to you' },
+  { value: 'Private', description: 'Only visible to you' },
   { value: 'agent_only', label: 'Agent Only', description: 'Visible to agents only' },
 ];
+*/
 
 interface EnhancedBuyerIntentFormProps {
   onIntentSubmitted?: (intent: any) => void;
   onFindMatches?: (matches: any[]) => void;
 }
 
-export function EnhancedBuyerIntentForm({ onIntentSubmitted, onFindMatches }: EnhancedBuyerIntentFormProps) {
+export function EnhancedBuyerIntentForm({ onIntentSubmitted }: EnhancedBuyerIntentFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [mustHaveInput, setMustHaveInput] = useState('');

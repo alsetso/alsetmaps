@@ -86,6 +86,9 @@ export interface AgentInquiry {
 export interface AgentSearchFilters {
   search_query?: string;
   location_filter?: string[];
+  specialty_filter?: string[];
+  min_rating?: number;
+  max_price?: number;
   limit_count?: number;
   offset_count?: number;
 }

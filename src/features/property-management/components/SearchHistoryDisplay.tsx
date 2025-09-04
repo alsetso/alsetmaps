@@ -1,5 +1,5 @@
 import React from 'react';
-import { useSearchHistory } from '../hooks';
+// useSearchHistory hook removed - will be reimplemented later
 import { SearchHistory } from '../types';
 import { Button } from '@/features/shared/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/features/shared/components/ui/card';
@@ -17,14 +17,13 @@ export const SearchHistoryDisplay: React.FC<SearchHistoryDisplayProps> = ({
   showActions = true,
   onSearchSelect
 }) => {
-  const {
-    searchHistory,
-    loading,
-    error,
-    deleteSearch,
-    clearSearchHistory,
-    refresh
-  } = useSearchHistory();
+  // Hook removed - will be reimplemented later
+  const searchHistory: SearchHistory[] = [];
+  const loading = false;
+  const error = null;
+  const deleteSearch = async (_id: string) => console.log('Delete not yet implemented');
+  const clearSearchHistory = async () => console.log('Clear not yet implemented');
+  const refresh = () => console.log('Refresh not yet implemented');
 
   const handleDelete = async (id: string) => {
     if (confirm('Are you sure you want to delete this search from your history?')) {

@@ -34,7 +34,7 @@ Thank you for your interest in contributing to Alset! This document provides gui
 ### Prerequisites
 
 - Node.js 18+
-- npm, yarn, or bun
+- npm or yarn
 - Git
 
 ### Local Development

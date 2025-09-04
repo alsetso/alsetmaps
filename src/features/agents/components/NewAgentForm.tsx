@@ -35,7 +35,9 @@ const newAgentSchema = z.object({
   license_state: z.string().optional(),
   
   // Service Information
+  specialties: z.array(z.string()).min(1, 'At least one specialty is required'),
   service_areas: z.array(z.string()).min(1, 'At least one service area is required'),
+  years_experience: z.number().optional(),
   languages: z.array(z.string()).optional(),
   
   // Profile Content
@@ -82,7 +84,9 @@ export function NewAgentForm({ onSubmit, isSubmitting = false, onCancel }: NewAg
   const form = useForm<NewAgentFormData>({
     resolver: zodResolver(newAgentSchema),
     defaultValues: {
+      specialties: [''],
       service_areas: [''],
+      years_experience: undefined,
       languages: ['English'],
       search_keywords: [],
       profile_image: '',

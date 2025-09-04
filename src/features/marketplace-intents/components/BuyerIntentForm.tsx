@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/features/shared/components/ui/card';
 import { Button } from '@/features/shared/components/ui/button';
 import { Input } from '@/features/shared/components/ui/input';
@@ -23,10 +23,7 @@ import {
   CalculatorIcon
 } from '@heroicons/react/24/outline';
 import { 
-  BuyerIntentData, 
-  LocationPreference,
-  PropertyCriteria,
-  FinancialCriteria,
+  BuyerIntentData,
   PropertyType,
   FinancingType,
   Timeline,

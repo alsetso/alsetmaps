@@ -11,7 +11,6 @@ import {
   RefinanceRequestSearchParams,
   RefinanceCalculationResult,
   RefinanceWorkflowActionPayload,
-  RefinanceStatus,
   RefinancePriority
 } from '../types/refinance-request';
 

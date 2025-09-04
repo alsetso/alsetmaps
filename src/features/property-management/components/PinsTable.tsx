@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Pin } from '../types/pin';
 import { PinsService } from '../services/pins-service';
-import { TrashIcon, PencilIcon, CheckIcon } from '@heroicons/react/24/outline';
+import { TrashIcon, CheckIcon } from '@heroicons/react/24/outline';
 import { Button } from '@/features/shared/components/ui/button';
 
 export function PinsTable() {
@@ -41,27 +41,12 @@ export function PinsTable() {
   };
 
   const handleMarkAsSold = async (pinId: string) => {
-    const price = prompt('Enter the sold price:');
-    if (price && !isNaN(Number(price))) {
-      try {
-        await PinsService.markPinAsSold(pinId, Number(price));
-        await loadPins(); // Reload to get updated data
-      } catch (err) {
-        console.error('Failed to mark pin as sold:', err);
-        alert('Failed to mark pin as sold');
-      }
-    }
+    // TODO: Implement markPinAsSold functionality
+    console.log('Mark as sold functionality not yet implemented for pin:', pinId);
+    alert('Mark as sold functionality coming soon!');
   };
 
-  const formatPrice = (price?: number) => {
-    if (!price) return 'N/A';
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(price);
-  };
+
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString();
@@ -123,33 +108,32 @@ export function PinsTable() {
           {pins.map((pin) => (
             <tr key={pin.id} className="hover:bg-gray-50">
               <td className="px-6 py-4 whitespace-nowrap">
-                <div className="text-sm font-medium text-gray-900">{pin.name}</div>
+                <div className="text-sm font-medium text-gray-900">{pin.title || 'Untitled'}</div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
-                <div className="text-sm text-gray-900 max-w-xs truncate">{pin.address}</div>
+                <div className="text-sm text-gray-900 max-w-xs truncate">{pin.input_address}</div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
                 <div className="text-sm text-gray-900">
-                  {pin.property_data.bedrooms && `${pin.property_data.bedrooms} bed`}
-                  {pin.property_data.bathrooms && `, ${pin.property_data.bathrooms} bath`}
-                  {pin.property_data.square_feet && `, ${pin.property_data.square_feet} sqft`}
-                  {!pin.property_data.bedrooms && !pin.property_data.bathrooms && !pin.property_data.square_feet && 'N/A'}
+                  {pin.pin_type}
                 </div>
                 <div className="text-sm text-gray-500">
-                  {pin.property_data.price && formatPrice(pin.property_data.price)}
+                  {pin.status}
                 </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
                 <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                  pin.is_sold 
+                  pin.status === 'sold'
                     ? 'bg-green-100 text-green-800' 
-                    : 'bg-blue-100 text-blue-800'
+                    : pin.status === 'active'
+                    ? 'bg-blue-100 text-blue-800'
+                    : 'bg-gray-100 text-gray-800'
                 }`}>
-                  {pin.is_sold ? 'Sold' : 'Active'}
+                  {pin.status}
                 </span>
-                {pin.is_sold && pin.sold_price && (
+                {pin.status === 'sold' && (
                   <div className="text-xs text-gray-500 mt-1">
-                    {formatPrice(pin.sold_price)}
+                    Sold
                   </div>
                 )}
               </td>
@@ -158,7 +142,7 @@ export function PinsTable() {
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                 <div className="flex space-x-2">
-                  {!pin.is_sold && (
+                  {pin.status !== 'sold' && (
                     <Button
                       onClick={() => handleMarkAsSold(pin.id)}
                       size="sm"

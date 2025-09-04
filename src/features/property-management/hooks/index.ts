@@ -1,2 +1,2 @@
 // Property Management Hooks
-export { useSearchHistory } from './use-search-history';
+// useSearchHistory hook removed - will be reimplemented later

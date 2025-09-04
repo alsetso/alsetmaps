@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/features/shared/components/ui/form';
+import { FormControl, FormItem, FormLabel, FormMessage } from '@/features/shared/components/ui/form';
 import { Input } from '@/features/shared/components/ui/input';
 import { MapboxGeocodingService, type AddressSuggestion } from '@/integrations/mapbox';
 import { HomeIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
@@ -20,13 +20,9 @@ export function AddressAutocompleteInput({ onAddressSelect }: AddressAutocomplet
   
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
-  const { setValue, watch } = useFormContext();
+  const { setValue } = useFormContext();
 
   // Watch form values to sync with address fields
-  const propertyAddress = watch('propertyAddress');
-  const city = watch('city');
-  const state = watch('state');
-  const zipCode = watch('zipCode');
 
   // Debounced search
   useEffect(() => {

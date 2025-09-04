@@ -1,5 +1,5 @@
 {
-  "name": "alset-platform",
+  "name": "alsetmaps",
   "private": true,
   "version": "1.0.0",
   "description": "AI-powered business transformation platform with intelligent workflows and autonomous agents",
@@ -12,10 +12,12 @@
     "agents"
   ],
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 3000",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "clean": "rm -rf .next out dist",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
@@ -49,9 +51,11 @@
     "@radix-ui/react-toggle-group": "^1.1.0",
     "@radix-ui/react-tooltip": "^1.1.4",
     "@react-email/render": "^1.2.1",
+    "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.50.5",
     "@tanstack/react-query": "^5.56.2",
     "@types/mapbox-gl": "^3.4.1",
+    "canvas-confetti": "^1.9.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.0.0",
@@ -78,20 +82,20 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@eslint/js": "^9.9.0",
     "@tailwindcss/typography": "^0.5.15",
+    "@types/canvas-confetti": "^1.9.0",
     "@types/node": "^22.5.5",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
+    "@typescript-eslint/eslint-plugin": "^8.41.0",
+    "@typescript-eslint/parser": "^8.41.0",
     "autoprefixer": "^10.4.20",
-    "eslint": "^9.9.0",
+    "eslint": "^8.57.1",
     "eslint-config-next": "14.0.4",
-    "eslint-plugin-react-hooks": "^5.1.0-rc.0",
-    "globals": "^15.9.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
     "lovable-tagger": "^1.1.7",
     "postcss": "^8.4.47",
     "tailwindcss": "^3.4.11",
-    "typescript": "^5.5.3",
-    "typescript-eslint": "^8.0.1"
+    "typescript": "^5.5.3"
   }
 }

@@ -47,7 +47,7 @@ export class SellIntentService {
   /**
    * Validate property address (placeholder for future integration)
    */
-  static async validateAddress(address: string, city: string, state: string, zipCode: string): Promise<boolean> {
+  static async validateAddress(_address: string, _city: string, _state: string, _zipCode: string): Promise<boolean> {
     // TODO: Integrate with address validation service
     return true;
   }
@@ -55,7 +55,7 @@ export class SellIntentService {
   /**
    * Get estimated property value (placeholder for future integration)
    */
-  static async getEstimatedValue(address: string, city: string, state: string, zipCode: string): Promise<string | null> {
+  static async getEstimatedValue(_address: string, _city: string, _state: string, _zipCode: string): Promise<string | null> {
     // TODO: Integrate with property valuation service
     return null;
   }
@@ -63,7 +63,7 @@ export class SellIntentService {
   /**
    * Get market analysis for the area (placeholder for future integration)
    */
-  static async getMarketAnalysis(city: string, state: string): Promise<any> {
+  static async getMarketAnalysis(_city: string, _state: string): Promise<any> {
     // TODO: Integrate with market data service
     return null;
   }

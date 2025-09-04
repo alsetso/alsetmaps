@@ -91,11 +91,11 @@ export class RefinanceTableService {
         
                  // Property Information
          property_address: data.propertyAddress,
-         property_city: data.city,
-         property_state: data.state,
-         property_zip: data.zipCode,
-         latitude: data.latitude?.toString() || null,
-         longitude: data.longitude?.toString() || null,
+         property_city: data.propertyCity,
+         property_state: data.propertyState,
+         property_zip: data.propertyZip,
+         latitude: null,
+         longitude: null,
         current_property_value: data.currentPropertyValue,
         
         // Current Loan Information

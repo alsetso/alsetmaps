@@ -26,7 +26,7 @@ A comprehensive real estate platform built with Next.js, Supabase, and modern we
 ## 📋 Prerequisites
 
 - Node.js 18+ 
-- npm, yarn, or bun
+- npm or yarn
 - Supabase account
 - Mapbox account
 - Stripe account (for payments)
@@ -49,7 +49,7 @@ npm install
 # or
 yarn install
 # or
-bun install
+npm install
 ```
 
 ### 3. Environment Setup
@@ -115,7 +115,7 @@ npm run dev
 # or
 yarn dev
 # or
-bun dev
+npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.

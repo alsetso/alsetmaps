@@ -123,3 +123,4 @@ com.yourapp://auth/callback
 - [Supabase Auth Documentation](https://supabase.com/docs/guides/auth)
 - [Google OAuth 2.0 Documentation](https://developers.google.com/identity/protocols/oauth2)
 - [Next.js Authentication](https://nextjs.org/docs/authentication)
+

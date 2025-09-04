@@ -1,130 +1,92 @@
--- Database Tables
--- This file contains all CREATE TABLE statements for the database
+-- Simple Accounts, Search, and Credit System
 
--- ========================================
--- ACCOUNTS TABLE
--- ========================================
+-- Accounts Table
 CREATE TABLE public.accounts (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    first_name character varying(100),
-    last_name character varying(100),
-    phone character varying(20),
-    email character varying(255) UNIQUE NOT NULL,
-    role character varying(50) DEFAULT 'user' CHECK (role IN ('user', 'admin', 'moderator')),
-    stripe_customer_id character varying(255) UNIQUE,
-    created_at timestamp with time zone DEFAULT NOW(),
-    updated_at timestamp with time zone DEFAULT NOW()
-);
-
--- ========================================
--- CREDIT_PACKAGES TABLE
--- ========================================
-CREATE TABLE public.credit_packages (
-    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    name character varying(100) NOT NULL UNIQUE,
-    credits integer NOT NULL CHECK (credits > 0),
-    price_cents integer NOT NULL CHECK (price_cents >= 0),
-    is_popular boolean DEFAULT false,
-    is_active boolean DEFAULT true,
+    auth_user_id uuid NOT NULL,
+    first_name text,
+    last_name text,
+    phone text,
+    email text NOT NULL,
+    stripe_customer_id text,
+    role text DEFAULT 'buyer' CHECK (role IN ('seller', 'buyer', 'investor', 'wholesaler', 'realtor', 'lender')),
     created_at timestamp with time zone DEFAULT NOW()
 );
 
--- ========================================
--- USER_CREDITS TABLE (Simplified)
--- ========================================
-CREATE TABLE public.user_credits (
-    user_id uuid PRIMARY KEY REFERENCES public.accounts(id) ON DELETE CASCADE,
-    balance integer NOT NULL DEFAULT 0 CHECK (balance >= 0),
-    total_earned integer NOT NULL DEFAULT 0 CHECK (total_earned >= 0),
-    total_spent integer NOT NULL DEFAULT 0 CHECK (total_spent >= 0),
-    last_updated timestamp with time zone DEFAULT NOW()
-);
-
--- ========================================
--- CREDIT_TRANSACTIONS TABLE (Simplified)
--- ========================================
-CREATE TABLE public.credit_transactions (
+-- Credits Table
+CREATE TABLE public.credits (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id uuid NOT NULL REFERENCES public.accounts(id) ON DELETE CASCADE,
-    amount integer NOT NULL CHECK (amount != 0), -- positive for credits added, negative for consumed
-    type character varying(50) NOT NULL CHECK (type IN ('purchase', 'subscription', 'search', 'refund', 'bonus', 'monthly_subscription')),
-    reference_id uuid,
-    reference_table character varying(100),
-    description text,
-    metadata jsonb DEFAULT '{}'::jsonb,
+    available_credits integer DEFAULT 10,
     created_at timestamp with time zone DEFAULT NOW()
 );
 
--- ========================================
--- USER_SUBSCRIPTIONS TABLE
--- ========================================
-CREATE TABLE public.user_subscriptions (
-    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id uuid NOT NULL REFERENCES public.accounts(id) ON DELETE CASCADE,
-    stripe_subscription_id character varying(255) UNIQUE,
-    plan_type character varying(50) NOT NULL CHECK (plan_type IN ('basic', 'premium', 'enterprise')),
-    status character varying(50) NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'canceled', 'past_due', 'unpaid', 'trialing')),
-    current_period_start timestamp with time zone NOT NULL,
-    current_period_end timestamp with time zone NOT NULL CHECK (current_period_end > current_period_start),
-    credits_per_month integer NOT NULL CHECK (credits_per_month > 0),
-    created_at timestamp with time zone DEFAULT NOW(),
-    updated_at timestamp with time zone DEFAULT NOW()
-);
-
--- ========================================
--- PROPERTY_DATA_CACHE TABLE
--- ========================================
-CREATE TABLE public.property_data_cache (
-    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    normalized_address character varying(500) UNIQUE NOT NULL,
-    latitude numeric(10, 8) CHECK (latitude >= -90 AND latitude <= 90),
-    longitude numeric(11, 8) CHECK (longitude >= -180 AND longitude <= 180),
-    property_data jsonb NOT NULL,
-    data_source character varying(100) NOT NULL,
-    cache_expires_at timestamp with time zone NOT NULL,
-    last_accessed timestamp with time zone DEFAULT NOW(),
-    access_count integer DEFAULT 0 CHECK (access_count >= 0),
-    created_at timestamp with time zone DEFAULT NOW()
-);
-
--- ========================================
--- SEARCH_HISTORY TABLE
--- ========================================
+-- Search History Table
 CREATE TABLE public.search_history (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id uuid REFERENCES public.accounts(id) ON DELETE SET NULL,
-    session_id character varying(255),
-    search_address character varying(500) NOT NULL,
-    search_type character varying(50) NOT NULL DEFAULT 'basic' CHECK (search_type IN ('basic', 'advanced', 'comprehensive')),
-    search_tier character varying(50) NOT NULL DEFAULT 'basic' CHECK (search_tier IN ('basic', 'smart', 'premium')),
-    credits_consumed integer NOT NULL DEFAULT 0 CHECK (credits_consumed >= 0),
-    search_filters jsonb DEFAULT '{}'::jsonb,
-    search_metadata jsonb DEFAULT '{}'::jsonb,
-    success boolean DEFAULT true,
-    error_message text,
+    search_address text NOT NULL,
+    search_type text DEFAULT 'basic' CHECK (search_type IN ('basic', 'smart')),
+    credits_used integer DEFAULT 1,
     created_at timestamp with time zone DEFAULT NOW()
 );
 
--- ========================================
--- SEARCH_RESULTS TABLE
--- ========================================
-CREATE TABLE public.search_results (
-    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    search_history_id uuid NOT NULL REFERENCES public.search_history(id) ON DELETE CASCADE,
-    result_data jsonb NOT NULL,
-    metadata jsonb DEFAULT '{}'::jsonb,
-    created_at timestamp with time zone DEFAULT NOW()
+-- Basic Indexes
+CREATE INDEX idx_accounts_auth_user_id ON public.accounts(auth_user_id);
+CREATE INDEX idx_accounts_email ON public.accounts(email);
+CREATE INDEX idx_accounts_stripe_customer_id ON public.accounts(stripe_customer_id);
+CREATE INDEX idx_credits_user_id ON public.credits(user_id);
+CREATE INDEX idx_search_history_user_id ON public.search_history(user_id);
+
+-- Enable RLS
+ALTER TABLE public.accounts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.credits ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.search_history ENABLE ROW LEVEL SECURITY;
+
+-- Simple RLS Policies
+CREATE POLICY "Users can view own account" ON public.accounts FOR SELECT USING (auth.uid()::text = auth_user_id::text);
+CREATE POLICY "Users can create own account" ON public.accounts FOR INSERT WITH CHECK (auth.uid()::text = auth_user_id::text);
+CREATE POLICY "Users can update own account" ON public.accounts FOR UPDATE USING (auth.uid()::text = auth_user_id::text);
+
+-- Credits table policies - simple and direct
+CREATE POLICY "Users can view own credits" ON public.credits FOR SELECT USING (
+    EXISTS (
+        SELECT 1 FROM public.accounts 
+        WHERE accounts.id = credits.user_id 
+        AND accounts.auth_user_id = auth.uid()
+    )
+);
+CREATE POLICY "Users can insert own credits" ON public.credits FOR INSERT WITH CHECK (
+    EXISTS (
+        SELECT 1 FROM public.accounts 
+        WHERE accounts.id = credits.user_id 
+        AND accounts.auth_user_id = auth.uid()
+    )
+);
+CREATE POLICY "Users can update own credits" ON public.credits FOR UPDATE USING (
+    EXISTS (
+        SELECT 1 FROM public.accounts 
+        WHERE accounts.id = credits.user_id 
+        AND accounts.auth_user_id = auth.uid()
+    )
+);
+CREATE POLICY "Users can delete own credits" ON public.credits FOR DELETE USING (
+    EXISTS (
+        SELECT 1 FROM public.accounts 
+        WHERE accounts.id = credits.user_id 
+        AND accounts.auth_user_id = auth.uid()
+    )
 );
 
--- ========================================
--- TABLE COMMENTS FOR DOCUMENTATION
--- ========================================
+CREATE POLICY "Users can view own search history" ON public.search_history FOR SELECT USING (
+    EXISTS (
+        SELECT 1 FROM public.accounts 
+        WHERE accounts.id = search_history.user_id 
+        AND accounts.auth_user_id::text = auth.uid()::text
+    )
+);
 
-COMMENT ON TABLE public.accounts IS 'User account information and authentication details';
-COMMENT ON TABLE public.credit_packages IS 'Available credit packages for purchase';
-COMMENT ON TABLE public.user_credits IS 'Current credit balance and totals for each user';
-COMMENT ON TABLE public.credit_transactions IS 'Complete audit trail of all credit movements';
-COMMENT ON TABLE public.user_subscriptions IS 'User subscription plans and billing information';
-COMMENT ON TABLE public.property_data_cache IS 'Cached property data to reduce API calls';
-COMMENT ON TABLE public.search_history IS 'User search history and metadata';
-COMMENT ON TABLE public.search_results IS 'Search results linked to search history';
+-- Grant permissions
+GRANT SELECT, INSERT, UPDATE ON public.accounts TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.credits TO authenticated;
+GRANT SELECT, INSERT ON public.search_history TO authenticated;

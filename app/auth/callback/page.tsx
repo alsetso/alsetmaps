@@ -17,9 +17,6 @@ export default function AuthCallbackPage() {
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
-        // Get environment info
-        const envInfo = getEnvironmentInfo();
-        
         // Get OAuth parameters from URL
         const code = searchParams.get('code');
         const error = searchParams.get('error');

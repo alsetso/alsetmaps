@@ -46,6 +46,7 @@ export interface Agent {
   slug: string;
   search_keywords: string[];
   featured: boolean;
+  featured_date?: string;
   
   // Timestamps
   created_at: string;
@@ -124,6 +125,7 @@ export interface CreateAgentData {
   bio?: string;
   profile_image?: string;
   cover_image?: string;
+  slug?: string;
   search_keywords?: string[];
 }
 

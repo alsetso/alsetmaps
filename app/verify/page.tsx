@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/features/shared/components/ui/button';
 import Link from 'next/link';
 import Image from 'next/image';

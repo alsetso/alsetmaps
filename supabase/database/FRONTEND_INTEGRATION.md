@@ -390,3 +390,4 @@ ORDER BY month DESC;
 - Efficient credit balance calculations
 
 This integration creates a **seamless, performant, and user-friendly** property search platform where all database operations support the frontend user experience efficiently.
+

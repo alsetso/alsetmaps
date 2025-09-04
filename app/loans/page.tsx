@@ -13,17 +13,15 @@ import { Input } from '@/features/shared/components/ui/input';
 import { Label } from '@/features/shared/components/ui/label';
 import { Badge } from '@/features/shared/components/ui/badge';
 import { 
+  HomeIcon, 
+  MapPinIcon,
   CurrencyDollarIcon,
-  HomeIcon,
-  PhoneIcon,
-  EnvelopeIcon,
-  CalculatorIcon,
-  CheckCircleIcon,
-  UserIcon,
   ClockIcon,
-  ArrowPathIcon,
-  ShieldCheckIcon,
-  DocumentTextIcon
+  CheckCircleIcon,
+  MagnifyingGlassIcon,
+  BuildingOfficeIcon,
+  StarIcon,
+  CreditCardIcon
 } from '@heroicons/react/24/outline';
 
 // Form validation schema
@@ -229,7 +227,7 @@ export default function LoansPage() {
           <div className="max-w-7xl mx-auto text-center">
             <div className="flex items-center justify-center mb-6">
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mr-4">
-                <CalculatorIcon className="w-8 h-8 text-green-600" />
+                <CurrencyDollarIcon className="w-8 h-8 text-green-600" />
               </div>
               <div>
                 <h1 className="text-4xl font-bold text-gray-900">Get Your Best Loan Rate</h1>
@@ -240,7 +238,7 @@ export default function LoansPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mt-8">
               <div className="text-center">
                 <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <ShieldCheckIcon className="w-6 h-6 text-green-600" />
+                  <BuildingOfficeIcon className="w-6 h-6 text-green-600" />
                 </div>
                 <h3 className="font-semibold text-gray-900 mb-2">Secure & Compliant</h3>
                 <p className="text-sm text-gray-600">Bank-level security with full compliance</p>
@@ -302,7 +300,7 @@ export default function LoansPage() {
                 <Card>
                   <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <UserIcon className="w-5 h-5 text-green-600" />
+                    <HomeIcon className="w-5 h-5 text-green-600" />
                     Personal Information
                     </CardTitle>
                   </CardHeader>
@@ -338,7 +336,7 @@ export default function LoansPage() {
                     <div>
                       <Label htmlFor="email">Email *</Label>
                       <div className="relative mt-1">
-                                    <EnvelopeIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                                    <HomeIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                         <Input
                           id="email"
                           {...form.register('email')}
@@ -353,7 +351,7 @@ export default function LoansPage() {
                     <div>
                       <Label htmlFor="phone">Phone *</Label>
                       <div className="relative mt-1">
-                                    <PhoneIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                                    <HomeIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                         <Input
                           id="phone"
                           {...form.register('phone')}
@@ -578,7 +576,7 @@ export default function LoansPage() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <ShieldCheckIcon className="w-5 h-5 text-orange-600" />
+                    <HomeIcon className="w-5 h-5 text-orange-600" />
                     Compliance & Permissions
                   </CardTitle>
                 </CardHeader>
@@ -629,7 +627,7 @@ export default function LoansPage() {
 
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                     <div className="flex items-start">
-                      <ShieldCheckIcon className="w-5 h-5 text-blue-600 mr-2 mt-0.5" />
+                      <HomeIcon className="w-5 h-5 text-blue-600 mr-2 mt-0.5" />
                       <div className="text-sm text-blue-800">
                         <p className="font-medium mb-1">Your information is secure and compliant</p>
                         <p>We follow all federal regulations including FCRA, GLBA, and ECOA. Your data is encrypted and protected.</p>
@@ -735,7 +733,7 @@ export default function LoansPage() {
               <div className="flex items-center justify-between">
                 <h2 className="text-2xl font-bold text-gray-900">My Loan Applications</h2>
                 <Button onClick={fetchUserRecords} variant="outline" className="flex items-center gap-2">
-                  <ArrowPathIcon className="w-4 h-4" />
+                  <HomeIcon className="w-4 h-4" />
                   Refresh
                       </Button>
               </div>
@@ -833,7 +831,9 @@ export default function LoansPage() {
                                 <div className="text-gray-600">
                                   {new Date(record.created_at).toLocaleDateString()}
                                 </div>
+
                               </div>
+
                             </div>
                             
                             {record.pre_approval_amount && (
@@ -860,7 +860,7 @@ export default function LoansPage() {
                 </div>
               ) : (
                 <div className="text-center py-12">
-                  <DocumentTextIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                  <HomeIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 mb-2">No applications yet</h3>
                   <p className="text-gray-500 mb-4">
                     Submit your first loan application to get started with pre-approval.

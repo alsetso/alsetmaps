@@ -1,2 +1,2 @@
 export { PinsService } from './pins-service';
-export { SearchHistoryService } from './search-history-service';
+// SearchHistoryService removed - will be reimplemented later

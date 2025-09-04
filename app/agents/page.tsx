@@ -18,12 +18,9 @@ import {
   StarIcon,
   PhoneIcon,
   EnvelopeIcon,
-  HomeIcon,
-  CalendarIcon,
   CurrencyDollarIcon,
   CheckCircleIcon,
   ArrowPathIcon,
-  BuildingOfficeIcon,
   UserGroupIcon
 } from '@heroicons/react/24/outline';
 
@@ -130,7 +127,6 @@ export default function AgentsPage() {
   const [showLeadForm, setShowLeadForm] = useState(false);
   const [isSubmittingLead, setIsSubmittingLead] = useState(false);
   const [leadSubmitted, setLeadSubmitted] = useState(false);
-  const [selectedState, setSelectedState] = useState('TX');
 
   const { user, loading: authLoading } = useAuth();
 

@@ -142,3 +142,4 @@ SELECT * FROM analyze_index_usage();
 - **Composite indexes** should cover the most common query patterns
 - **Analytics indexes** should only be enabled if you're doing heavy reporting
 - **Regular maintenance** is required for optimal performance
+

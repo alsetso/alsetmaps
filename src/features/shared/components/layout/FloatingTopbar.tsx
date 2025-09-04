@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import { UserIcon, ChevronDownIcon, Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
+import { useState, useEffect, useCallback } from 'react';
+import { ChevronDownIcon, Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useAuth } from '@/features/authentication/components/AuthProvider';
-import { AccountCredits } from '../account_credits';
+import { AccountSetupService } from '@/features/authentication/services/account-setup-service';
 
 // Utility function for debouncing
 function debounce<T extends (...args: any[]) => any>(func: T, wait: number): (...args: Parameters<T>) => void {
@@ -20,6 +20,7 @@ export function FloatingTopbar() {
   const [isDark, setIsDark] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [showMobileNav, setShowMobileNav] = useState(false);
+  const [credits, setCredits] = useState<number | null>(null);
   const { user, loading, signOut } = useAuth();
 
   // Debounced scroll handler for better performance
@@ -77,14 +78,32 @@ export function FloatingTopbar() {
     setShowMobileNav(false);
   };
 
-  // Memoize navigation items for better performance
-  const navigationItems = useMemo(() => [
-    { href: '/buy', label: 'Buy', color: 'green' },
-    { href: '/sell', label: 'Sell', color: 'red' },
-    { href: '/loans', label: 'Loans', color: 'blue' },
-    { href: '/refinance', label: 'Refinance', color: 'purple' },
-    { href: '/agents', label: 'Agents', color: 'orange' }
-  ], []);
+  // Fetch user credits
+  const fetchCredits = useCallback(async () => {
+    if (!user) {
+      setCredits(null);
+      return;
+    }
+
+    try {
+      const creditBalance = await AccountSetupService.getCreditBalance();
+      if (creditBalance) {
+        setCredits(creditBalance.availableCredits);
+      } else {
+        setCredits(0);
+      }
+    } catch (error) {
+      console.error('Error fetching credits:', error);
+      setCredits(0);
+    }
+  }, [user]);
+
+  // Fetch credits when user changes
+  useEffect(() => {
+    fetchCredits();
+  }, [fetchCredits]);
+
+
 
   // Don't render while loading to avoid flash
   if (loading) {
@@ -190,6 +209,23 @@ export function FloatingTopbar() {
                   `} />
                 </button>
               </Link>
+              <Link href="/search-history">
+                <button className={`
+                  px-5 py-2.5 rounded-xl font-semibold transition-all duration-300
+                  hover:scale-105 active:scale-95 relative overflow-hidden
+                  ${isDark 
+                    ? 'hover:bg-indigo-500/20 text-white hover:text-indigo-300' 
+                    : 'hover:bg-gray-50 text-gray-900 hover:text-indigo-600'
+                  }
+                `}>
+                  Search History
+                  <div className={`
+                    absolute bottom-0 left-0 h-0.5 w-0 transition-all duration-300
+                    ${isDark ? 'bg-indigo-400' : 'bg-indigo-500'}
+                    hover:w-full
+                  `} />
+                </button>
+              </Link>
             </div>
 
             {/* Mobile Menu Button - Visible only on mobile */}
@@ -232,92 +268,111 @@ export function FloatingTopbar() {
             </div>
 
             {/* Right: User Section */}
-            <div className="flex items-center">
+            <div className="flex items-center space-x-3">
               {user ? (
-                /* Logged In User Dropdown */
-                <div className="relative user-dropdown">
-                  <button
-                    onClick={() => setShowUserDropdown(!showUserDropdown)}
-                    className={`
-                      flex items-center space-x-3 p-3 rounded-xl transition-all duration-300
-                      hover:scale-105 active:scale-95 group
-                      ${isDark 
-                        ? 'hover:bg-white/20 text-white' 
-                        : 'hover:bg-gray-100 text-gray-900'
-                      }
-                    `}
-                    aria-label="User menu"
-                    aria-expanded={showUserDropdown}
-                  >
-                    {/* User Avatar/Initials */}
+                <>
+                  {/* Credits Display - Outside dropdown */}
+                  {credits !== null && (
                     <div className={`
-                      w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold
+                      text-xs font-medium transition-all duration-300
                       ${isDark 
-                        ? 'bg-white/20 text-white' 
-                        : 'bg-gray-200 text-gray-700'
+                        ? 'text-white/90' 
+                        : 'text-gray-600'
                       }
                     `}>
-                      {user.email?.charAt(0).toUpperCase() || 'U'}
+                      {credits} Credits
                     </div>
-                    <ChevronDownIcon className={`h-4 w-4 transition-transform duration-200 ${showUserDropdown ? 'rotate-180' : ''}`} />
-                  </button>
+                  )}
+                  
+                  {/* Logged In User Dropdown */}
+                  <div className="relative user-dropdown">
+                    <button
+                      onClick={() => {
+                        setShowUserDropdown(!showUserDropdown);
+                        // Refresh credits when opening dropdown
+                        if (!showUserDropdown) {
+                          fetchCredits();
+                        }
+                      }}
+                      className={`
+                        flex items-center space-x-3 p-3 rounded-xl transition-all duration-300
+                        hover:scale-105 active:scale-95 group
+                        ${isDark 
+                          ? 'hover:bg-white/20 text-white' 
+                          : 'hover:bg-gray-100 text-gray-900'
+                        }
+                      `}
+                      aria-label="User menu"
+                      aria-expanded={showUserDropdown}
+                    >
+                      {/* User Avatar/Initials */}
+                      <div className={`
+                        w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold
+                        ${isDark 
+                          ? 'bg-white/20 text-white' 
+                          : 'bg-gray-200 text-gray-700'
+                        }
+                      `}>
+                        {user.email?.charAt(0).toUpperCase() || 'U'}
+                      </div>
+                      
+                      <ChevronDownIcon className={`h-4 w-4 transition-transform duration-200 ${showUserDropdown ? 'rotate-180' : ''}`} />
+                    </button>
 
-                  {/* User Dropdown Menu */}
-                  {showUserDropdown && (
-                    <div className={`
-                      absolute right-0 top-full mt-3 w-56 rounded-2xl shadow-2xl overflow-hidden
-                      animate-in slide-in-from-top-2 duration-200 backdrop-blur-xl
-                      ${isDark 
-                        ? 'bg-black/80 border border-white/15' 
-                        : 'bg-white/95 border border-gray-200/60'
-                      }
-                    `}>
-                      <div className="py-3">
-                        {/* User Info Section */}
-                        <div className={`
-                          px-4 py-3 border-b
-                          ${isDark ? 'border-white/20' : 'border-gray-200'}
-                        `}>
-                          <div className="text-sm font-medium text-gray-900 dark:text-white">
-                            {user.email}
+                    {/* User Dropdown Menu */}
+                    {showUserDropdown && (
+                      <div className={`
+                        absolute right-0 top-full mt-3 w-56 rounded-2xl shadow-2xl overflow-hidden
+                        animate-in slide-in-from-top-2 duration-200 backdrop-blur-xl
+                        ${isDark 
+                          ? 'bg-black/80 border border-white/15' 
+                          : 'bg-white/95 border border-gray-200/60'
+                        }
+                      `}>
+                        <div className="py-3">
+                          {/* User Info Section */}
+                          <div className={`
+                            px-4 py-3 border-b
+                            ${isDark ? 'border-white/20' : 'border-gray-200'}
+                          `}>
+                            <div className="text-sm font-medium text-gray-900 dark:text-white">
+                              {user.email}
+                            </div>
                           </div>
-                          <AccountCredits className="mt-2" isDark={isDark} />
-                        </div>
-                        
-
-                        <Link href="/dashboard">
-                          <button className={`
-                            w-full px-4 py-3 text-left hover:bg-blue-50 transition-colors duration-200
-                            ${isDark 
-                              ? 'text-white hover:bg-white/10' 
-                              : 'text-gray-900'
-                            }
-                          `}>
-                            Dashboard
-                          </button>
-                        </Link>
-                        <Link href="/pins">
-                          <button className={`
-                            w-full px-4 py-3 text-left hover:bg-blue-50 transition-colors duration-200
-                            ${isDark 
-                              ? 'text-white hover:bg-white/10' 
-                              : 'text-gray-900'
-                            }
-                          `}>
-                            My Pins
-                          </button>
-                        </Link>
-                        <Link href="/search-history">
-                          <button className={`
-                            w-full px-4 py-3 text-left hover:bg-blue-50 transition-colors duration-200
-                            ${isDark 
-                              ? 'text-white hover:bg-white/10' 
-                              : 'text-gray-900'
-                            }
-                          `}>
-                            Search History
-                          </button>
-                        </Link>
+                          
+                          <Link href="/dashboard">
+                            <button className={`
+                              w-full px-4 py-3 text-left hover:bg-blue-50 transition-colors duration-200
+                              ${isDark 
+                                ? 'text-white hover:bg-white/10' 
+                                : 'text-gray-900'
+                              }
+                            `}>
+                              Dashboard
+                            </button>
+                          </Link>
+                          <Link href="/my-pins">
+                            <button className={`
+                              w-full px-4 py-3 text-left hover:bg-blue-50 transition-colors duration-200
+                              ${isDark 
+                                ? 'text-white hover:bg-white/10' 
+                                : 'text-gray-900'
+                              }
+                            `}>
+                              My Pins
+                            </button>
+                          </Link>
+                          <Link href="/search-history">
+                            <button className={`
+                              w-full px-4 py-3 text-left hover:bg-blue-50 transition-colors duration-200
+                              ${isDark 
+                                ? 'text-white hover:bg-white/10' 
+                                : 'text-gray-900'
+                              }
+                            `}>
+                              Search History
+                            </button>
+                          </Link>
 
                           <Link href="/settings">
                             <button className={`
@@ -330,21 +385,22 @@ export function FloatingTopbar() {
                               Settings
                             </button>
                           </Link>
-                        <div className={`
-                          border-t my-1
-                          ${isDark ? 'border-white/20' : 'border-gray-200'}
-                        `} />
-                        <button 
-                          onClick={handleSignOut}
-                          className={`
-                            w-full px-4 py-3 text-left hover:bg-red-50 dark:hover:bg-red-500/20 text-red-600 dark:text-red-400 transition-colors duration-200
-                          `}>
-                          Sign Out
-                        </button>
+                          <div className={`
+                            border-t my-1
+                            ${isDark ? 'border-white/20' : 'border-gray-200'}
+                          `} />
+                          <button 
+                            onClick={handleSignOut}
+                            className={`
+                              w-full px-4 py-3 text-left hover:bg-red-50 dark:hover:bg-red-500/20 text-red-600 dark:text-red-400 transition-colors duration-200
+                            `}>
+                            Sign Out
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  )}
-                </div>
+                    )}
+                  </div>
+                </>
               ) : (
                 /* Sign In Button for Non-Logged In Users */
                 <Link href="/login">

@@ -4,14 +4,14 @@
 // Core Features
 export * from './property-search';
 export * from './property-management';
-export * from './credit-system';
+// Credit system moved to authentication services
 
 // User Features
-export * from './user-dashboard';
+
 export * from './authentication';
 
 // Business Features
-export * from './marketplace-intents';
+// export * from './marketplace-intents'; // Temporarily disabled due to type mismatches
 export * from './agent-directory';
 
 // Shared
