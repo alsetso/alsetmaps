@@ -152,35 +152,49 @@ The platform operates on a credit-based system:
 
 ## 🚀 Deployment
 
-### Vercel (Recommended)
+### Quick Deploy to Vercel
 
-1. Connect your GitHub repository to Vercel
-2. Set environment variables in Vercel dashboard
-3. Deploy automatically on push to main branch
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/alsetso/alsetmaps)
 
-### Manual Deployment
+1. **One-Click Deploy:** Click the button above to deploy instantly
+2. **Manual Deploy:** Connect your GitHub repository to Vercel
+3. **Environment Variables:** Set up your API keys in Vercel dashboard
+4. **Auto-Deploy:** Automatic deployments on every push to main
 
-```bash
-npm run build
-npm start
+### Other Deployment Options
+
+- **Netlify:** [Deploy to Netlify](https://app.netlify.com/start/deploy?repository=https://github.com/alsetso/alsetmaps)
+- **Railway:** [Deploy to Railway](https://railway.app/template/alsetmaps)
+- **Manual:** See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed instructions
+
+### Environment Variables Required
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=your_mapbox_access_token
+NEXT_PUBLIC_APP_URL=https://your-domain.com
 ```
+
+> 📖 **Detailed Deployment Guide:** See [DEPLOYMENT.md](DEPLOYMENT.md) for comprehensive deployment instructions, troubleshooting, and best practices.
 
 ## 📁 Project Structure
 
 ```
-alset-so/
+alsetmaps/
 ├── app/                    # Next.js app router pages
 ├── src/
 │   ├── features/          # Feature-based modules
 │   │   ├── authentication/
-│   │   ├── credit-system/
 │   │   ├── property-search/
 │   │   ├── marketplace-intents/
+│   │   ├── property-management/
 │   │   └── shared/
 │   ├── integrations/      # Third-party service integrations
 │   └── lib/              # Utility functions and helpers
 ├── supabase/              # Database schema and migrations
 ├── public/                # Static assets
+├── .github/               # GitHub Actions workflows
 └── components.json        # shadcn/ui configuration
 ```
 
