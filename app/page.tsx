@@ -6,6 +6,7 @@ import { SmartSearch } from '@/features/property-search/components/SmartSearch';
 import { OnboardingModal } from '@/features/authentication/components/OnboardingModal';
 import { AccountSetupService } from '@/features/authentication/services/account-setup-service';
 import { PinsService } from '@/features/property-management/services/pins-service';
+import { useAuth } from '@/features/authentication/components/AuthProvider';
 
 import dynamic from 'next/dynamic';
 
@@ -20,6 +21,7 @@ const MapboxMap = dynamic(() => import('@/features/property-search/components/Ma
 });
 
 export default function HomePage() {
+  const { user, loading } = useAuth();
   const [mapCenter] = useState({ lat: 39.8283, lng: -98.5795 }); // Center of continental United States
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [isOnboardingComplete, setIsOnboardingComplete] = useState(false);
@@ -28,10 +30,18 @@ export default function HomePage() {
   const [showSmartSearch, setShowSmartSearch] = useState(true);
 
   useEffect(() => {
-    checkOnboardingStatus();
-  }, []);
+    // Only check onboarding status if user is authenticated
+    if (!loading && user) {
+      checkOnboardingStatus();
+    }
+  }, [user, loading]);
 
   const checkOnboardingStatus = async () => {
+    // Double-check that user is authenticated before proceeding
+    if (!user) {
+      return;
+    }
+    
     const status = await AccountSetupService.checkAccountStatus();
     if (status.hasAccount && status.hasCredits) {
       setIsOnboardingComplete(true);
