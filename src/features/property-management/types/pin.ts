@@ -26,6 +26,42 @@ export interface Pin {
   tags?: string[];
   linked_resources?: string[]; // IDs of other tables/resources
   
+  // Legacy fields for backward compatibility
+  name: string;
+  notes?: string;
+  images?: string[];
+  user_id: string;
+  search_history_id?: string;
+  
+  // Sharing and visibility
+  is_public?: boolean;
+  share_token?: string;
+  seo_title?: string;
+  seo_description?: string;
+  custom_domain?: string;
+  share_settings?: any;
+  
+  // Terms agreement
+  requires_terms_agreement?: boolean;
+  custom_terms?: string;
+  terms_agreement_count?: number;
+  
+  // For sale listing
+  listing_price?: number;
+  property_type?: string;
+  timeline?: string;
+  for_sale_by?: string;
+  contact_info?: any;
+  agent_name?: string;
+  agent_company?: string;
+  agent_phone?: string;
+  agent_email?: string;
+  listing_status?: string;
+  
+  // Analytics
+  view_count?: number;
+  last_viewed_at?: string;
+  
   // Contact and matching
   contact_preferences?: ContactPreferences;
   match_score?: number;
@@ -47,7 +83,6 @@ export interface Pin {
 export interface IntentData {
   buyer_intent_id?: string;
   seller_intent_id?: string;
-  refinance_intent_id?: string;
   wholesale_intent_id?: string;
   
   // Intent-specific data

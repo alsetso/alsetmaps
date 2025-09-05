@@ -1,14 +1,13 @@
 # Alset - Property Search & Real Estate Platform
 
-A comprehensive real estate platform built with Next.js, Supabase, and modern web technologies. Alset provides property search, market analysis, and real estate tools for buyers, sellers, and agents.
+A comprehensive real estate platform built with Next.js, Supabase, and modern web technologies. Alset provides property search, market analysis, and real estate tools for buyers and sellers.
 
 ## 🚀 Features
 
 - **Property Search**: Advanced property search with Mapbox integration
 - **User Authentication**: Secure authentication with Supabase Auth
 - **Credit System**: Flexible credit-based access to premium features
-- **Marketplace Intents**: Buyer, seller, and refinance intent management
-- **Agent Directory**: Comprehensive agent management and search
+- **Marketplace Intents**: Buyer and seller intent management
 - **Real-time Updates**: Live data updates and notifications
 - **Responsive Design**: Mobile-first, responsive UI built with Tailwind CSS
 
@@ -129,8 +128,7 @@ The application uses a PostgreSQL database with the following main tables:
 - **credit_transactions**: Detailed credit transaction logs
 - **property_data_cache**: Cached property information
 - **search_history**: User search history
-- **marketplace_intents**: Buyer/seller/refinance intents
-- **agents**: Agent directory and profiles
+- **marketplace_intents**: Buyer/seller intents
 
 See `DATABASE_SCHEMA.md` for detailed schema information.
 

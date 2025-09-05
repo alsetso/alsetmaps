@@ -166,6 +166,104 @@ export class PropertySearchService {
   }
 
   /**
+   * Upgrade an existing basic search to smart search
+   */
+  static async upgradeToSmartSearch(searchHistoryId: string): Promise<{ success: boolean; error?: string }> {
+    try {
+      console.log('Upgrading search to smart:', searchHistoryId);
+      
+      // 1. Get current user session
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !session) {
+        throw new Error('User not authenticated');
+      }
+
+      // 2. Get user's account record
+      const { data: account, error: accountError } = await supabase
+        .from('accounts')
+        .select('id')
+        .eq('auth_user_id', session.user.id)
+        .single();
+
+      if (accountError || !account) {
+        throw new Error('User account not found');
+      }
+
+      // 3. Get the existing search history record
+      const { data: searchHistory, error: historyError } = await supabase
+        .from('search_history')
+        .select('*')
+        .eq('id', searchHistoryId)
+        .eq('user_id', account.id)
+        .single();
+
+      if (historyError || !searchHistory) {
+        throw new Error('Search history not found');
+      }
+
+      // 4. Check if already upgraded
+      if (searchHistory.search_tier === 'smart') {
+        throw new Error('Search has already been upgraded to smart');
+      }
+
+      // 5. Check credits
+      const { data: credits, error: creditsError } = await supabase
+        .from('credits')
+        .select('available_credits')
+        .eq('user_id', account.id)
+        .single();
+
+      if (creditsError || !credits || credits.available_credits < 1) {
+        throw new Error('Insufficient credits for smart search upgrade');
+      }
+
+      // 6. Perform smart search with existing coordinates
+      const smartSearchData = await this.performSmartSearch(
+        searchHistory.search_address,
+        searchHistory.latitude || 0,
+        searchHistory.longitude || 0
+      );
+
+      // 7. Check if smart search was successful
+      if (smartSearchData.zillowData && smartSearchData.zillowData.error) {
+        throw new Error(`Smart search failed: ${smartSearchData.zillowData.error}`);
+      }
+
+      // 8. Update the search history record with smart data
+      const { error: updateError } = await supabase
+        .from('search_history')
+        .update({
+          search_tier: 'smart',
+          smart_data: smartSearchData,
+          credits_consumed: 1,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', searchHistoryId);
+
+      if (updateError) {
+        throw new Error('Failed to update search history');
+      }
+
+      // 9. Deduct credits
+      const deductionSuccess = await this.deductCredits(account.id, searchHistoryId, 1);
+      if (!deductionSuccess) {
+        console.error('Failed to deduct credits, but upgrade was successful');
+        // Don't throw error here as the upgrade itself succeeded
+      }
+
+      console.log('✅ Successfully upgraded search to smart');
+      return { success: true };
+
+    } catch (error) {
+      console.error('Error upgrading search:', error);
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Unknown error occurred' 
+      };
+    }
+  }
+
+  /**
    * Perform basic property search
    */
   private static async performBasicSearch(searchRequest: SearchRequest): Promise<any> {
@@ -179,45 +277,43 @@ export class PropertySearchService {
   }
 
   /**
-   * Perform smart property search using real Zillow API
+   * Perform smart property search using server-side API route
    */
   private static async performSmartSearch(address: string, latitude: number, longitude: number): Promise<any> {
     try {
       console.log('Performing smart search for:', address);
       
-      // Build the URL with the address as a query parameter
-      const url = new URL('https://zillow56.p.rapidapi.com/search_address');
-      url.searchParams.append('address', address);
-      
-      console.log('Calling Zillow API with URL:', url.toString());
-      
-      // Call the real Zillow API
-      const zillowResponse = await fetch(url.toString(), {
-        method: 'GET',
+      // Call our server-side API route instead of making direct client-side calls
+      const response = await fetch('/api/property/smart-search', {
+        method: 'POST',
         headers: {
-          'x-rapidapi-host': 'zillow56.p.rapidapi.com',
-          'x-rapidapi-key': process.env.NEXT_PUBLIC_RAPIDAPI_KEY || 'f4a7d42741mshbc2b95a8fd24074p1cf1a6jsn44343abb32e8'
-        }
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          address,
+          latitude,
+          longitude
+        })
       });
 
-      if (!zillowResponse.ok) {
-        throw new Error(`Zillow API error: ${zillowResponse.status} ${zillowResponse.statusText}`);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `API error: ${response.status} ${response.statusText}`);
       }
 
-      const zillowData = await zillowResponse.json();
-      console.log('Zillow API response:', zillowData);
+      const result = await response.json();
+      console.log('Smart search API response:', result);
 
-      // Check if the API returned an error
-      if (zillowData.error) {
-        throw new Error(`Zillow API returned error: ${zillowData.error}`);
+      if (!result.success) {
+        throw new Error(result.error || 'Smart search failed');
       }
 
-      // Return the real API data
+      // Return the API data in the expected format
       return {
         type: 'smart',
         address,
         timestamp: new Date().toISOString(),
-        zillowData,
+        zillowData: result.data,
         message: 'Smart search completed with real Zillow data'
       };
 
@@ -228,7 +324,7 @@ export class PropertySearchService {
   }
 
   /**
-   * Deduct credits for smart search - SIMPLIFIED VERSION
+   * Deduct credits for smart search and record transaction
    */
   private static async deductCredits(accountId: string, searchId: string, amount: number): Promise<boolean> {
     try {
@@ -263,6 +359,7 @@ export class PropertySearchService {
         console.error('Error updating credits:', updateError);
         return false;
       }
+
 
       console.log(`Credits deducted successfully: ${amount} credits removed, new balance: ${newBalance}`);
       return true;

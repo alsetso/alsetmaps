@@ -17,6 +17,7 @@ export function AddressAutocompleteInput({ onAddressSelect }: AddressAutocomplet
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [error, setError] = useState<string | null>(null);
   
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
@@ -52,6 +53,7 @@ export function AddressAutocompleteInput({ onAddressSelect }: AddressAutocomplet
 
   const searchAddresses = async (searchQuery: string) => {
     setIsLoading(true);
+    setError(null);
     try {
       const results = await MapboxGeocodingService.searchAddresses(searchQuery, 5);
       setSuggestions(results);
@@ -60,6 +62,7 @@ export function AddressAutocompleteInput({ onAddressSelect }: AddressAutocomplet
     } catch (error) {
       console.error('Failed to search addresses:', error);
       setSuggestions([]);
+      setError('Failed to search addresses. Please check your connection and try again.');
     } finally {
       setIsLoading(false);
     }
@@ -69,6 +72,7 @@ export function AddressAutocompleteInput({ onAddressSelect }: AddressAutocomplet
     const value = e.target.value;
     setQuery(value);
     setValue('propertyAddress', value);
+    setError(null); // Clear error when user starts typing
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -131,7 +135,7 @@ export function AddressAutocompleteInput({ onAddressSelect }: AddressAutocomplet
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
               onFocus={handleFocus}
-              className="pl-10 pr-10"
+              className={`pl-10 pr-10 ${error ? 'border-red-500 focus:border-red-500' : ''}`}
             />
             {isLoading && (
               <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
@@ -143,6 +147,14 @@ export function AddressAutocompleteInput({ onAddressSelect }: AddressAutocomplet
             )}
           </div>
         </FormControl>
+        {error && (
+          <div className="text-sm text-red-600 mt-1 flex items-center gap-1">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            {error}
+          </div>
+        )}
         <FormMessage />
       </FormItem>
 

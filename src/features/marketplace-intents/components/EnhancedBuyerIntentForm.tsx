@@ -100,11 +100,6 @@ const urgencyLevelOptions: { value: string; label: string; description: string }
   { value: 'urgent', label: 'Urgent', description: 'Need to close quickly' },
 ];
 
-const listingVisibilityOptions: { value: string; label: string; description: string }[] = [
-  { value: 'public', label: 'Public', description: 'Visible to everyone' },
-  { value: 'Private', description: 'Only visible to you' },
-  { value: 'agent_only', label: 'Agent Only', description: 'Visible to agents only' },
-];
 */
 
 interface EnhancedBuyerIntentFormProps {

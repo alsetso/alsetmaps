@@ -27,7 +27,7 @@ export interface LoanRecord {
   property_use: 'primary-residence' | 'investment' | 'second-home';
   down_payment: number;
   loan_amount: number;
-  loan_type: 'conventional' | 'fha' | 'va' | 'usda' | 'jumbo' | 'investment' | 'refinance';
+  loan_type: 'conventional' | 'fha' | 'va' | 'usda' | 'jumbo' | 'investment';
   credit_check_consent: boolean;
   pre_approval_consent: boolean;
   marketing_consent: boolean;

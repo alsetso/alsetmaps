@@ -12,7 +12,6 @@ export * from './authentication';
 
 // Business Features
 // export * from './marketplace-intents'; // Temporarily disabled due to type mismatches
-export * from './agent-directory';
 
 // Shared
 export * from './shared';

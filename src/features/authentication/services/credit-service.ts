@@ -35,7 +35,7 @@ export interface CreditTransaction {
   created_at: string;
 }
 
-export interface SearchRequest {
+export interface CreditSearchRequest {
   address: string;
   latitude: number;
   longitude: number;
@@ -70,7 +70,7 @@ export class CreditService {
   /**
    * Record a search and handle credit deduction if smart search
    */
-  static async recordSearch(userId: string, searchRequest: SearchRequest): Promise<SearchRecord | null> {
+  static async recordSearch(userId: string, searchRequest: CreditSearchRequest): Promise<SearchRecord | null> {
     try {
       console.log('Recording search for user:', userId, 'Type:', searchRequest.search_type);
 

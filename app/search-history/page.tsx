@@ -4,10 +4,10 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/features/authentication/components/AuthProvider';
 import { PropertySearchService } from '@/features/property-search/services/property-search-service';
 import { SharedLayout } from '@/features/shared/components/layout/SharedLayout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/features/shared/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/features/shared/components/ui/card';
 import { Badge } from '@/features/shared/components/ui/badge';
 import { Button } from '@/features/shared/components/ui/button';
-import { Loader2, Search, MapPin, Calendar, CreditCard, RefreshCw, MapPinIcon } from 'lucide-react';
+import { Loader2, Search, MapPin, Calendar, CreditCard, RefreshCw, MapPinIcon, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 interface SearchHistoryRecord {
@@ -35,6 +35,7 @@ export default function SearchHistoryPage() {
   const [droppingPin, setDroppingPin] = useState<string | null>(null);
   const [accountData, setAccountData] = useState<AccountData | null>(null);
   const [loadingAccount, setLoadingAccount] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Load account data when user is authenticated
   useEffect(() => {
@@ -62,7 +63,6 @@ export default function SearchHistoryPage() {
       }
 
       setAccountData(data);
-      console.log('✅ Account data loaded:', data);
     } catch (error) {
       console.error('Error loading account data:', error);
       setError('Failed to load account data');
@@ -106,10 +106,6 @@ export default function SearchHistoryPage() {
         user_id: accountData.id
       };
 
-      console.log('Dropping pin with data:', pinData);
-      console.log('Account ID available:', accountData.id);
-      console.log('User ID from auth:', user?.id);
-      console.log('Pin data being sent to API:', JSON.stringify(pinData, null, 2));
 
       const response = await fetch('/api/pins', {
         method: 'POST',
@@ -119,8 +115,6 @@ export default function SearchHistoryPage() {
         body: JSON.stringify(pinData),
       });
 
-      console.log('Response status:', response.status);
-      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
 
       if (response.ok) {
         const result = await response.json();
@@ -145,6 +139,15 @@ export default function SearchHistoryPage() {
     return record.search_type === 'smart' && 
            record.smart_data?.zillowData?.latitude && 
            record.smart_data?.zillowData?.longitude;
+  };
+
+  // Filter search history based on search query
+  const filteredSearchHistory = searchHistory.filter(record =>
+    record.search_address.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const clearSearch = () => {
+    setSearchQuery('');
   };
 
   if (authLoading || loadingAccount) {
@@ -186,22 +189,31 @@ export default function SearchHistoryPage() {
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Search History</h1>
           <p className="text-gray-600">Track your property searches and manage your pins</p>
           
-          {/* Debug Information */}
-          <div className="mt-4 p-4 bg-gray-100 rounded-lg">
-            <h3 className="text-lg font-semibold mb-2">Debug Information</h3>
-            <p><strong>Auth User ID:</strong> {user?.id || 'Not available'}</p>
-            <p><strong>User Email:</strong> {user?.email || 'Not available'}</p>
-            <p><strong>Session Status:</strong> {user ? 'Authenticated' : 'Not authenticated'}</p>
-            <p><strong>Account ID:</strong> {accountData?.id || (loadingAccount ? 'Loading...' : 'Not available')}</p>
-            <p><strong>Account Name:</strong> {accountData ? `${accountData.first_name} ${accountData.last_name}` : 'Loading...'}</p>
-            <p><strong>Account Loading:</strong> {loadingAccount ? 'Yes' : 'No'}</p>
-            <Button 
-              onClick={loadAccountData}
-              className="mt-2"
-              disabled={loadingAccount}
-            >
-              {loadingAccount ? 'Loading...' : 'Reload Account Data'}
-            </Button>
+          {/* Search Input */}
+          <div className="mt-6 max-w-md">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <input
+                type="text"
+                placeholder="Search by address..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              {searchQuery && (
+                <button
+                  onClick={clearSearch}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+            {searchQuery && (
+              <p className="mt-2 text-sm text-gray-600">
+                Showing {filteredSearchHistory.length} of {searchHistory.length} searches
+              </p>
+            )}
           </div>
         </div>
 
@@ -272,19 +284,31 @@ export default function SearchHistoryPage() {
                 </Button>
               </CardContent>
             </Card>
-          ) : searchHistory.length === 0 ? (
+          ) : filteredSearchHistory.length === 0 ? (
             <Card>
               <CardContent className="p-6 text-center">
                 <Search className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No searches yet</h3>
-                <p className="text-gray-600 mb-4">Start searching for properties to see your history here.</p>
-                <Button>
-                  <a href="/">Start Searching</a>
-                </Button>
+                {searchQuery ? (
+                  <>
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No matching searches</h3>
+                    <p className="text-gray-600 mb-4">No searches found matching "{searchQuery}". Try a different search term.</p>
+                    <Button onClick={clearSearch} variant="outline">
+                      Clear Search
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No searches yet</h3>
+                    <p className="text-gray-600 mb-4">Start searching for properties to see your history here.</p>
+                    <Button>
+                      <a href="/">Start Searching</a>
+                    </Button>
+                  </>
+                )}
               </CardContent>
             </Card>
           ) : (
-            searchHistory.map((record) => (
+            filteredSearchHistory.map((record) => (
               <Card key={record.id} className="hover:shadow-md transition-shadow">
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">

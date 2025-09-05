@@ -1,4 +1,4 @@
-// Marketplace Components - Buy/Sell/Refinance/Loans components
+// Marketplace Components - Buy/Sell/Loans components
 export * from './BuyerIntentForm';
 export * from './EnhancedBuyerIntentForm';
 export * from './BuyerIntentDirectory';

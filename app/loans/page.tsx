@@ -37,7 +37,7 @@ const loanFormSchema = z.object({
   downPayment: z.string().min(1, 'Down payment is required'),
   propertyPrice: z.string().min(1, 'Property price is required'),
   propertyUse: z.enum(['primary-residence', 'investment', 'second-home']),
-  loanType: z.enum(['conventional', 'fha', 'va', 'usda', 'jumbo', 'investment', 'refinance']),
+  loanType: z.enum(['conventional', 'fha', 'va', 'usda', 'jumbo', 'investment']),
   additionalIncome: z.string().optional(),
   otherAssets: z.string().optional(),
   monthlyDebts: z.string().optional(),
@@ -55,7 +55,6 @@ const loanTypes = [
   { value: 'usda', label: 'USDA' },
   { value: 'jumbo', label: 'Jumbo' },
   { value: 'investment', label: 'Investment' },
-  { value: 'refinance', label: 'Refinance' },
 ];
 
 const propertyUses = [

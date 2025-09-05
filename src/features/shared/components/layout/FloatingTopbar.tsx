@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { ChevronDownIcon, Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
+import { ChevronDownIcon, Bars3Icon, XMarkIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useAuth } from '@/features/authentication/components/AuthProvider';
-import { AccountSetupService } from '@/features/authentication/services/account-setup-service';
+import { EnhancedTopbarSearch } from '../EnhancedTopbarSearch';
 
 // Utility function for debouncing
 function debounce<T extends (...args: any[]) => any>(func: T, wait: number): (...args: Parameters<T>) => void {
@@ -20,7 +20,7 @@ export function FloatingTopbar() {
   const [isDark, setIsDark] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [showMobileNav, setShowMobileNav] = useState(false);
-  const [credits, setCredits] = useState<number | null>(null);
+  const [showSearchContainer, setShowSearchContainer] = useState(false);
   const { user, loading, signOut } = useAuth();
 
   // Debounced scroll handler for better performance
@@ -45,6 +45,9 @@ export function FloatingTopbar() {
       const target = event.target as Element;
       if (!target.closest('.user-dropdown')) {
         setShowUserDropdown(false);
+      }
+      if (!target.closest('.search-container')) {
+        setShowSearchContainer(false);
       }
     };
 
@@ -78,30 +81,6 @@ export function FloatingTopbar() {
     setShowMobileNav(false);
   };
 
-  // Fetch user credits
-  const fetchCredits = useCallback(async () => {
-    if (!user) {
-      setCredits(null);
-      return;
-    }
-
-    try {
-      const creditBalance = await AccountSetupService.getCreditBalance();
-      if (creditBalance) {
-        setCredits(creditBalance.availableCredits);
-      } else {
-        setCredits(0);
-      }
-    } catch (error) {
-      console.error('Error fetching credits:', error);
-      setCredits(0);
-    }
-  }, [user]);
-
-  // Fetch credits when user changes
-  useEffect(() => {
-    fetchCredits();
-  }, [fetchCredits]);
 
 
 
@@ -114,7 +93,7 @@ export function FloatingTopbar() {
     <>
       <div className="fixed top-0 left-0 right-0 z-[9999] h-16">
         <div className={`
-          w-full h-full px-8 
+          w-full h-full px-4 sm:px-6 lg:px-8 
           backdrop-blur-xl border-b transition-all duration-500 ease-in-out
           ${isDark 
             ? 'bg-black/80 border-white/15 shadow-2xl' 
@@ -175,57 +154,6 @@ export function FloatingTopbar() {
                   `} />
                 </button>
               </Link>
-              <Link href="/refinance">
-                <button className={`
-                  px-5 py-2.5 rounded-xl font-semibold transition-all duration-300
-                  hover:scale-105 active:scale-95 relative overflow-hidden
-                  ${isDark 
-                    ? 'hover:bg-purple-500/20 text-white hover:text-purple-300' 
-                    : 'hover:bg-gray-50 text-gray-900 hover:text-purple-600'
-                  }
-                `}>
-                  Refinance
-                  <div className={`
-                    absolute bottom-0 left-0 h-0.5 w-0 transition-all duration-300
-                    ${isDark ? 'bg-purple-400' : 'bg-purple-500'}
-                    hover:w-full
-                  `} />
-                </button>
-              </Link>
-              <Link href="/agents">
-                <button className={`
-                  px-5 py-2.5 rounded-xl font-semibold transition-all duration-300
-                  hover:scale-105 active:scale-95 relative overflow-hidden
-                  ${isDark 
-                    ? 'hover:bg-orange-500/20 text-white hover:text-orange-300' 
-                    : 'hover:bg-gray-50 text-gray-900 hover:text-orange-600'
-                  }
-                `}>
-                  Agents
-                  <div className={`
-                    absolute bottom-0 left-0 h-0.5 w-0 transition-all duration-300
-                    ${isDark ? 'bg-orange-400' : 'bg-orange-500'}
-                    hover:w-full
-                  `} />
-                </button>
-              </Link>
-              <Link href="/search-history">
-                <button className={`
-                  px-5 py-2.5 rounded-xl font-semibold transition-all duration-300
-                  hover:scale-105 active:scale-95 relative overflow-hidden
-                  ${isDark 
-                    ? 'hover:bg-indigo-500/20 text-white hover:text-indigo-300' 
-                    : 'hover:bg-gray-50 text-gray-900 hover:text-indigo-600'
-                  }
-                `}>
-                  Search History
-                  <div className={`
-                    absolute bottom-0 left-0 h-0.5 w-0 transition-all duration-300
-                    ${isDark ? 'bg-indigo-400' : 'bg-indigo-500'}
-                    hover:w-full
-                  `} />
-                </button>
-              </Link>
             </div>
 
             {/* Mobile Menu Button - Visible only on mobile */}
@@ -261,39 +189,37 @@ export function FloatingTopbar() {
                     alt="Alset"
                     width={120}
                     height={30}
+                    priority
                     className="h-7 w-auto transition-transform duration-300 hover:scale-110"
                   />
                 </div>
               </Link>
             </div>
 
-            {/* Right: User Section */}
+            {/* Right: Search and User Section */}
             <div className="flex items-center space-x-3">
+              {/* Search Icon */}
+              <button
+                onClick={() => setShowSearchContainer(!showSearchContainer)}
+                className={`
+                  p-2.5 rounded-xl transition-all duration-300
+                  hover:scale-110 active:scale-95
+                  ${isDark 
+                    ? 'hover:bg-white/20 text-white' 
+                    : 'hover:bg-gray-100 text-gray-900'
+                  }
+                `}
+                aria-label="Open search"
+              >
+                <MagnifyingGlassIcon className="h-6 w-6" />
+              </button>
+
               {user ? (
                 <>
-                  {/* Credits Display - Outside dropdown */}
-                  {credits !== null && (
-                    <div className={`
-                      text-xs font-medium transition-all duration-300
-                      ${isDark 
-                        ? 'text-white/90' 
-                        : 'text-gray-600'
-                      }
-                    `}>
-                      {credits} Credits
-                    </div>
-                  )}
-                  
                   {/* Logged In User Dropdown */}
                   <div className="relative user-dropdown">
                     <button
-                      onClick={() => {
-                        setShowUserDropdown(!showUserDropdown);
-                        // Refresh credits when opening dropdown
-                        if (!showUserDropdown) {
-                          fetchCredits();
-                        }
-                      }}
+                      onClick={() => setShowUserDropdown(!showUserDropdown)}
                       className={`
                         flex items-center space-x-3 p-3 rounded-xl transition-all duration-300
                         hover:scale-105 active:scale-95 group
@@ -351,17 +277,6 @@ export function FloatingTopbar() {
                               Dashboard
                             </button>
                           </Link>
-                          <Link href="/my-pins">
-                            <button className={`
-                              w-full px-4 py-3 text-left hover:bg-blue-50 transition-colors duration-200
-                              ${isDark 
-                                ? 'text-white hover:bg-white/10' 
-                                : 'text-gray-900'
-                              }
-                            `}>
-                              My Pins
-                            </button>
-                          </Link>
                           <Link href="/search-history">
                             <button className={`
                               w-full px-4 py-3 text-left hover:bg-blue-50 transition-colors duration-200
@@ -417,6 +332,18 @@ export function FloatingTopbar() {
           </div>
         </div>
       </div>
+
+      {/* Enhanced Search Container */}
+      {showSearchContainer && (
+        <EnhancedTopbarSearch
+          isDark={isDark}
+          onClose={() => setShowSearchContainer(false)}
+          onPinCreated={() => {
+            // Optionally refresh pins or perform other actions
+            console.log('Pin created from topbar search');
+          }}
+        />
+      )}
 
       {/* Mobile Navigation Overlay */}
       {showMobileNav && (
@@ -482,25 +409,7 @@ export function FloatingTopbar() {
                 </button>
               </Link>
 
-              <Link href="/refinance" onClick={closeMobileNav}>
-                <button className={`w-full py-6 px-8 text-2xl font-bold rounded-2xl shadow-2xl transition-all duration-300 hover:scale-105 active:scale-95 ${
-                  isDark
-                    ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white hover:shadow-purple-500/25 hover:from-purple-400 hover:to-purple-500'
-                    : 'bg-gradient-to-r from-purple-500 to-purple-600 text-white hover:shadow-purple-500/25 hover:from-purple-400 hover:to-purple-500'
-                }`}>
-                  Refinance
-                </button>
-              </Link>
 
-              <Link href="/agents" onClick={closeMobileNav}>
-                <button className={`w-full py-6 px-8 text-2xl font-bold rounded-2xl shadow-2xl transition-all duration-300 hover:scale-105 active:scale-95 ${
-                  isDark
-                    ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:shadow-orange-500/25 hover:from-orange-400 hover:to-orange-500'
-                    : 'bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:shadow-orange-500/25 hover:from-orange-400 hover:to-orange-500'
-                }`}>
-                  Find Agents
-                </button>
-              </Link>
             </div>
 
             {/* User Actions */}

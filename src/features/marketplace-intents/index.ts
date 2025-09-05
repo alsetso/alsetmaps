@@ -1,4 +1,4 @@
-// Marketplace Feature - Buy/Sell/Refinance/Loans
+// Marketplace Feature - Buy/Sell/Loans
 export * from './types';
 export * from './services';
 export * from './components';

@@ -9,7 +9,7 @@ This document describes the comprehensive database schema for Alset SO, a sophis
 The schema follows these key principles:
 
 1. **Universal Address System** - Every location reference goes through a single, normalized addresses table
-2. **Entity-Relationship Model** - Clear relationships between properties, users, agents, and intents
+2. **Entity-Relationship Model** - Clear relationships between properties, users, and intents
 3. **Workflow Integration** - Built-in approval processes and status tracking for all major actions
 4. **Credit-Based Access Control** - Monetization and usage tracking integrated throughout the system
 5. **JSONB Flexibility** - Type-specific data stored in flexible JSONB fields for future extensibility
@@ -67,7 +67,6 @@ The schema follows these key principles:
 - **Intent Types**:
   - `buy` - Buyer intentions
   - `sell` - Seller intentions
-  - `refinance` - Refinancing intentions
   - `wholesale` - Wholesale intentions
 
 #### `sell` Table
@@ -111,13 +110,6 @@ The schema follows these key principles:
   - `refund` - Credit refunds
   - `bonus` - Promotional credits
 
-#### `agents` Table
-- **Purpose**: Professional agent directory
-- **Key Features**:
-  - License verification
-  - Specialty and service area management
-  - SEO optimization (slug, keywords)
-  - Featured agent system
 
 ### 5. Analytics & Discovery Layer
 
@@ -155,7 +147,6 @@ accounts (1) ←→ (many) pins
 accounts (1) ←→ (many) intents
 accounts (1) ←→ (many) sell (as authenticated user)
 accounts (1) ←→ (1) user_credits
-accounts (1) ←→ (1) agents
 accounts (1) ←→ (many) search_history
 ```
 

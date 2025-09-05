@@ -32,7 +32,7 @@ interface Pin {
 
 interface Intent {
   id: string;
-  intent_type: 'buy' | 'sell' | 'refinance' | 'loan';
+  intent_type: 'buy' | 'sell' | 'loan';
   pin_id?: string;
   city?: string;
   state?: string;
@@ -579,7 +579,7 @@ export default function BuyPage() {
                   {loading ? 'Submitting...' : 'Submit Buy Intent'}
                 </Button>
                 <p className="text-sm text-gray-600 mt-2">
-                  Your intent will be matched with relevant properties and agents.
+                  Your intent will be matched with relevant properties.
                 </p>
               </div>
             </form>

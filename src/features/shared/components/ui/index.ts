@@ -10,3 +10,7 @@ export * from './alert';
 export * from './dialog';
 export * from './carousel';
 export * from './badge';
+export * from './select';
+export * from './separator';
+export * from './textarea';
+export * from './switch';

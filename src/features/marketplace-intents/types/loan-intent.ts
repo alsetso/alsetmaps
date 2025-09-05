@@ -1,6 +1,6 @@
 export type LoanScenario = 'prequalify' | 'rate-beat';
 
-export type LoanType = 'conventional' | 'fha' | 'va' | 'usda' | 'jumbo' | 'investment' | 'refinance';
+export type LoanType = 'conventional' | 'fha' | 'va' | 'usda' | 'jumbo' | 'investment';
 
 export type PropertyUse = 'primary-residence' | 'investment' | 'second-home';
 
@@ -56,7 +56,6 @@ export interface RateBeatData {
   creditScoreRange: 'excellent' | 'good' | 'fair' | 'poor';
   
   // Additional
-  refinanceReason?: string;
   cashOutAmount?: number;
 }
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useEffect, useState, useCallback, useMemo } from 'react';
+import { useRef, useEffect, useState, useCallback } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { useAuth } from '@/features/authentication/components/AuthProvider';
@@ -11,7 +11,8 @@ declare global {
     flyToLocation?: (lat: number, lng: number, zoom?: number) => void;
     dropPin?: (lat: number, lng: number, address?: string) => void;
     clearSearchResultPin?: () => void;
-    handleCreateListing?: (pinId: string) => void;
+    clearTempPin?: () => void;
+    handleViewProperty?: (pinId: string) => void;
     handleSmartSearchUpgrade?: (searchHistoryId: string) => void;
     showSmartSearch?: () => void;
   }
@@ -50,10 +51,11 @@ interface MapboxMapProps {
   onPinCreate?: (lat: number, lng: number) => void;
   onPinClick?: (pin: Pin) => void;
   onMapClick?: () => void;
-  onCreateListing?: (pin: Pin) => void;
+  onViewProperty?: (pin: Pin) => void;
   onSmartSearchUpgrade?: (searchHistoryId: string) => void;
   onShowSmartSearch?: () => void;
   onMapReady?: (map: mapboxgl.Map) => void;
+  onTempPinCreate?: (lat: number, lng: number, address?: string) => void;
   pins?: Pin[];
 }
 
@@ -68,10 +70,11 @@ export function MapboxMap({
   onPinCreate,
   onPinClick,
   onMapClick,
-  onCreateListing,
+  onViewProperty,
   onSmartSearchUpgrade,
   onShowSmartSearch,
   onMapReady,
+  onTempPinCreate,
   pins = []
 }: MapboxMapProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
@@ -99,51 +102,38 @@ export function MapboxMap({
 
 
 
-  // Method to clear search result pin
+  // Optimized method to clear search result pin
   const clearSearchResultPin = useCallback(() => {
-    if (map.current && mapLoaded) {
-      try {
-        // Remove all pin-related layers
-        const layersToRemove = [
-          'search-result-pin-layer',
-          'search-result-pin-label',
-          'search-result-pin-pulse',
-          'search-result-pin-glow'
-        ];
-        
-        layersToRemove.forEach(layerId => {
-          if (map.current?.getLayer(layerId)) {
-            map.current.removeLayer(layerId);
-          }
-        });
-        
-        // Remove all pin-related sources
-        const sourcesToRemove = [
-          'search-result-pin',
-          'search-result-pin-pulse'
-        ];
-        
-        sourcesToRemove.forEach(sourceId => {
-          if (map.current?.getSource(sourceId)) {
-            map.current.removeSource(sourceId);
-          }
-        });
-      } catch (error) {
-        console.error('Error clearing search result pin:', error);
+    if (!map.current || !mapLoaded) return;
+
+    try {
+      // Remove layers efficiently
+      const layersToRemove = ['search-result-pin-layer', 'search-result-pin-label'];
+      layersToRemove.forEach(layerId => {
+        if (map.current?.getLayer(layerId)) {
+          map.current.removeLayer(layerId);
+        }
+      });
+      
+      // Remove source
+      if (map.current.getSource('search-result-pin')) {
+        map.current.removeSource('search-result-pin');
       }
+    } catch (error) {
+      console.error('Error clearing search result pin:', error);
     }
   }, [mapLoaded]);
 
-  // Method to handle create listing button click
-  const handleCreateListing = useCallback((pinId: string) => {
-    if (onCreateListing) {
+  // Method to handle view property button click
+  const handleViewProperty = useCallback((pinId: string) => {
+    if (onViewProperty) {
       // Find the full pin data from the pins array
       const fullPin = pins.find(p => p.id === pinId);
       if (fullPin) {
-        onCreateListing(fullPin);
+        onViewProperty(fullPin);
       }
     }
-  }, [onCreateListing, pins]);
+  }, [onViewProperty, pins]);
 
   // Method to handle smart search upgrade
   const handleSmartSearchUpgrade = useCallback((searchHistoryId: string) => {
@@ -158,247 +148,6 @@ export function MapboxMap({
       onShowSmartSearch();
     }
   }, [onShowSmartSearch]);
-
-  // Method to render existing user pins
-  const renderExistingPins = (onPinClick?: (pin: Pin) => void) => {
-    if (!map.current || !mapLoaded || pins.length === 0) return;
-
-    // Check if map style is fully loaded
-    if (!map.current.isStyleLoaded()) {
-      console.log('⏳ Map style not yet loaded, waiting...');
-      // Wait for style to load, then retry
-      setTimeout(() => {
-        if (map.current && map.current.isStyleLoaded()) {
-          renderExistingPins(onPinClick);
-        }
-      }, 100);
-      return;
-    }
-
-    try {
-      // Clear any existing user pins first
-      clearExistingPins();
-
-      // Create a GeoJSON source for all pins
-      const pinFeatures = pins.map(pin => ({
-        type: 'Feature' as const,
-        geometry: {
-          type: 'Point' as const,
-          coordinates: [pin.longitude, pin.latitude]
-        },
-        properties: {
-          id: pin.id,
-          name: pin.name,
-          notes: pin.notes || '',
-          hasImages: pin.images && pin.images.length > 0
-        }
-      }));
-
-      // Add pins source
-      map.current.addSource('user-pins', {
-        type: 'geojson',
-        data: {
-          type: 'FeatureCollection',
-          features: pinFeatures
-        }
-      });
-
-      // Add pin markers layer
-      map.current.addLayer({
-        id: 'user-pins-markers',
-        type: 'circle',
-        source: 'user-pins',
-        paint: {
-          'circle-radius': 8,
-          'circle-color': '#10B981', // Green color for user pins
-          'circle-stroke-color': '#FFFFFF',
-          'circle-stroke-width': 2,
-          'circle-stroke-opacity': 0.8
-        }
-      });
-
-      // Add pin labels
-      map.current.addLayer({
-        id: 'user-pins-labels',
-        type: 'symbol',
-        source: 'user-pins',
-        layout: {
-          'text-field': ['get', 'name'],
-          'text-font': ['Open Sans Regular', 'Arial Unicode MS Regular'],
-          'text-size': 12,
-          'text-offset': [0, 1.5],
-          'text-anchor': 'top',
-          'text-max-width': 12,
-          'text-line-height': 1.2
-        },
-        paint: {
-          'text-color': '#1F2937',
-          'text-halo-color': '#FFFFFF',
-          'text-halo-width': 1,
-          'text-halo-blur': 0.5
-        }
-      });
-
-      // Add click handler for user pins
-      map.current.on('click', 'user-pins-markers', (e) => {
-        if (e.features && e.features[0]) {
-          const pin = e.features[0];
-          const geometry = pin.geometry as any;
-          const coordinates = geometry.coordinates.slice();
-          const name = pin.properties?.name || 'Pin';
-          
-          // Ensure the popup appears above the pin
-          while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
-            coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
-          }
-
-          // Fly to the pin location with smooth animation
-          flyToLocation(coordinates[1], coordinates[0], 16);
-
-          // Find the full pin data to get search history
-          const fullPin = pins.find(p => p.id === pin.properties?.id);
-          const searchHistory = fullPin?.search_history;
-          const isBasicSearch = searchHistory?.search_tier === 'basic';
-          const hasSmartData = searchHistory?.smart_data;
-
-          // Create enhanced popup content
-          const popupContent = `
-            <style>
-              .mapboxgl-popup-content {
-                padding: 0 !important;
-                margin: 0 !important;
-              }
-            </style>
-            <div class="w-80 bg-white overflow-hidden p-0">
-              <!-- Header -->
-              <div class="flex items-center justify-between px-4 py-3 bg-gray-50 border-b border-gray-200">
-                <h3 class="font-semibold text-gray-900 truncate">${name}</h3>
-                <button onclick="this.closest('.mapboxgl-popup').remove(); if (window.showSmartSearch) window.showSmartSearch();" class="text-gray-400 hover:text-gray-600 transition-colors">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                  </svg>
-                </button>
-              </div>
-              
-              <!-- Details Section -->
-              <div class="p-4">
-                <!-- Search History Info -->
-                ${searchHistory ? `
-                  <div class="mb-4 p-3 bg-gray-50 rounded-md">
-                    <div class="flex items-center justify-between mb-2">
-                      <span class="text-sm font-medium text-gray-700">Search Info</span>
-                      <span class="text-xs px-2 py-1 rounded-full ${isBasicSearch ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}">
-                        ${isBasicSearch ? 'Basic' : 'Smart'}
-                      </span>
-                    </div>
-                    <p class="text-xs text-gray-600 mb-1">${searchHistory.search_address}</p>
-                    <p class="text-xs text-gray-500">${new Date(searchHistory.created_at).toLocaleDateString()}</p>
-                  </div>
-                ` : ''}
-
-                <!-- Smart Search Upgrade (only for basic searches) -->
-                ${isBasicSearch && !hasSmartData ? `
-                  <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
-                    <div class="flex items-center justify-between mb-2">
-                      <span class="text-sm font-medium text-blue-900">Upgrade to Smart Search</span>
-                      <span class="text-xs text-blue-600">1 credit</span>
-                    </div>
-                    <p class="text-xs text-blue-700 mb-3">Get detailed property data, market analysis, and more insights.</p>
-                    <button onclick="handleSmartSearchUpgrade('${searchHistory?.id}')" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-3 rounded-md transition-colors text-sm">
-                      Upgrade to Smart Search
-                    </button>
-                  </div>
-                ` : ''}
-
-                <!-- Smart Data Display (if available) -->
-                ${hasSmartData ? `
-                  <div class="mb-4 p-3 bg-green-50 border border-green-200 rounded-md">
-                    <div class="flex items-center mb-2">
-                      <svg class="w-4 h-4 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                      </svg>
-                      <span class="text-sm font-medium text-green-900">Smart Data Available</span>
-                    </div>
-                    <p class="text-xs text-green-700">Property details, market analysis, and insights loaded.</p>
-                  </div>
-                ` : ''}
-                
-                <!-- Type Selector -->
-                <div class="mb-4">
-                  <label class="block text-sm font-medium text-gray-700 mb-2">Property Type</label>
-                  <select class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
-                    <option value="residential">Residential</option>
-                    <option value="commercial">Commercial</option>
-                    <option value="land">Land</option>
-                    <option value="investment">Investment</option>
-                  </select>
-                </div>
-                
-                <!-- Notes Section -->
-                ${pin.properties?.notes ? `
-                  <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Notes</label>
-                    <p class="text-sm text-gray-600 bg-gray-50 p-3 rounded-md">${pin.properties.notes}</p>
-                  </div>
-                ` : ''}
-                
-                <!-- Images Indicator -->
-                ${pin.properties?.hasImages ? `
-                  <div class="mb-4">
-                    <div class="flex items-center text-sm text-blue-600">
-                      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                      </svg>
-                      Has images
-                    </div>
-                  </div>
-                ` : ''}
-                
-                <!-- Action Button -->
-                <button onclick="handleCreateListing('${pin.properties?.id}')" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors text-sm">
-                  Create Listing
-                </button>
-              </div>
-            </div>
-          `;
-
-          // Create and show popup (keep it open)
-          new mapboxgl.Popup({ 
-            closeOnClick: false,
-            closeButton: false, // Remove the default Mapbox close button
-            offset: [0, -10], // Offset to position above the pin
-            maxWidth: 'none', // Allow full width
-            className: 'custom-popup' // Add custom class for styling
-          })
-            .setLngLat(coordinates as [number, number])
-            .setHTML(popupContent)
-            .addTo(map.current!);
-
-          // Call the onPinClick callback if provided
-          if (onPinClick) {
-            // Find the full pin data from the pins array
-            const fullPin = pins.find(p => p.id === pin.properties?.id);
-            if (fullPin) {
-              onPinClick(fullPin);
-            }
-          }
-        }
-      });
-
-      // Change cursor to pointer when hovering over pins
-      map.current.on('mouseenter', 'user-pins-markers', () => {
-        map.current!.getCanvas().style.cursor = 'pointer';
-      });
-
-      map.current.on('mouseleave', 'user-pins-markers', () => {
-        map.current!.getCanvas().style.cursor = '';
-      });
-
-      console.log(`✅ Rendered ${pins.length} user pins on the map`);
-    } catch (error) {
-      console.error('Error rendering existing pins:', error);
-    }
-  };
 
   // Method to clear existing user pins
   const clearExistingPins = useCallback(() => {
@@ -422,133 +171,244 @@ export function MapboxMap({
     }
   }, []);
 
-  // Method to drop a pin at specific coordinates with enhanced styling
-  const dropPin = useCallback((lat: number, lng: number, address?: string) => {
-    if (map.current && mapLoaded) {
-      // Always clear any existing search result pins first
-      clearSearchResultPin();
-      
-      // Add main pin source
-      map.current.addSource('search-result-pin', {
+  // Optimized method to render existing user pins
+  const renderExistingPins = useCallback((onPinClick?: (pin: Pin) => void) => {
+    if (!map.current || !mapLoaded) return;
+
+    // Early return if style not loaded - will be handled by map load event
+    if (!map.current.isStyleLoaded()) return;
+
+    try {
+      // Clear existing pins efficiently
+      clearExistingPins();
+
+      // Create optimized GeoJSON features
+      const pinFeatures = pins.map(pin => ({
+        type: 'Feature' as const,
+        geometry: {
+          type: 'Point' as const,
+          coordinates: [pin.longitude, pin.latitude]
+        },
+        properties: {
+          id: pin.id,
+          name: pin.name,
+          hasNotes: !!pin.notes,
+          hasImages: !!(pin.images && pin.images.length > 0)
+        }
+      }));
+
+      // Add source with optimized data
+      map.current.addSource('user-pins', {
         type: 'geojson',
         data: {
-          type: 'Feature',
-          geometry: {
-            type: 'Point',
-            coordinates: [lng, lat]
-          },
-          properties: {
-            address: address || 'Selected Location'
-          }
+          type: 'FeatureCollection',
+          features: pinFeatures
         }
       });
 
-      // Add pulse effect source for better visibility
-      map.current.addSource('search-result-pin-pulse', {
-        type: 'geojson',
-        data: {
-          type: 'Feature',
-          geometry: {
-            type: 'Point',
-            coordinates: [lng, lat]
-          },
-          properties: {
-            address: address || 'Selected Location'
-          }
-        }
-      });
-      
-      // Add main pin layer with enhanced styling
+      // Add simplified pin markers layer
       map.current.addLayer({
-        id: 'search-result-pin-layer',
+        id: 'user-pins-markers',
         type: 'circle',
-        source: 'search-result-pin',
+        source: 'user-pins',
         paint: {
-          'circle-radius': 10,
-          'circle-color': '#3B82F6',
+          'circle-radius': 8,
+          'circle-color': '#10B981',
           'circle-stroke-color': '#FFFFFF',
-          'circle-stroke-width': 3,
-          'circle-stroke-opacity': 0.8
+          'circle-stroke-width': 2
         }
       });
 
-      // Add pulse effect layer
+      // Add simplified labels (only show on zoom > 12 for performance)
       map.current.addLayer({
-        id: 'search-result-pin-pulse',
-        type: 'circle',
-        source: 'search-result-pin-pulse',
-        paint: {
-          'circle-radius': [
-            'interpolate',
-            ['linear'],
-            ['zoom'],
-            10, 15,
-            15, 25
-          ],
-          'circle-color': '#3B82F6',
-          'circle-opacity': [
-            'interpolate',
-            ['linear'],
-            ['zoom'],
-            10, 0.3,
-            15, 0.1
-          ],
-          'circle-stroke-color': '#3B82F6',
-          'circle-stroke-width': 2,
-          'circle-stroke-opacity': [
-            'interpolate',
-            ['linear'],
-            ['zoom'],
-            10, 0.5,
-            15, 0.2
-          ]
-        }
-      });
-      
-      // Add pin label with better positioning
-      map.current.addLayer({
-        id: 'search-result-pin-label',
+        id: 'user-pins-labels',
         type: 'symbol',
-        source: 'search-result-pin',
+        source: 'user-pins',
+        minzoom: 12,
         layout: {
-          'text-field': ['get', 'address'],
+          'text-field': ['get', 'name'],
           'text-font': ['Open Sans Regular', 'Arial Unicode MS Regular'],
-          'text-size': 14,
-          'text-offset': [0, 1.8],
-          'text-anchor': 'top',
-          'text-max-width': 15,
-          'text-line-height': 1.2
+          'text-size': 12,
+          'text-offset': [0, 1.5],
+          'text-anchor': 'top'
         },
         paint: {
           'text-color': '#1F2937',
           'text-halo-color': '#FFFFFF',
-          'text-halo-width': 2,
-          'text-halo-blur': 1
+          'text-halo-width': 1
         }
       });
 
-      // Add a subtle glow effect around the pin
-      map.current.addLayer({
-        id: 'search-result-pin-glow',
-        type: 'circle',
-        source: 'search-result-pin',
-        paint: {
-          'circle-radius': [
-            'interpolate',
-            ['linear'],
-            ['zoom'],
-            10, 20,
-            15, 35
-          ],
-          'circle-color': '#3B82F6',
-          'circle-opacity': 0.1,
-          'circle-stroke-color': '#3B82F6',
-          'circle-stroke-width': 1,
-          'circle-stroke-opacity': 0.3
+      // Simplified click handler
+      const handlePinClick = (e: any) => {
+        if (!e.features?.[0]) return;
+        
+        const pin = e.features[0];
+        const coordinates = pin.geometry.coordinates.slice();
+        const fullPin = pins.find(p => p.id === pin.properties?.id);
+        
+        if (fullPin) {
+          flyToLocation(coordinates[1], coordinates[0], 16);
+          onPinClick?.(fullPin);
+        }
+      };
+
+      // Add event listeners (only once)
+      map.current.off('click', 'user-pins-markers', handlePinClick);
+      map.current.on('click', 'user-pins-markers', handlePinClick);
+
+      // Simplified hover effects
+      const handleMouseEnter = () => {
+        map.current!.getCanvas().style.cursor = 'pointer';
+      };
+      const handleMouseLeave = () => {
+        map.current!.getCanvas().style.cursor = '';
+      };
+      
+      map.current.off('mouseenter', 'user-pins-markers', handleMouseEnter);
+      map.current.off('mouseleave', 'user-pins-markers', handleMouseLeave);
+      
+      map.current.on('mouseenter', 'user-pins-markers', handleMouseEnter);
+      map.current.on('mouseleave', 'user-pins-markers', handleMouseLeave);
+
+    } catch (error) {
+      console.error('Error rendering pins:', error);
+    }
+  }, [mapLoaded, pins, flyToLocation, clearExistingPins]);
+
+  // Optimized method to drop a pin at specific coordinates
+  const dropPin = useCallback((lat: number, lng: number, address?: string) => {
+    if (!map.current || !mapLoaded) return;
+
+    clearSearchResultPin();
+    
+    // Simplified pin source
+    map.current.addSource('search-result-pin', {
+      type: 'geojson',
+      data: {
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [lng, lat]
+        },
+        properties: {
+          address: address || 'Selected Location'
+        }
+      }
+    });
+    
+    // Simplified pin layer
+    map.current.addLayer({
+      id: 'search-result-pin-layer',
+      type: 'circle',
+      source: 'search-result-pin',
+      paint: {
+        'circle-radius': 10,
+        'circle-color': '#3B82F6',
+        'circle-stroke-color': '#FFFFFF',
+        'circle-stroke-width': 3
+      }
+    });
+
+    // Simplified label (only show on zoom > 10)
+    map.current.addLayer({
+      id: 'search-result-pin-label',
+      type: 'symbol',
+      source: 'search-result-pin',
+      minzoom: 10,
+      layout: {
+        'text-field': ['get', 'address'],
+        'text-font': ['Open Sans Regular', 'Arial Unicode MS Regular'],
+        'text-size': 14,
+        'text-offset': [0, 1.8],
+        'text-anchor': 'top'
+      },
+      paint: {
+        'text-color': '#1F2937',
+        'text-halo-color': '#FFFFFF',
+        'text-halo-width': 2
+      }
+    });
+  }, [mapLoaded, clearSearchResultPin]);
+
+  // Method to drop a temporary pin for map clicks
+  const dropTempPin = useCallback((lat: number, lng: number, address?: string) => {
+    if (!map.current || !mapLoaded) return;
+
+    clearTempPin();
+    
+    // Add temporary pin source
+    map.current.addSource('temp-pin', {
+      type: 'geojson',
+      data: {
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [lng, lat]
+        },
+        properties: {
+          address: address || 'New Pin Location'
+        }
+      }
+    });
+    
+    // Add temporary pin layer with distinct styling
+    map.current.addLayer({
+      id: 'temp-pin-layer',
+      type: 'circle',
+      source: 'temp-pin',
+      paint: {
+        'circle-radius': 12,
+        'circle-color': '#F59E0B', // Amber color for temporary pin
+        'circle-stroke-color': '#FFFFFF',
+        'circle-stroke-width': 3,
+        'circle-opacity': 0.9
+      }
+    });
+
+    // Add pulsing effect for temporary pin
+    map.current.addLayer({
+      id: 'temp-pin-pulse',
+      type: 'circle',
+      source: 'temp-pin',
+      paint: {
+        'circle-radius': [
+          'interpolate',
+          ['linear'],
+          ['zoom'],
+          12, 20,
+          16, 30
+        ],
+        'circle-color': '#F59E0B',
+        'circle-opacity': 0.3,
+        'circle-stroke-color': '#F59E0B',
+        'circle-stroke-width': 2,
+        'circle-stroke-opacity': 0.5
+      }
+    });
+  }, [mapLoaded]);
+
+  // Method to clear temporary pin
+  const clearTempPin = useCallback(() => {
+    if (!map.current || !mapLoaded) return;
+
+    try {
+      // Remove temporary pin layers
+      const tempPinLayers = ['temp-pin-layer', 'temp-pin-pulse'];
+      tempPinLayers.forEach(layerId => {
+        if (map.current?.getLayer(layerId)) {
+          map.current.removeLayer(layerId);
         }
       });
+      
+      // Remove temporary pin source
+      if (map.current.getSource('temp-pin')) {
+        map.current.removeSource('temp-pin');
+      }
+    } catch (error) {
+      console.error('Error clearing temporary pin:', error);
     }
-  }, [mapLoaded, clearSearchResultPin]);
+  }, [mapLoaded]);
 
 
 
@@ -559,7 +419,8 @@ export function MapboxMap({
       window.flyToLocation = flyToLocation;
       window.dropPin = dropPin;
       window.clearSearchResultPin = clearSearchResultPin;
-      window.handleCreateListing = handleCreateListing;
+      window.clearTempPin = clearTempPin;
+      window.handleViewProperty = handleViewProperty;
       window.handleSmartSearchUpgrade = handleSmartSearchUpgrade;
       window.showSmartSearch = showSmartSearch;
       
@@ -568,12 +429,13 @@ export function MapboxMap({
         onMapReady(map.current);
       }
     }
-  }, [mapLoaded, onMapReady, handleCreateListing, handleSmartSearchUpgrade, showSmartSearch]);
+  }, [mapLoaded, onMapReady, handleViewProperty, handleSmartSearchUpgrade, showSmartSearch, clearTempPin]);
 
+  // Optimized map initialization - only runs once
   useEffect(() => {
-    if (!mapContainer.current) return;
+    if (!mapContainer.current || map.current) return;
 
-    // Initialize map with enhanced settings
+    // Initialize map with optimized settings
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
       style: 'mapbox://styles/mapbox/streets-v12',
@@ -586,112 +448,84 @@ export function MapboxMap({
       minZoom: 3,
       maxPitch: 85,
       antialias: true,
-      fadeDuration: 300
+      fadeDuration: 200, // Reduced for faster transitions
+      renderWorldCopies: false, // Performance optimization
+      preserveDrawingBuffer: true // Better performance
     });
 
-    // Navigation controls removed as requested
-
-    // Add click handler for map clicks (not on pins)
-    map.current.on('click', async (e) => {
-      // Check if the click was on a pin - if so, don't handle it here
-      const features = map.current!.queryRenderedFeatures(e.point, {
+    // Enhanced map click handler with temporary pin functionality
+    const handleMapClick = async (e: any) => {
+      // Quick check for pin clicks
+      const features = map.current?.queryRenderedFeatures(e.point, {
         layers: ['user-pins-markers']
-      });
+      }) || [];
       
-      if (features.length > 0) {
-        // Click was on a pin, let the pin click handler deal with it
-        return;
-      }
+      if (features.length > 0) return; // Let pin handler deal with it
 
-      // Call the onMapClick callback if provided
-      if (onMapClick) {
-        onMapClick();
-      }
+      const { lng: clickLng, lat: clickLat } = e.lngLat;
+      const currentZoom = map.current?.getZoom() || 0;
 
-      // Add geocoder for address search if onAddressSelect is provided
-      if (onAddressSelect) {
-        const { lng: clickLng, lat: clickLat } = e.lngLat;
+      // Check if zoom level is 12 or higher for temporary pin
+      if (currentZoom >= 12) {
+        // Get address for the clicked location
+        let address = `${clickLat.toFixed(6)}, ${clickLng.toFixed(6)}`;
         
         try {
-          // Reverse geocode to get address
+          // Try to get a more readable address
           const response = await fetch(
-            `https://api.mapbox.com/geocoding/v5/mapbox.places/${clickLng},${clickLat}.json?access_token=${process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN}`
+            `https://api.mapbox.com/geocoding/v5/mapbox.places/${clickLng},${clickLat}.json?access_token=${process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN}&types=address,poi`
           );
           
           if (response.ok) {
             const data = await response.json();
             if (data.features && data.features.length > 0) {
-              const address = data.features[0].place_name;
-              
-              // Record the map click address selection in search history
-              console.log('Map click search recorded (history service not yet implemented)');
-              
-              onAddressSelect(address, clickLat, clickLng);
+              address = data.features[0].place_name;
             }
           }
         } catch (error) {
-          console.error('Error reverse geocoding:', error);
-          
-          // Record failed reverse geocoding attempt
-          console.log('Failed map click search recorded (history service not yet implemented)');
-          
-          // Fallback to coordinates
-          onAddressSelect(`${clickLat}, ${clickLng}`, clickLat, clickLng);
+          console.log('Could not get address for clicked location, using coordinates');
         }
+
+        // Drop temporary pin and trigger modal
+        dropTempPin(clickLat, clickLng, address);
+        onTempPinCreate?.(clickLat, clickLng, address);
+        return;
       }
-    });
 
-    // Add pin creation handler
-    if (onPinCreate) {
-      map.current.on('dblclick', async (e) => {
+      onMapClick?.();
+
+      // Simplified address selection for lower zoom levels
+      if (onAddressSelect) {
+        onAddressSelect(`${clickLat}, ${clickLng}`, clickLat, clickLng);
+      }
+    };
+
+    // Simplified double-click handler
+    const handleDoubleClick = (e: any) => {
+      if (onPinCreate) {
         const { lng: clickLng, lat: clickLat } = e.lngLat;
-        
-        // Record pin creation in search history
-        console.log('Pin creation recorded (history service not yet implemented)');
-        
         onPinCreate(clickLat, clickLng);
-      });
-    }
+      }
+    };
 
-    // Enhanced map load handler
+    // Add event listeners
+    map.current.on('click', handleMapClick);
+    map.current.on('dblclick', handleDoubleClick);
+
+    // Optimized map load handler
     map.current.on('load', () => {
       setMapLoaded(true);
-      
-      // Add custom map styling after load
-      if (map.current) {
-        // Add a subtle shadow effect to the map
-        const mapStyle = map.current.getStyle();
-        if (mapStyle) {
-          // Custom styling can be added here
-          console.log('Map loaded with enhanced styling');
-        }
-      }
-      
-      // If we have pins and the map is loaded, render them
-      if (pins.length > 0) {
-        console.log('🗺️ Map loaded, rendering existing pins...');
-        setTimeout(() => {
-          renderExistingPins(onPinClick);
-        }, 100);
-      }
+      // Render pins immediately without timeout
+      renderExistingPins(onPinClick);
     });
 
-    // Listen for address selection events from other components
+    // Address selection event listener
     const handleAddressSelect = (event: CustomEvent) => {
       const { lat, lng, address } = event.detail;
       if (lat && lng) {
-        // Fly to the selected location with smooth animation
         flyToLocation(lat, lng, 15);
-        
-        // Automatically drop a pin at the selected location
         if (map.current && mapLoaded) {
-          // Remove any existing search result pin
-          const existingPin = map.current.getSource('search-result-pin');
-          if (existingPin) {
-            clearSearchResultPin();
-          }
-          
-          // Add new pin with enhanced styling
+          clearSearchResultPin();
           dropPin(lat, lng, address);
         }
       }
@@ -700,13 +534,9 @@ export function MapboxMap({
     window.addEventListener('addressSelect', handleAddressSelect as EventListener);
 
     return () => {
-      if (map.current) {
-        map.current.remove();
-      }
-      // Clean up event listener
       window.removeEventListener('addressSelect', handleAddressSelect as EventListener);
     };
-  }, [lat, lng, zoom, onAddressSelect, onPinCreate, onMapClick]);
+  }, []); // Empty dependency array - only initialize once
 
   useEffect(() => {
     if (map.current && mapLoaded) {
@@ -714,26 +544,36 @@ export function MapboxMap({
     }
   }, [lat, lng, mapLoaded]);
 
-  // Memoize pins to prevent unnecessary re-renders
-  const memoizedPins = useMemo(() => pins, [pins.length, pins.map(p => p.id).join(',')]);
-
-  // Render existing pins when pins array changes
+  // Optimized pin rendering with minimal re-renders
+  const prevPinsRef = useRef<string>('');
+  
   useEffect(() => {
-    if (mapLoaded && memoizedPins.length > 0) {
-      // Add a small delay to ensure map is fully ready
-      const timer = setTimeout(() => {
-        renderExistingPins(onPinClick);
-      }, 200);
-      
-      return () => clearTimeout(timer);
+    if (!mapLoaded || !map.current) return;
+    
+    // Create lightweight hash for change detection
+    const currentPinsHash = pins.map(p => `${p.id}-${p.latitude}-${p.longitude}`).join('|');
+    
+    // Only re-render if pins actually changed
+    if (currentPinsHash !== prevPinsRef.current) {
+      prevPinsRef.current = currentPinsHash;
+      renderExistingPins(onPinClick);
     }
-  }, [memoizedPins, mapLoaded, onPinClick]);
+  }, [pins, mapLoaded, onPinClick, renderExistingPins]);
+
+  // Cleanup map on unmount
+  useEffect(() => {
+    return () => {
+      if (map.current) {
+        map.current.remove();
+        map.current = null;
+      }
+    };
+  }, []);
 
   return (
     <div 
       ref={mapContainer} 
       className={`w-full h-full ${className}`}
-      style={{ minHeight: '400px' }}
     />
   );
 }

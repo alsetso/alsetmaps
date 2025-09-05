@@ -1,6 +1,5 @@
 'use client';
 
-import { SmartSearch } from '@/features/property-search/components/SmartSearch';
 import { MapboxMap } from '@/features/property-search/components/MapboxMap';
 
 export default function TestEnvPage() {
@@ -9,17 +8,36 @@ export default function TestEnvPage() {
       <div className="max-w-7xl mx-auto">
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Enhanced Smart Search Demo
+            Enhanced Topbar Search Demo
           </h1>
           <p className="text-gray-600">
-            Test the enhanced property search with Mapbox geocoding and map integration
+            The enhanced search functionality is now integrated into the topbar. Use the search icon in the top navigation.
           </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Search Panel */}
           <div className="lg:col-span-1">
-            <SmartSearch />
+            <div className="bg-white rounded-lg shadow-lg p-6">
+              <h2 className="text-lg font-semibold mb-4">Enhanced Topbar Search</h2>
+              <div className="space-y-4">
+                <div className="p-4 bg-blue-50 rounded-lg">
+                  <h3 className="font-medium text-blue-900 mb-2">How to Use</h3>
+                  <p className="text-sm text-blue-700">
+                    Click the search icon in the top navigation bar to access the enhanced search functionality.
+                  </p>
+                </div>
+                <div className="p-4 bg-green-50 rounded-lg">
+                  <h3 className="font-medium text-green-900 mb-2">Features</h3>
+                  <ul className="text-sm text-green-700 space-y-1">
+                    <li>• Mapbox geocoding suggestions</li>
+                    <li>• Basic vs Smart search toggle</li>
+                    <li>• Direct pin creation</li>
+                    <li>• Success states and navigation</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Map Panel */}

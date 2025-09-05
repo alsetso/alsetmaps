@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Pin } from '../types/pin';
-import { PinsService } from '../services/pins-service';
-import { TrashIcon, CheckIcon } from '@heroicons/react/24/outline';
+import { PinsService, Pin } from '../services/pins-service';
+import { TrashIcon, CheckIcon, ShareIcon, EyeIcon, EyeSlashIcon, CogIcon } from '@heroicons/react/24/outline';
 import { Button } from '@/features/shared/components/ui/button';
+import { Badge } from '@/features/shared/components/ui/badge';
+import { PinSharingModal } from './PinSharingModal';
 
 export function PinsTable() {
   const [pins, setPins] = useState<Pin[]>([]);
@@ -18,9 +19,13 @@ export function PinsTable() {
   const loadPins = async () => {
     try {
       setLoading(true);
-      const userPins = await PinsService.getUserPins();
-      setPins(userPins);
-      setError(null);
+      const result = await PinsService.getUserPins();
+      if (result.success && result.pins) {
+        setPins(result.pins);
+        setError(null);
+      } else {
+        setError(result.error || 'Failed to load pins');
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load pins');
     } finally {
@@ -97,6 +102,9 @@ export function PinsTable() {
               Status
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Sharing
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Created
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -108,14 +116,16 @@ export function PinsTable() {
           {pins.map((pin) => (
             <tr key={pin.id} className="hover:bg-gray-50">
               <td className="px-6 py-4 whitespace-nowrap">
-                <div className="text-sm font-medium text-gray-900">{pin.title || 'Untitled'}</div>
+                <div className="text-sm font-medium text-gray-900">{pin.name || 'Untitled'}</div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
-                <div className="text-sm text-gray-900 max-w-xs truncate">{pin.input_address}</div>
+                <div className="text-sm text-gray-900 max-w-xs truncate">
+                  {pin.search_history_id ? `Search ${pin.search_history_id.slice(0, 8)}` : 'No address'}
+                </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
                 <div className="text-sm text-gray-900">
-                  {pin.pin_type}
+                  Property
                 </div>
                 <div className="text-sm text-gray-500">
                   {pin.status}
@@ -137,11 +147,52 @@ export function PinsTable() {
                   </div>
                 )}
               </td>
+              <td className="px-6 py-4 whitespace-nowrap">
+                <div className="flex flex-col space-y-1">
+                  {pin.is_public ? (
+                    <Badge variant="default" className="bg-green-100 text-green-800 text-xs">
+                      <EyeIcon className="h-3 w-3 mr-1" />
+                      Public
+                    </Badge>
+                  ) : (
+                    <Badge variant="secondary" className="text-xs">
+                      <EyeSlashIcon className="h-3 w-3 mr-1" />
+                      Private
+                    </Badge>
+                  )}
+                  {pin.listing_price && (
+                    <Badge variant="outline" className="text-xs text-green-600">
+                      For Sale
+                    </Badge>
+                  )}
+                  {pin.requires_terms_agreement && (
+                    <Badge variant="outline" className="text-xs text-blue-600">
+                      Terms Required
+                    </Badge>
+                  )}
+                </div>
+              </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 {formatDate(pin.created_at)}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                 <div className="flex space-x-2">
+                  <PinSharingModal 
+                    pin={pin} 
+                    onPinUpdated={(updatedPin) => {
+                      setPins(pins.map(p => p.id === updatedPin.id ? updatedPin : p));
+                    }}
+                    trigger={
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-blue-600 hover:text-blue-900"
+                      >
+                        <CogIcon className="h-4 w-4 mr-1" />
+                        Share
+                      </Button>
+                    }
+                  />
                   {pin.status !== 'sold' && (
                     <Button
                       onClick={() => handleMarkAsSold(pin.id)}

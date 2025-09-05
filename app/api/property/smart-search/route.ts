@@ -1,7 +1,93 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-// This is where you'd integrate with your property data API (RapidAPI, etc.)
-// For now, we'll return mock data to demonstrate the structure
+// Helper function to call the Zillow API with rate limiting and error handling
+async function callZillowAPI(address: string): Promise<any> {
+  try {
+    console.log('Calling Zillow API for address:', address);
+    
+    // Build the URL with the address as a query parameter
+    const url = new URL('https://zillow56.p.rapidapi.com/search_address');
+    url.searchParams.append('address', address);
+    
+    // Get the API key from server-side environment variables
+    const apiKey = process.env.RAPIDAPI_KEY;
+    if (!apiKey) {
+      throw new Error('RAPIDAPI_KEY environment variable is not set');
+    }
+    
+    console.log('Calling Zillow API with URL:', url.toString());
+    
+    // Call the Zillow API with proper headers
+    const response = await fetch(url.toString(), {
+      method: 'GET',
+      headers: {
+        'x-rapidapi-host': 'zillow56.p.rapidapi.com',
+        'x-rapidapi-key': apiKey,
+        'User-Agent': 'AlsetMaps/1.0'
+      }
+    });
+
+    if (!response.ok) {
+      // Handle rate limiting specifically
+      if (response.status === 429) {
+        throw new Error('Rate limit exceeded. Please try again in a few minutes.');
+      }
+      throw new Error(`Zillow API error: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    console.log('Zillow API response received');
+
+    // Check if the API returned an error
+    if (data.error) {
+      throw new Error(`Zillow API returned error: ${data.error}`);
+    }
+
+    return data;
+
+  } catch (error) {
+    console.error('Zillow API call failed:', error);
+    return { error: error instanceof Error ? error.message : 'Unknown error occurred' };
+  }
+}
+
+// Helper function to transform Zillow data to our PropertyData format
+function transformZillowData(zillowData: any, address: string, latitude: number, longitude: number): PropertyData {
+  // Extract property information from Zillow response
+  const property = zillowData.property || zillowData;
+  
+  return {
+    address: address,
+    latitude: latitude,
+    longitude: longitude,
+    propertyType: property.propertyType || property.type || 'Unknown',
+    squareFootage: property.squareFootage || property.livingArea || 0,
+    bedrooms: property.bedrooms || property.beds || 0,
+    bathrooms: property.bathrooms || property.baths || 0,
+    yearBuilt: property.yearBuilt || property.year || 0,
+    estimatedValue: property.estimatedValue || property.price || property.zestimate || 0,
+    lastSoldDate: property.lastSoldDate || property.soldDate,
+    lastSoldPrice: property.lastSoldPrice || property.soldPrice,
+    propertyTax: property.propertyTax || property.tax || 0,
+    lotSize: property.lotSize || property.lotArea || 0,
+    neighborhood: property.neighborhood || property.area || 'Unknown',
+    schoolDistrict: property.schoolDistrict || 'Unknown',
+    crimeRate: property.crimeRate || 'Unknown',
+    walkScore: property.walkScore || 0,
+    transitScore: property.transitScore || 0,
+    bikeScore: property.bikeScore || 0,
+    nearbyAmenities: property.nearbyAmenities || [],
+    marketTrends: {
+      trend: property.marketTrend || 'stable',
+      changePercent: property.priceChangePercent || 0,
+      timeframe: property.priceChangeTimeframe || 'Unknown'
+    },
+    investmentPotential: {
+      score: property.investmentScore || 5.0,
+      factors: property.investmentFactors || ['Property data available']
+    }
+  };
+}
 
 interface SmartSearchRequest {
   latitude: number;
@@ -73,65 +159,32 @@ export async function POST(request: NextRequest) {
 
     console.log(`Smart search requested for: ${address} at ${latitude}, ${longitude}`);
 
-    // TODO: Integrate with your actual property data API here
-    // This is where you'd call RapidAPI, Zillow, or other property data services
+    // Call the real Zillow API
+    const zillowData = await callZillowAPI(address);
     
-    // For now, return mock data to demonstrate the structure
-    const mockPropertyData: PropertyData = {
-      address: address,
-      latitude: latitude,
-      longitude: longitude,
-      propertyType: 'Single Family Home',
-      squareFootage: 2500,
-      bedrooms: 4,
-      bathrooms: 2.5,
-      yearBuilt: 1995,
-      estimatedValue: 450000,
-      lastSoldDate: '2022-06-15',
-      lastSoldPrice: 420000,
-      propertyTax: 5400,
-      lotSize: 0.25,
-      neighborhood: 'Suburban Residential',
-      schoolDistrict: 'City School District',
-      crimeRate: 'Low',
-      walkScore: 65,
-      transitScore: 45,
-      bikeScore: 70,
-      nearbyAmenities: [
-        'Grocery Store (0.3 mi)',
-        'Park (0.5 mi)',
-        'Restaurant (0.2 mi)',
-        'School (0.8 mi)'
-      ],
-      marketTrends: {
-        trend: 'increasing',
-        changePercent: 8.5,
-        timeframe: 'Last 12 months'
-      },
-      investmentPotential: {
-        score: 7.8,
-        factors: [
-          'Strong school district',
-          'Growing neighborhood',
-          'Good rental demand',
-          'Stable property values'
-        ]
-      }
-    };
+    if (zillowData.error) {
+      return NextResponse.json(
+        { 
+          error: `Zillow API error: ${zillowData.error}`,
+          details: 'Failed to fetch property data from Zillow'
+        },
+        { status: 500 }
+      );
+    }
 
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // Transform Zillow data to our PropertyData format
+    const propertyData: PropertyData = transformZillowData(zillowData, address, latitude, longitude);
 
     console.log(`Smart search completed for: ${address}`);
 
     return NextResponse.json({
       success: true,
-      data: mockPropertyData,
+      data: propertyData,
       searchMetadata: {
         timestamp: new Date().toISOString(),
         coordinates: { latitude, longitude },
         searchType: 'smart',
-        dataSource: 'mock' // Change this to your actual data source
+        dataSource: 'zillow'
       }
     });
 
