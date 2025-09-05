@@ -4,6 +4,11 @@ import { StripeService } from '@/integrations/stripe/stripe-service';
 
 export async function POST(request: NextRequest) {
   try {
+    // Check if Stripe is configured
+    if (!process.env.STRIPE_SECRET_KEY) {
+      return NextResponse.json({ error: 'Stripe not configured' }, { status: 503 });
+    }
+
     // Create supabase client
     const supabase = createServerSupabaseClientFromRequest(request);
 

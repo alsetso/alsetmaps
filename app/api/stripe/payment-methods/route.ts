@@ -4,6 +4,11 @@ import { StripeService } from '@/integrations/stripe/stripe-service';
 
 export async function GET(request: NextRequest) {
   try {
+    // Check if Stripe is configured
+    if (!process.env.STRIPE_SECRET_KEY) {
+      return NextResponse.json({ error: 'Stripe not configured' }, { status: 503 });
+    }
+
     // Create supabase client
     const supabase = createServerSupabaseClientFromRequest(request);
 
@@ -45,6 +50,11 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    // Check if Stripe is configured
+    if (!process.env.STRIPE_SECRET_KEY) {
+      return NextResponse.json({ error: 'Stripe not configured' }, { status: 503 });
+    }
+
     // Create supabase client
     const supabase = createServerSupabaseClientFromRequest(request);
 
@@ -110,6 +120,11 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
+    // Check if Stripe is configured
+    if (!process.env.STRIPE_SECRET_KEY) {
+      return NextResponse.json({ error: 'Stripe not configured' }, { status: 503 });
+    }
+
     const { searchParams } = new URL(request.url);
     const paymentMethodId = searchParams.get('paymentMethodId');
 

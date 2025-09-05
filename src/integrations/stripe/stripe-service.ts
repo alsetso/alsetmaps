@@ -1,9 +1,20 @@
 import Stripe from 'stripe';
 
-// Initialize Stripe with secret key
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-08-27.basil',
-});
+// Lazy initialization of Stripe to avoid build-time errors
+let stripe: Stripe | null = null;
+
+function getStripe(): Stripe {
+  if (!stripe) {
+    const secretKey = process.env.STRIPE_SECRET_KEY;
+    if (!secretKey) {
+      throw new Error('STRIPE_SECRET_KEY environment variable is not set');
+    }
+    stripe = new Stripe(secretKey, {
+      apiVersion: '2025-08-27.basil',
+    });
+  }
+  return stripe;
+}
 
 export interface PaymentMethod {
   id: string;
@@ -34,8 +45,9 @@ export class StripeService {
    */
   static async createOrGetCustomer(email: string, name?: string): Promise<string | null> {
     try {
+      const stripeInstance = getStripe();
       // Check if customer already exists
-      const existingCustomers = await stripe.customers.list({
+      const existingCustomers = await stripeInstance.customers.list({
         email: email,
         limit: 1,
       });
@@ -45,7 +57,7 @@ export class StripeService {
       }
 
       // Create new customer
-      const customer = await stripe.customers.create({
+      const customer = await stripeInstance.customers.create({
         email: email,
         name: name,
       });
@@ -62,7 +74,8 @@ export class StripeService {
    */
   static async createSetupIntent(customerId: string): Promise<CreatePaymentMethodResult> {
     try {
-      const setupIntent = await stripe.setupIntents.create({
+      const stripeInstance = getStripe();
+      const setupIntent = await stripeInstance.setupIntents.create({
         customer: customerId,
         payment_method_types: ['card'],
         usage: 'off_session',
@@ -87,7 +100,8 @@ export class StripeService {
    */
   static async getPaymentMethods(customerId: string): Promise<PaymentMethodsResult> {
     try {
-      const paymentMethods = await stripe.paymentMethods.list({
+      const stripeInstance = getStripe();
+      const paymentMethods = await stripeInstance.paymentMethods.list({
         customer: customerId,
         type: 'card',
       });
@@ -120,7 +134,8 @@ export class StripeService {
    */
   static async deletePaymentMethod(paymentMethodId: string): Promise<{ success: boolean; error?: string }> {
     try {
-      await stripe.paymentMethods.detach(paymentMethodId);
+      const stripeInstance = getStripe();
+      await stripeInstance.paymentMethods.detach(paymentMethodId);
       return { success: true };
     } catch (error) {
       console.error('Error deleting payment method:', error);
@@ -136,7 +151,8 @@ export class StripeService {
    */
   static async setDefaultPaymentMethod(customerId: string, paymentMethodId: string): Promise<{ success: boolean; error?: string }> {
     try {
-      await stripe.customers.update(customerId, {
+      const stripeInstance = getStripe();
+      await stripeInstance.customers.update(customerId, {
         invoice_settings: {
           default_payment_method: paymentMethodId,
         },
@@ -161,7 +177,8 @@ export class StripeService {
     metadata?: Record<string, string>
   ): Promise<{ success: boolean; clientSecret?: string; error?: string }> {
     try {
-      const paymentIntent = await stripe.paymentIntents.create({
+      const stripeInstance = getStripe();
+      const paymentIntent = await stripeInstance.paymentIntents.create({
         amount: amount * 100, // Convert to cents
         currency: currency,
         customer: customerId,
@@ -189,7 +206,8 @@ export class StripeService {
    */
   static async getPaymentIntent(paymentIntentId: string): Promise<{ success: boolean; paymentIntent?: Stripe.PaymentIntent; error?: string }> {
     try {
-      const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+      const stripeInstance = getStripe();
+      const paymentIntent = await stripeInstance.paymentIntents.retrieve(paymentIntentId);
       return {
         success: true,
         paymentIntent: paymentIntent,
@@ -212,6 +230,7 @@ export class StripeService {
     paymentMethodId?: string
   ): Promise<{ success: boolean; subscriptionId?: string; error?: string }> {
     try {
+      const stripeInstance = getStripe();
       const subscriptionData: Stripe.SubscriptionCreateParams = {
         customer: customerId,
         items: [{ price: priceId }],
@@ -224,7 +243,7 @@ export class StripeService {
         subscriptionData.default_payment_method = paymentMethodId;
       }
 
-      const subscription = await stripe.subscriptions.create(subscriptionData);
+      const subscription = await stripeInstance.subscriptions.create(subscriptionData);
 
       return {
         success: true,
@@ -244,7 +263,8 @@ export class StripeService {
    */
   static async cancelSubscription(subscriptionId: string): Promise<{ success: boolean; error?: string }> {
     try {
-      await stripe.subscriptions.cancel(subscriptionId);
+      const stripeInstance = getStripe();
+      await stripeInstance.subscriptions.cancel(subscriptionId);
       return { success: true };
     } catch (error) {
       console.error('Error canceling subscription:', error);
