@@ -4,7 +4,7 @@ export interface SignupData {
   first_name: string;
   last_name: string;
   phone: string;
-  role: 'agent' | 'wholesaler' | 'home_owner' | 'other';
+  role: 'user' | 'agent' | 'admin' | 'moderator';
   email: string;
   password: string;
 }
@@ -57,9 +57,9 @@ export class SignupService {
       const authUserId = authData.user.id;
       console.log('Auth user created successfully with ID:', authUserId);
 
-      // STEP 2: Create user record in public.users
+      // STEP 2: Create user record in public.accounts
       const { data: userRecord, error: userError } = await supabase
-        .from('users')
+        .from('accounts')
         .insert({
           id: authUserId, // Use the auth user's ID as the primary key
           first_name: signupData.first_name,
@@ -67,7 +67,6 @@ export class SignupService {
           phone: signupData.phone,
           role: signupData.role,
           email: signupData.email,
-          auth_user_id: authUserId, // Link to auth user
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         })
@@ -117,7 +116,7 @@ export class SignupService {
   static async checkEmailAvailability(email: string): Promise<boolean> {
     try {
       const { data, error } = await supabase
-        .from('users')
+        .from('accounts')
         .select('id')
         .eq('email', email)
         .single();

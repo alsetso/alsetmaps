@@ -1,8 +1,7 @@
 import { supabase } from '@/integrations/supabase/client';
 
 export interface UserAccount {
-  id: string;
-  auth_user_id: string;
+  id: string; // Now directly equals auth.users.id
   email: string;
   first_name?: string;
   last_name?: string;
@@ -34,11 +33,11 @@ export class UnifiedAuthService {
         };
       }
 
-      // Get the account data from accounts table
+      // Get the account data from accounts table (now uses auth.users.id as primary key)
       const { data: account, error: accountError } = await supabase
         .from('accounts')
         .select('*')
-        .eq('auth_user_id', user.id)
+        .eq('id', user.id)
         .single();
 
       if (accountError) {
@@ -65,11 +64,11 @@ export class UnifiedAuthService {
   }
 
   /**
-   * Get the current user's account ID
+   * Get the current user's account ID (now same as auth user ID)
    */
   static async getCurrentAccountId(): Promise<string | null> {
     const result = await this.getCurrentUser();
-    return result.success ? result.account?.id || null : null;
+    return result.success ? result.user?.id || null : null;
   }
 
   /**

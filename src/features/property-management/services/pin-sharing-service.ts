@@ -43,11 +43,11 @@ export class PinSharingService {
         return { success: false, error: 'User not authenticated' };
       }
 
-      // Get the user's account ID
+      // Get the user's account ID (now using auth.users.id directly)
       const { data: accountData, error: accountError } = await supabase
         .from('accounts')
         .select('id')
-        .eq('auth_user_id', session.user.id)
+        .eq('id', session.user.id)
         .single();
 
       if (accountError || !accountData) {
@@ -92,11 +92,11 @@ export class PinSharingService {
         return { success: false, error: 'User not authenticated' };
       }
 
-      // Get the user's account ID
+      // Get the user's account ID (now using auth.users.id directly)
       const { data: accountData, error: accountError } = await supabase
         .from('accounts')
         .select('id')
-        .eq('auth_user_id', session.user.id)
+        .eq('id', session.user.id)
         .single();
 
       if (accountError || !accountData) {
@@ -135,7 +135,7 @@ export class PinSharingService {
         .from('pins')
         .update(updateData)
         .eq('id', pinId)
-        .eq('user_id', accountData.id);
+        .eq('account_id', accountData.id);
 
       if (error) {
         console.error('Error updating pin sharing settings:', error);
@@ -222,11 +222,11 @@ export class PinSharingService {
         return { success: false, error: 'User not authenticated' };
       }
 
-      // Get the user's account ID
+      // Get the user's account ID (now using auth.users.id directly)
       const { data: accountData, error: accountError } = await supabase
         .from('accounts')
         .select('id')
-        .eq('auth_user_id', session.user.id)
+        .eq('id', session.user.id)
         .single();
 
       if (accountError || !accountData) {
@@ -238,7 +238,7 @@ export class PinSharingService {
         .from('pins')
         .select('view_count, last_viewed_at, is_public, share_token')
         .eq('id', pinId)
-        .eq('user_id', accountData.id)
+        .eq('account_id', accountData.id)
         .single();
 
       if (error || !pin) {

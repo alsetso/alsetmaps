@@ -140,7 +140,7 @@ export const SearchHistoryDisplay: React.FC<SearchHistoryDisplayProps> = ({
                 
                 <div className="flex items-center space-x-1">
                   <User className="h-3 w-3" />
-                  <span>{search.user_id ? 'Signed In' : 'Anonymous'}</span>
+                  <span>{search.account_id ? 'Signed In' : 'Anonymous'}</span>
                 </div>
                 
                 {search.search_type && (

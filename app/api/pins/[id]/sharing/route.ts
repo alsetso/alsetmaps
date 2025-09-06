@@ -11,40 +11,15 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    console.log('🔍 Pin Sharing API: Starting PUT request for ID:', params.id);
-    
     const supabase = createServerSupabaseClientFromRequest(request);
     const pinId = params.id;
     const body = await request.json();
 
     // Get the current authenticated user
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
     
-    if (sessionError || !session?.user) {
+    if (authError || !user) {
       return NextResponse.json({ error: 'User not authenticated' }, { status: 401 });
-    }
-
-    // Get the user's account ID
-    const { data: accountData, error: accountError } = await supabase
-      .from('accounts')
-      .select('id')
-      .eq('auth_user_id', session.user.id)
-      .single();
-
-    if (accountError || !accountData) {
-      return NextResponse.json({ error: 'User account not found' }, { status: 404 });
-    }
-
-    // Verify the pin belongs to the user
-    const { data: existingPin, error: fetchError } = await supabase
-      .from('pins')
-      .select('id')
-      .eq('id', pinId)
-      .eq('user_id', accountData.id)
-      .single();
-
-    if (fetchError || !existingPin) {
-      return NextResponse.json({ error: 'Pin not found' }, { status: 404 });
     }
 
     // Prepare update data
@@ -69,25 +44,26 @@ export async function PUT(
       updateData.share_settings = body.shareSettings;
     }
 
-    // Update the pin
+    // Update the pin - RLS policies will ensure user can only update their own pins
     const { data: updatedPin, error: updateError } = await supabase
       .from('pins')
       .update(updateData)
       .eq('id', pinId)
-      .eq('user_id', accountData.id)
+      .eq('account_id', user.id)
       .select()
       .single();
 
     if (updateError) {
-      console.error('Error updating pin sharing settings:', updateError);
       return NextResponse.json({ error: 'Failed to update sharing settings' }, { status: 500 });
     }
 
-    console.log('✅ Pin Sharing API: Successfully updated sharing settings');
+    if (!updatedPin) {
+      return NextResponse.json({ error: 'Pin not found' }, { status: 404 });
+    }
+
     return NextResponse.json(updatedPin);
 
   } catch (error) {
-    console.error('❌ Pin Sharing API: Unexpected error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -100,30 +76,17 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    console.log('🔍 Pin Sharing API: Starting GET request for analytics');
-    
     const supabase = createServerSupabaseClientFromRequest(request);
     const pinId = params.id;
 
     // Get the current authenticated user
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
     
-    if (sessionError || !session?.user) {
+    if (authError || !user) {
       return NextResponse.json({ error: 'User not authenticated' }, { status: 401 });
     }
 
-    // Get the user's account ID
-    const { data: accountData, error: accountError } = await supabase
-      .from('accounts')
-      .select('id')
-      .eq('auth_user_id', session.user.id)
-      .single();
-
-    if (accountError || !accountData) {
-      return NextResponse.json({ error: 'User account not found' }, { status: 404 });
-    }
-
-    // Get pin sharing analytics
+    // Get pin sharing analytics - RLS policies will ensure user can only access their own pins
     const { data: pin, error } = await supabase
       .from('pins')
       .select(`
@@ -140,7 +103,7 @@ export async function GET(
         updated_at
       `)
       .eq('id', pinId)
-      .eq('user_id', accountData.id)
+      .eq('account_id', user.id)
       .single();
 
     if (error || !pin) {
@@ -173,11 +136,9 @@ export async function GET(
       }
     };
 
-    console.log('✅ Pin Sharing API: Successfully returning analytics');
     return NextResponse.json(analytics);
 
   } catch (error) {
-    console.error('❌ Pin Sharing API: Unexpected error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

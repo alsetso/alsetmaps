@@ -101,57 +101,18 @@ export function FloatingTopbar() {
           }
         `}>
           <div className="flex items-center justify-between h-full">
-            {/* Left: Buy/Sell/Loans Navigation - Hidden on mobile */}
-            <div className="hidden xl:flex items-center">
+            {/* Left: Navigation */}
+            <div className="hidden xl:flex items-center space-x-4">
               <Link href="/buy">
                 <button className={`
-                  px-5 py-2.5 rounded-xl font-semibold transition-all duration-300
-                  hover:scale-105 active:scale-95 relative overflow-hidden
+                  px-4 py-2 rounded-lg font-medium transition-all duration-300
+                  hover:scale-105 active:scale-95
                   ${isDark 
-                    ? 'hover:bg-green-500/20 text-white hover:text-green-300' 
-                    : 'hover:bg-gray-50 text-gray-900 hover:text-green-600'
+                    ? 'text-white hover:bg-white/20' 
+                    : 'text-gray-700 hover:bg-gray-100'
                   }
                 `}>
                   Buy
-                  <div className={`
-                    absolute bottom-0 left-0 h-0.5 w-0 transition-all duration-300
-                    ${isDark ? 'bg-green-400' : 'bg-green-500'}
-                    hover:w-full
-                  `} />
-                </button>
-              </Link>
-              <Link href="/sell">
-                <button className={`
-                  px-5 py-2.5 rounded-xl font-semibold transition-all duration-300
-                  hover:scale-105 active:scale-95 relative overflow-hidden
-                  ${isDark 
-                    ? 'hover:bg-red-500/20 text-white hover:text-red-300' 
-                    : 'hover:bg-gray-50 text-gray-900 hover:text-red-600'
-                  }
-                `}>
-                  Sell
-                  <div className={`
-                    absolute bottom-0 left-0 h-0.5 w-0 transition-all duration-300
-                    ${isDark ? 'bg-red-400' : 'bg-red-500'}
-                    hover:w-full
-                  `} />
-                </button>
-              </Link>
-              <Link href="/loans">
-                <button className={`
-                  px-5 py-2.5 rounded-xl font-semibold transition-all duration-300
-                  hover:scale-105 active:scale-95 relative overflow-hidden
-                  ${isDark 
-                    ? 'hover:bg-blue-500/20 text-white hover:text-blue-300' 
-                    : 'hover:bg-gray-50 text-gray-900 hover:text-blue-600'
-                  }
-                `}>
-                  Loans
-                  <div className={`
-                    absolute bottom-0 left-0 h-0.5 w-0 transition-all duration-300
-                    ${isDark ? 'bg-blue-400' : 'bg-blue-500'}
-                    hover:w-full
-                  `} />
                 </button>
               </Link>
             </div>
@@ -277,6 +238,17 @@ export function FloatingTopbar() {
                               Dashboard
                             </button>
                           </Link>
+                          <Link href="/my-pins">
+                            <button className={`
+                              w-full px-4 py-3 text-left hover:bg-blue-50 transition-colors duration-200
+                              ${isDark 
+                                ? 'text-white hover:bg-white/10' 
+                                : 'text-gray-900'
+                              }
+                            `}>
+                              My Pins
+                            </button>
+                          </Link>
                           <Link href="/search-history">
                             <button className={`
                               w-full px-4 py-3 text-left hover:bg-blue-50 transition-colors duration-200
@@ -377,39 +349,17 @@ export function FloatingTopbar() {
               />
             </div>
 
-            {/* Large Navigation Buttons */}
+            {/* Navigation */}
             <div className="w-full max-w-md space-y-6">
               <Link href="/buy" onClick={closeMobileNav}>
-                <button className={`w-full py-6 px-8 text-2xl font-bold rounded-2xl shadow-2xl transition-all duration-300 hover:scale-105 active:scale-95 ${
-                  isDark
-                    ? 'bg-gradient-to-r from-green-500 to-green-600 text-white hover:shadow-green-500/25 hover:from-green-400 hover:to-green-500'
-                    : 'bg-gradient-to-r from-green-500 to-green-600 text-white hover:shadow-green-500/25 hover:from-green-400 hover:to-green-500'
+                <button className={`w-full py-4 px-6 text-lg font-medium rounded-xl border transition-all duration-300 ${
+                  isDark 
+                    ? 'border-white/20 text-white hover:bg-white/10' 
+                    : 'border-gray-200 text-gray-700 hover:bg-gray-50'
                 }`}>
-                  Buy Property
+                  Buy Properties
                 </button>
               </Link>
-
-              <Link href="/sell" onClick={closeMobileNav}>
-                <button className={`w-full py-6 px-8 text-2xl font-bold rounded-2xl shadow-2xl transition-all duration-300 hover:scale-105 active:scale-95 ${
-                  isDark
-                    ? 'bg-gradient-to-r from-red-500 to-red-600 text-white hover:shadow-red-500/25 hover:from-red-400 hover:to-red-500'
-                    : 'bg-gradient-to-r from-red-500 to-red-600 text-white hover:shadow-red-500/25 hover:from-red-400 hover:to-red-500'
-                }`}>
-                  Sell Property
-                </button>
-              </Link>
-
-              <Link href="/loans" onClick={closeMobileNav}>
-                <button className={`w-full py-6 px-8 text-2xl font-bold rounded-2xl shadow-2xl transition-all duration-300 hover:scale-105 active:scale-95 ${
-                  isDark
-                    ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:shadow-blue-500/25 hover:from-blue-400 hover:to-blue-500'
-                    : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:shadow-blue-500/25 hover:from-blue-400 hover:to-blue-500'
-                }`}>
-                  Get a Loan
-                </button>
-              </Link>
-
-
             </div>
 
             {/* User Actions */}

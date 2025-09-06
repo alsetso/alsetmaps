@@ -30,7 +30,6 @@ export interface Pin {
   name: string;
   notes?: string;
   images?: string[];
-  user_id: string;
   search_history_id?: string;
   
   // Sharing and visibility

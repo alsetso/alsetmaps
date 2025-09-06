@@ -11,11 +11,9 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    console.log('🔍 Shared Property API: Starting GET request for ID:', params.id);
-    
     const pinId = params.id;
     
-    // Use service role client for public access
+    // Use service role client for public access (this is appropriate for public endpoints)
     const supabase = createServerSupabaseClient();
     
     // Fetch the pin - only public pins should be accessible
@@ -25,64 +23,21 @@ export async function GET(
       .eq('id', pinId)
       .eq('is_public', true) // Only allow access to public pins
       .single();
-    
-    console.log('🔍 Shared Property API: Pin query result', { 
-      pinId,
-      hasPin: !!pin, 
-      pinError: pinError?.message,
-      pinErrorCode: pinError?.code
-    });
 
     if (pinError || !pin) {
-      console.log('❌ Shared Property API: Pin not found or not public', { 
-        pinError: pinError?.message,
-        pinErrorCode: pinError?.code
-      });
       return NextResponse.json({ 
-        error: 'Property not found or not publicly accessible',
-        details: pinError?.message
+        error: 'Property not found or not publicly accessible'
       }, { status: 404 });
     }
 
     // Increment view count using the database RPC function (single source of truth)
     try {
       await supabase.rpc('increment_pin_view_count', { pin_id: pinId });
-      console.log('✅ Shared Property API: View count incremented via RPC');
     } catch (viewError) {
-      console.warn('⚠️ Shared Property API: Failed to increment view count:', viewError);
       // Don't fail the request if view tracking fails
     }
 
-    // Check if this pin has a for_sale listing
-    const { data: forSaleListing, error: listingError } = await supabase
-      .from('for_sale')
-      .select(`
-        id,
-        title,
-        description,
-        property_type,
-        listing_price,
-        timeline,
-        for_sale_by,
-        images,
-        contact_info,
-        agent_name,
-        agent_company,
-        agent_phone,
-        agent_email,
-        status,
-        views_count,
-        inquiries_count,
-        created_at,
-        updated_at
-      `)
-      .eq('pin_id', pinId)
-      .eq('status', 'active')
-      .single();
-
-    if (listingError && listingError.code !== 'PGRST116') {
-      console.warn('⚠️ Shared Property API: Error fetching for_sale listing:', listingError);
-    }
+    // Note: for_sale table no longer exists, removed for_sale listing query
 
     // Get fresh view count after incrementing
     const { data: updatedPin, error: fetchError } = await supabase
@@ -106,7 +61,7 @@ export async function GET(
           });
         hasAgreedToTerms = agreementStatus || false;
       } catch (agreementError) {
-        console.warn('⚠️ Shared Property API: Error checking terms agreement:', agreementError);
+        // Don't fail the request if terms checking fails
       }
     }
 
@@ -124,7 +79,7 @@ export async function GET(
         created_at: pin.created_at,
         updated_at: pin.updated_at,
         // Remove sensitive fields
-        user_id: undefined,
+        account_id: undefined,
         search_history_id: undefined,
         is_public: pin.is_public,
         // Terms information
@@ -132,7 +87,6 @@ export async function GET(
         custom_terms: pin.requires_terms_agreement ? pin.custom_terms : undefined,
         terms_agreement_count: pin.terms_agreement_count || 0
       },
-      forSaleListing: forSaleListing || null,
       viewCount: updatedPin?.view_count || pin.view_count || 0,
       lastViewed: updatedPin?.last_viewed_at || pin.last_viewed_at,
       shareUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/shared/property/${pinId}`,
@@ -141,11 +95,9 @@ export async function GET(
       requiresTermsAgreement: pin.requires_terms_agreement || false
     };
 
-    console.log('✅ Shared Property API: Successfully returning shared property data');
     return NextResponse.json(responseData);
 
   } catch (error) {
-    console.error('❌ Shared Property API: Unexpected error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

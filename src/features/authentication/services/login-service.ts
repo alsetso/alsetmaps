@@ -20,9 +20,8 @@ export interface UserProfile {
   last_name: string;
   phone: string;
   email: string;
-  role: 'agent' | 'wholesaler' | 'home_owner' | 'other';
+  role: 'user' | 'agent' | 'admin' | 'moderator';
   stripe_customer_id?: string;
-  auth_user_id: string;
   created_at: string;
   updated_at: string;
 }
@@ -76,11 +75,11 @@ export class LoginService {
       const authUser = authData.user;
       console.log('Auth user authenticated successfully:', authUser.id);
 
-      // STEP 2: Check if user profile exists in public.users
+      // STEP 2: Check if user profile exists in public.accounts
       const { data: profileData, error: profileError } = await supabase
-        .from('users')
+        .from('accounts')
         .select('*')
-        .eq('auth_user_id', authUser.id)
+        .eq('id', authUser.id)
         .single();
 
       if (profileError) {
@@ -154,15 +153,14 @@ export class LoginService {
       const metadata = authUser.user_metadata || {};
       
       const { data: newProfile, error: createError } = await supabase
-        .from('users')
+        .from('accounts')
         .insert({
           id: authUser.id, // Use auth user ID as primary key
           first_name: metadata.first_name || 'Unknown',
           last_name: metadata.last_name || 'User',
           phone: metadata.phone || '',
           email: authUser.email,
-          role: metadata.role || 'other',
-          auth_user_id: authUser.id,
+          role: metadata.role || 'user',
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         })
@@ -186,12 +184,12 @@ export class LoginService {
   /**
    * Update last login timestamp
    */
-  private static async updateLastLogin(userId: string): Promise<void> {
+  private static async updateLastLogin(accountId: string): Promise<void> {
     try {
       await supabase
-        .from('users')
+        .from('accounts')
         .update({ updated_at: new Date().toISOString() })
-        .eq('id', userId);
+        .eq('id', accountId);
     } catch (error) {
       console.error('Error updating last login:', error);
       // Don't fail login if this fails
@@ -204,9 +202,9 @@ export class LoginService {
   static async getUserProfile(authUserId: string): Promise<UserProfile | null> {
     try {
       const { data, error } = await supabase
-        .from('users')
+        .from('accounts')
         .select('*')
-        .eq('auth_user_id', authUserId)
+        .eq('id', authUserId)
         .single();
 
       if (error) {

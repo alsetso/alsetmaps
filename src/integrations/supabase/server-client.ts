@@ -38,20 +38,24 @@ export function createServerSupabaseClientFromRequest(request: Request) {
         getAll() {
           // Extract cookies from the request headers
           const cookieHeader = request.headers.get('cookie');
-          console.log('🔧 Server client: Cookie header:', cookieHeader ? 'Present' : 'Missing');
           
           if (!cookieHeader) return [];
           
           const cookies = cookieHeader.split(';').map(cookie => {
-            const [name, value] = cookie.trim().split('=');
+            const trimmed = cookie.trim();
+            const equalIndex = trimmed.indexOf('=');
+            if (equalIndex === -1) {
+              return { name: trimmed, value: '' };
+            }
+            const name = trimmed.substring(0, equalIndex);
+            const value = trimmed.substring(equalIndex + 1);
             return { name, value };
           });
           
-          console.log('🔧 Server client: Parsed cookies:', cookies.map(c => c.name));
           return cookies;
         },
         setAll() {
-          // No-op for API routes
+          // No-op for API routes - cookies are handled by middleware
         },
       },
     }

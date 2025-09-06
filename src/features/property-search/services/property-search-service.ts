@@ -44,11 +44,11 @@ export class PropertySearchService {
         throw new Error('User not authenticated');
       }
 
-      // 2. Get user's account record
+      // 2. Get user's account record (id now equals auth user id)
       const { data: account, error: accountError } = await supabase
         .from('accounts')
         .select('id')
-        .eq('auth_user_id', session.user.id)
+        .eq('id', session.user.id)
         .single();
 
       if (accountError || !account) {
@@ -60,7 +60,7 @@ export class PropertySearchService {
         const { data: credits, error: creditsError } = await supabase
           .from('credits')
           .select('available_credits')
-          .eq('user_id', account.id)
+          .eq('account_id', account.id)
           .single();
 
         if (creditsError || !credits || credits.available_credits < 1) {
@@ -136,7 +136,7 @@ export class PropertySearchService {
   private static async recordSearchHistory(accountId: string, searchRequest: SearchRequest, searchData?: any): Promise<SearchHistoryRecord | null> {
     try {
       const historyData: any = {
-        user_id: accountId,
+        account_id: accountId,
         search_address: searchRequest.address,
         search_type: searchRequest.searchType,
         credits_used: searchRequest.searchType === 'smart' ? 1 : 0
@@ -178,11 +178,11 @@ export class PropertySearchService {
         throw new Error('User not authenticated');
       }
 
-      // 2. Get user's account record
+      // 2. Get user's account record (id now equals auth user id)
       const { data: account, error: accountError } = await supabase
         .from('accounts')
         .select('id')
-        .eq('auth_user_id', session.user.id)
+        .eq('id', session.user.id)
         .single();
 
       if (accountError || !account) {
@@ -194,7 +194,7 @@ export class PropertySearchService {
         .from('search_history')
         .select('*')
         .eq('id', searchHistoryId)
-        .eq('user_id', account.id)
+        .eq('account_id', account.id)
         .single();
 
       if (historyError || !searchHistory) {
@@ -210,7 +210,7 @@ export class PropertySearchService {
       const { data: credits, error: creditsError } = await supabase
         .from('credits')
         .select('available_credits')
-        .eq('user_id', account.id)
+        .eq('account_id', account.id)
         .single();
 
       if (creditsError || !credits || credits.available_credits < 1) {
@@ -284,11 +284,12 @@ export class PropertySearchService {
       console.log('Performing smart search for:', address);
       
       // Call our server-side API route instead of making direct client-side calls
-      const response = await fetch('/api/property/smart-search', {
+      const response = await fetch('/api/pins/smart-search', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include', // Include cookies for authentication
         body: JSON.stringify({
           address,
           latitude,
@@ -328,40 +329,26 @@ export class PropertySearchService {
    */
   private static async deductCredits(accountId: string, searchId: string, amount: number): Promise<boolean> {
     try {
-      // First, get current credit balance
-      const { data: currentCredits, error: fetchError } = await supabase
-        .from('credits')
-        .select('available_credits')
-        .eq('user_id', accountId)
-        .single();
+      // Use the accountId directly (now equals auth user id)
+      const { data: transactionId, error: transactionError } = await supabase
+        .rpc('record_credit_usage', {
+          p_auth_user_id: accountId, // accountId now equals auth user id
+          p_amount: -amount, // Negative for deduction
+          p_description: `Smart search performed`,
+          p_reference_id: searchId,
+          p_reference_table: 'search_history',
+          p_metadata: {
+            search_type: 'smart',
+            amount_deducted: amount
+          }
+        });
 
-      if (fetchError || !currentCredits) {
-        console.error('Error fetching current credits:', fetchError);
+      if (transactionError) {
+        console.error('Error recording credit transaction:', transactionError);
         return false;
       }
 
-      // Check if user has enough credits
-      if (currentCredits.available_credits < amount) {
-        console.error('Insufficient credits:', currentCredits.available_credits, 'needed:', amount);
-        return false;
-      }
-
-      // Calculate new balance
-      const newBalance = currentCredits.available_credits - amount;
-
-      // Update credits with new balance
-      const { error: updateError } = await supabase
-        .from('credits')
-        .update({ available_credits: newBalance })
-        .eq('user_id', accountId);
-
-      if (updateError) {
-        console.error('Error updating credits:', updateError);
-        return false;
-      }
-
-
-      console.log(`Credits deducted successfully: ${amount} credits removed, new balance: ${newBalance}`);
+      console.log(`Credits deducted successfully: ${amount} credits removed, transaction ID: ${transactionId}`);
       return true;
 
     } catch (error) {
@@ -381,7 +368,7 @@ export class PropertySearchService {
       const { data: account } = await supabase
         .from('accounts')
         .select('id')
-        .eq('auth_user_id', session.user.id)
+        .eq('id', session.user.id)
         .single();
 
       if (!account) return null;
@@ -389,7 +376,7 @@ export class PropertySearchService {
       const { data: credits, error } = await supabase
         .from('credits')
         .select('available_credits')
-        .eq('user_id', account.id)
+        .eq('account_id', account.id)
         .single();
 
       if (error || !credits) return null;
@@ -412,7 +399,7 @@ export class PropertySearchService {
       const { data: account } = await supabase
         .from('accounts')
         .select('id')
-        .eq('auth_user_id', session.user.id)
+        .eq('id', session.user.id)
         .single();
 
       if (!account) return [];
@@ -420,7 +407,7 @@ export class PropertySearchService {
       const { data, error } = await supabase
         .from('search_history')
         .select('*')
-        .eq('user_id', account.id)
+        .eq('account_id', account.id)
         .order('created_at', { ascending: false })
         .limit(limit);
 

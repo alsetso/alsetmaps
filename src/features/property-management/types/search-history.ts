@@ -1,6 +1,6 @@
 export interface SearchHistory {
   id: string;
-  user_id?: string | null;
+  account_id?: string | null;
   session_id?: string | null;
   anonymous_id?: string | null;
   search_address: string;
@@ -19,7 +19,7 @@ export interface SearchHistory {
 }
 
 export interface SearchHistoryCreate {
-  user_id?: string | null;
+  account_id?: string | null;
   session_id?: string | null;
   anonymous_id?: string | null;
   search_address: string;
@@ -49,7 +49,7 @@ export interface SearchHistoryUpdate {
 
 export interface SearchHistorySummary {
   id: string;
-  user_id?: string | null;
+  account_id?: string | null;
   session_id?: string | null;
   anonymous_id?: string | null;
   search_address: string;
@@ -67,7 +67,7 @@ export interface SearchHistorySummary {
 }
 
 export type SearchHistoryFilters = {
-  user_id?: string;
+  account_id?: string;
   session_id?: string;
   anonymous_id?: string;
   search_type?: string;
@@ -92,7 +92,7 @@ export interface AllSearches {
   search_filters: Record<string, any>;
   rapid_api_data?: Record<string, any> | null;
   user_type: 'authenticated' | 'anonymous';
-  user_id?: string | null;
+  account_id?: string | null;
   session_id?: string | null;
   anonymous_id?: string | null;
   user_agent?: string | null;

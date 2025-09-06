@@ -44,7 +44,7 @@ export class AccountManagementService {
       const { data: account, error } = await supabase
         .from('accounts')
         .select('*')
-        .eq('auth_user_id', session.user.id)
+        .eq('id', session.user.id)
         .single();
 
       if (error) {
@@ -73,7 +73,7 @@ export class AccountManagementService {
       const { error } = await supabase
         .from('accounts')
         .update(updates)
-        .eq('auth_user_id', session.user.id);
+        .eq('id', session.user.id);
 
       if (error) {
         console.error('Error updating account data:', error);
@@ -87,115 +87,9 @@ export class AccountManagementService {
     }
   }
 
-  /**
-   * Get payment methods for the current user
-   */
-  static async getPaymentMethods(): Promise<PaymentMethod[]> {
-    try {
-      const response = await fetch('/api/stripe/payment-methods', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+  // Payment methods functionality has been removed
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch payment methods');
-      }
-
-      const data = await response.json();
-      return data.paymentMethods || [];
-    } catch (error) {
-      console.error('Error in getPaymentMethods:', error);
-      return [];
-    }
-  }
-
-  /**
-   * Create setup intent for adding a payment method
-   */
-  static async createSetupIntent(): Promise<{ success: boolean; clientSecret?: string; error?: string }> {
-    try {
-      const response = await fetch('/api/stripe/payment-methods', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to create setup intent');
-      }
-
-      const data = await response.json();
-      return { 
-        success: true, 
-        clientSecret: data.clientSecret 
-      };
-    } catch (error) {
-      console.error('Error in createSetupIntent:', error);
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Failed to create setup intent' 
-      };
-    }
-  }
-
-  /**
-   * Delete a payment method
-   */
-  static async deletePaymentMethod(paymentMethodId: string): Promise<{ success: boolean; error?: string }> {
-    try {
-      const response = await fetch(`/api/stripe/payment-methods?paymentMethodId=${paymentMethodId}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to delete payment method');
-      }
-
-      return { success: true };
-    } catch (error) {
-      console.error('Error in deletePaymentMethod:', error);
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Failed to delete payment method' 
-      };
-    }
-  }
-
-  /**
-   * Set default payment method
-   */
-  static async setDefaultPaymentMethod(paymentMethodId: string): Promise<{ success: boolean; error?: string }> {
-    try {
-      const response = await fetch('/api/stripe/default-payment-method', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ paymentMethodId }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to set default payment method');
-      }
-
-      return { success: true };
-    } catch (error) {
-      console.error('Error in setDefaultPaymentMethod:', error);
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Failed to set default payment method' 
-      };
-    }
-  }
+  // Stripe-related methods have been removed
 
   /**
    * Get user's current credit balance
@@ -207,6 +101,7 @@ export class AccountManagementService {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
       });
 
       if (!response.ok) {

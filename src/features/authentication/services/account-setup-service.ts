@@ -38,7 +38,7 @@ export class AccountSetupService {
       const { data: existingAccount } = await supabase
         .from('accounts')
         .select('id')
-        .eq('auth_user_id', user.id)
+        .eq('id', user.id)
         .single();
 
       if (existingAccount) {
@@ -48,11 +48,11 @@ export class AccountSetupService {
         };
       }
 
-      // Create account record with user details
+      // Create account record with user details (id now equals auth user id)
       const { data: account, error: accountError } = await supabase
         .from('accounts')
         .insert({
-          auth_user_id: user.id,
+          id: user.id, // Use auth user id as primary key
           email: user.email,
           role: setupData.role,
           first_name: setupData.first_name,
@@ -93,7 +93,7 @@ export class AccountSetupService {
       const { data: credits, error: creditsError } = await supabase
         .from('credits')
         .insert({
-          user_id: accountId,
+          account_id: accountId,
           available_credits: 10
         })
         .select('id')
@@ -135,7 +135,7 @@ export class AccountSetupService {
       const { data: account } = await supabase
         .from('accounts')
         .select('id')
-        .eq('auth_user_id', user.id)
+        .eq('id', user.id) // Changed from 'auth_user_id'
         .single();
 
       if (!account) {
@@ -145,7 +145,7 @@ export class AccountSetupService {
       const { data: credits } = await supabase
         .from('credits')
         .select('id')
-        .eq('user_id', account.id)
+        .eq('account_id', account.id)
         .single();
 
       return {
@@ -172,7 +172,7 @@ export class AccountSetupService {
       const { data: account } = await supabase
         .from('accounts')
         .select('id')
-        .eq('auth_user_id', user.id)
+        .eq('id', user.id) // Changed from 'auth_user_id'
         .single();
 
       if (!account) return null;
@@ -180,7 +180,7 @@ export class AccountSetupService {
       const { data: credits } = await supabase
         .from('credits')
         .select('available_credits')
-        .eq('user_id', account.id)
+        .eq('account_id', account.id)
         .single();
 
       if (!credits) return null;

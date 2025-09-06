@@ -21,7 +21,6 @@ interface SearchHistoryRecord {
 
 interface AccountData {
   id: string;
-  auth_user_id: string;
   first_name: string;
   last_name: string;
   email: string;
@@ -53,7 +52,7 @@ export default function SearchHistoryPage() {
       const { data, error } = await supabase
         .from('accounts')
         .select('*')
-        .eq('auth_user_id', user.id)
+        .eq('id', user.id)
         .single();
 
       if (error) {

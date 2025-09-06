@@ -1,12 +1,11 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { MagnifyingGlassIcon, MapPinIcon, SparklesIcon, BoltIcon } from '@heroicons/react/24/outline';
+import { MagnifyingGlassIcon, MapPinIcon } from '@heroicons/react/24/outline';
 import { MapboxGeocodingService } from '@/integrations/mapbox/geocoding-service';
 import { BasicSearchService } from '@/features/property-search/services/basic-search-service';
 import { PropertySearchService } from '@/features/property-search/services/property-search-service';
 import { AddressSuggestion } from '@/integrations/mapbox/geocoding-service';
-import { AccountSetupService } from '@/features/authentication/services/account-setup-service';
 import { useAuth } from '@/features/authentication/components/AuthProvider';
 import { PinsService } from '@/features/property-management/services/pins-service';
 
@@ -21,7 +20,6 @@ interface SearchState {
   suggestions: AddressSuggestion[];
   selectedSuggestion: AddressSuggestion | null;
   isSearching: boolean;
-  searchType: 'basic' | 'smart';
   showSuggestions: boolean;
   showSuccess: boolean;
   showPinDropped: boolean;
@@ -30,11 +28,9 @@ interface SearchState {
     latitude: number;
     longitude: number;
     searchHistoryId?: string;
-    smartData?: any; // Smart search data from Zillow API
   } | null;
   createdPinId: string | null;
   isLoading: boolean;
-  credits: number | null;
   error: string | null;
 }
 
@@ -45,14 +41,12 @@ export function EnhancedTopbarSearch({ isDark, onClose, onPinCreated }: Enhanced
     suggestions: [],
     selectedSuggestion: null,
     isSearching: false,
-    searchType: 'basic',
     showSuggestions: false,
     showSuccess: false,
     showPinDropped: false,
     searchResult: null,
     createdPinId: null,
     isLoading: false,
-    credits: null,
     error: null,
   });
 
@@ -67,19 +61,6 @@ export function EnhancedTopbarSearch({ isDark, onClose, onPinCreated }: Enhanced
     }
   }, []);
 
-  // Fetch credits on mount
-  useEffect(() => {
-    const fetchCredits = async () => {
-      try {
-        const creditBalance = await AccountSetupService.getCreditBalance();
-        setState(prev => ({ ...prev, credits: creditBalance?.availableCredits || 0 }));
-      } catch (error) {
-        console.error('Failed to fetch credits:', error);
-      }
-    };
-
-    fetchCredits();
-  }, []);
 
   // Debounced search function
   const debouncedSearch = useCallback((query: string) => {
@@ -96,30 +77,13 @@ export function EnhancedTopbarSearch({ isDark, onClose, onPinCreated }: Enhanced
     }, 300);
   }, []);
 
-  // Perform geocoding based on search type
+  // Perform geocoding using basic search
   const performGeocoding = async (query: string) => {
     setState(prev => ({ ...prev, isSearching: true, error: null }));
 
     try {
-      let suggestions: AddressSuggestion[] = [];
-
-      if (state.searchType === 'basic') {
-        const basicSuggestions = await BasicSearchService.geocodeAddress(query);
-        // Convert BasicSearchSuggestion to AddressSuggestion
-        suggestions = basicSuggestions.map(suggestion => ({
-          ...suggestion,
-          properties: {
-            address: suggestion.text,
-            city: '',
-            state: '',
-            postcode: '',
-            country: 'US'
-          }
-        }));
-      } else {
-        // For smart search, we'll use the basic geocoding but with enhanced context
-        suggestions = await MapboxGeocodingService.searchAddresses(query, 5);
-      }
+      // Use basic geocoding for all searches
+      const suggestions = await MapboxGeocodingService.searchAddresses(query, 5);
 
       setState(prev => ({
         ...prev,
@@ -197,10 +161,10 @@ export function EnhancedTopbarSearch({ isDark, onClose, onPinCreated }: Enhanced
         window.flyToLocation(lat, lng, 15);
       }
 
-      // Perform property search
+      // Perform basic property search
       const searchRequest = {
         address,
-        searchType: state.searchType,
+        searchType: 'basic' as const,
         latitude: lat,
         longitude: lng,
       };
@@ -209,16 +173,6 @@ export function EnhancedTopbarSearch({ isDark, onClose, onPinCreated }: Enhanced
       console.log('🔍 PropertySearchService result:', result);
 
       if (result.success) {
-        // Refresh credits if this was a smart search
-        if (state.searchType === 'smart') {
-          try {
-            const creditBalance = await AccountSetupService.getCreditBalance();
-            setState(prev => ({ ...prev, credits: creditBalance?.availableCredits || 0 }));
-          } catch (error) {
-            console.error('Failed to refresh credits:', error);
-          }
-        }
-
         // Show success state with search result
         setState(prev => ({
           ...prev,
@@ -228,7 +182,6 @@ export function EnhancedTopbarSearch({ isDark, onClose, onPinCreated }: Enhanced
             latitude: result.latitude,
             longitude: result.longitude,
             searchHistoryId: result.searchHistoryId,
-            smartData: result.data?.zillowData, // Include smart search data if available
           },
           isLoading: false,
           error: null,
@@ -251,16 +204,6 @@ export function EnhancedTopbarSearch({ isDark, onClose, onPinCreated }: Enhanced
     }
   };
 
-  // Handle search type toggle
-  const toggleSearchType = () => {
-    setState(prev => ({
-      ...prev,
-      searchType: prev.searchType === 'basic' ? 'smart' : 'basic',
-      suggestions: [],
-      showSuggestions: false,
-      error: null,
-    }));
-  };
 
   // Reset form function
   const resetForm = () => {
@@ -292,8 +235,7 @@ export function EnhancedTopbarSearch({ isDark, onClose, onPinCreated }: Enhanced
         longitude: state.searchResult.longitude,
         searchHistoryId: state.searchResult.searchHistoryId,
         images: [], // No images for search-created pins
-        notes: `Created from ${state.searchType} search`, // Add a note about the search type
-        smartData: state.searchResult.smartData // Include smart search data if available
+        notes: 'Created from search' // Add a note about the search
       };
 
       console.log('🔧 Creating pin with PinsService:', pinData);
@@ -632,32 +574,6 @@ export function EnhancedTopbarSearch({ isDark, onClose, onPinCreated }: Enhanced
                   )}
                 </div>
 
-                {/* Search Type Toggle */}
-                <button
-                  onClick={toggleSearchType}
-                  className={`
-                    flex items-center gap-2 px-4 py-3 rounded-xl font-medium transition-all duration-300
-                    hover:scale-105 active:scale-95
-                    ${state.searchType === 'smart' 
-                      ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg' 
-                      : isDark
-                        ? 'bg-white/10 text-white hover:bg-white/20'
-                        : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
-                    }
-                  `}
-                >
-                  {state.searchType === 'smart' ? (
-                    <>
-                      <SparklesIcon className="h-5 w-5" />
-                      Smart
-                    </>
-                  ) : (
-                    <>
-                      <BoltIcon className="h-5 w-5" />
-                      Basic
-                    </>
-                  )}
-                </button>
 
               </div>
 
@@ -677,22 +593,6 @@ export function EnhancedTopbarSearch({ isDark, onClose, onPinCreated }: Enhanced
                 </div>
               )}
 
-              {/* Credits Display - Only show when Smart search is enabled */}
-              {state.searchType === 'smart' && state.credits !== null && (
-                <div className="absolute right-0 top-full mt-2 z-10">
-                  <div className={`
-                    flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium
-                    backdrop-blur-sm border transition-all duration-300
-                    ${isDark
-                      ? 'bg-black/60 border-white/20 text-white'
-                      : 'bg-white/80 border-gray-200 text-gray-700'
-                    }
-                  `}>
-                    <SparklesIcon className="h-4 w-4 text-purple-500" />
-                    <span>{state.credits} credits</span>
-                  </div>
-                </div>
-              )}
 
               {/* Suggestions Dropdown */}
               {state.showSuggestions && state.suggestions.length > 0 && (
@@ -731,11 +631,6 @@ export function EnhancedTopbarSearch({ isDark, onClose, onPinCreated }: Enhanced
                               {suggestion.place_name}
                             </div>
                           </div>
-                          {state.searchType === 'smart' && (
-                            <div className="flex-shrink-0">
-                              <SparklesIcon className={`h-4 w-4 ${isDark ? 'text-purple-400' : 'text-purple-500'}`} />
-                            </div>
-                          )}
                         </div>
                       </button>
                     ))}

@@ -15,11 +15,11 @@ export async function GET(
       return NextResponse.json({ error: 'User not authenticated' }, { status: 401 });
     }
 
-    // Get the user's account ID from the accounts table
+    // Get the user's account ID from the accounts table (now using auth.users.id directly)
     const { data: accountData, error: accountError } = await supabase
       .from('accounts')
       .select('id')
-      .eq('auth_user_id', session.user.id)
+      .eq('id', session.user.id) // Changed from 'auth_user_id'
       .single();
 
     if (accountError || !accountData) {
@@ -33,7 +33,7 @@ export async function GET(
       .from('search_history')
       .select('*')
       .eq('id', searchHistoryId)
-      .eq('user_id', accountData.id)
+      .eq('account_id', accountData.id) // Changed from 'user_id'
       .single();
 
     if (searchError || !searchHistory) {

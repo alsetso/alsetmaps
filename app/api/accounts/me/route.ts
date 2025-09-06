@@ -22,11 +22,11 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Look up the user's account
+    // Look up the user's account (id now equals auth user id)
     const { data: account, error: accountError } = await supabase
       .from('accounts')
-      .select('id, auth_user_id, email, created_at')
-      .eq('auth_user_id', user.id)
+      .select('id, email, created_at')
+      .eq('id', user.id)
       .single();
 
     console.log('🚨 ACCOUNTS/ME API: Account lookup', { 

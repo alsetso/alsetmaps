@@ -80,9 +80,8 @@ export default function SettingsPage() {
           setCreditBalance(creditBalance);
         }
 
-        // Load payment methods
-        const paymentMethods = await AccountManagementService.getPaymentMethods();
-        setPaymentMethods(paymentMethods);
+        // Payment methods functionality has been removed
+        setPaymentMethods([]);
 
         // Load billing history
         const historyResponse = await fetch('/api/credit-transactions/history');
@@ -178,9 +177,8 @@ export default function SettingsPage() {
 
   const handlePaymentMethodSuccess = async () => {
     setShowPaymentForm(false);
-    // Reload payment methods
-    const paymentMethods = await AccountManagementService.getPaymentMethods();
-    setPaymentMethods(paymentMethods);
+    // Payment methods functionality has been removed
+    toast.info('Payment method functionality is currently disabled');
   };
 
   const handlePaymentMethodCancel = () => {
@@ -188,41 +186,13 @@ export default function SettingsPage() {
   };
 
   const handleDeletePaymentMethod = async (paymentMethodId: string) => {
-    try {
-      const result = await AccountManagementService.deletePaymentMethod(paymentMethodId);
-      
-      if (!result.success) {
-        throw new Error(result.error);
-      }
-
-      // Reload payment methods
-      const paymentMethods = await AccountManagementService.getPaymentMethods();
-      setPaymentMethods(paymentMethods);
-      
-      toast.success('Payment method deleted successfully');
-    } catch (error) {
-      console.error('Error deleting payment method:', error);
-      toast.error('Failed to delete payment method');
-    }
+    // Payment methods functionality has been removed
+    toast.info('Payment method functionality is currently disabled');
   };
 
   const handleSetDefaultPaymentMethod = async (paymentMethodId: string) => {
-    try {
-      const result = await AccountManagementService.setDefaultPaymentMethod(paymentMethodId);
-      
-      if (!result.success) {
-        throw new Error(result.error);
-      }
-
-      // Reload payment methods to update default status
-      const paymentMethods = await AccountManagementService.getPaymentMethods();
-      setPaymentMethods(paymentMethods);
-      
-      toast.success('Default payment method updated successfully');
-    } catch (error) {
-      console.error('Error setting default payment method:', error);
-      toast.error('Failed to set default payment method');
-    }
+    // Payment methods functionality has been removed
+    toast.info('Payment method functionality is currently disabled');
   };
 
   if (loading || isLoading) {

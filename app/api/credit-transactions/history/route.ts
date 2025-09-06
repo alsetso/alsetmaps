@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
     const { data: account, error: accountError } = await supabase
       .from('accounts')
       .select('id')
-      .eq('auth_user_id', user.id)
+      .eq('id', user.id)
       .single();
 
     if (accountError || !account) {

@@ -88,11 +88,13 @@ export default function HomePage() {
     }
   }, [isOnboardingComplete]);
 
+
   const handlePinClick = useCallback((pin: Pin) => {
     console.log('Pin clicked:', pin);
     setSelectedPin(pin);
     setShowPinPopup(true);
   }, []);
+
 
   const handleMapClick = useCallback(() => {
     // Map clicked - no action needed with enhanced topbar search
@@ -128,12 +130,14 @@ export default function HomePage() {
     setSelectedPin(null);
   }, []);
 
+
   // Fetch pins when onboarding is complete
   useEffect(() => {
     if (isOnboardingComplete) {
       fetchUserPins();
     }
   }, [isOnboardingComplete, fetchUserPins]);
+
 
   // Prevent body scroll for full height layout
   useEffect(() => {
@@ -153,25 +157,6 @@ export default function HomePage() {
     );
   }
 
-  if (!user) {
-    return (
-      <SharedLayout>
-        <div className="w-full h-screen flex items-center justify-center">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Welcome to Alset Maps</h1>
-            <p className="text-gray-600 mb-6">Please sign in to access the property search and mapping features.</p>
-            <a 
-              href="/login" 
-              className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              Sign In
-            </a>
-          </div>
-        </div>
-      </SharedLayout>
-    );
-  }
-
   return (
     <SharedLayout showTopbar={true} fullHeight={true}>
       {/* Full viewport height container with topbar overlay */}
@@ -181,22 +166,24 @@ export default function HomePage() {
           lng={mapCenter.lng}
           zoom={4}
           className="w-full h-screen"
-          pins={userPins}
+          pins={user ? userPins : []}
           onAddressSelect={(address, coordinates) => {
             console.log('Address selected:', address, coordinates);
           }}
           onPinCreate={(pinData) => {
             console.log('Pin created:', pinData);
-            fetchUserPins();
+            if (user) {
+              fetchUserPins();
+            }
           }}
           onPinClick={handlePinClick}
           onMapClick={handleMapClick}
           onViewProperty={handleViewProperty}
-          onTempPinCreate={handleTempPinCreate}
+          onTempPinCreate={user ? handleTempPinCreate : undefined}
         />
         
         {/* Pins Loading Indicator - positioned below topbar */}
-        {isLoadingPins && (
+        {user && isLoadingPins && (
           <div className="absolute top-20 right-4 z-10 bg-white/90 backdrop-blur-sm rounded-lg px-3 py-2 shadow-lg border border-gray-200">
             <div className="flex items-center gap-2 text-sm text-gray-600">
               <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
@@ -206,30 +193,36 @@ export default function HomePage() {
         )}
       </div>
 
-      <OnboardingModal 
-        isOpen={showOnboarding} 
-        onComplete={handleOnboardingComplete} 
-      />
+      {/* Only show modals and popups for authenticated users */}
+      {user && (
+        <>
+          <OnboardingModal 
+            isOpen={showOnboarding} 
+            onComplete={handleOnboardingComplete} 
+          />
 
-      {/* Create Pin Modal */}
-      {tempPinLocation && (
-        <CreatePinModal
-          isOpen={showCreatePinModal}
-          onClose={handleCloseCreatePinModal}
-          onPinCreated={handlePinCreated}
-          latitude={tempPinLocation.latitude}
-          longitude={tempPinLocation.longitude}
-          address={tempPinLocation.address}
-        />
+          {/* Create Pin Modal */}
+          {tempPinLocation && (
+            <CreatePinModal
+              isOpen={showCreatePinModal}
+              onClose={handleCloseCreatePinModal}
+              onPinCreated={handlePinCreated}
+              latitude={tempPinLocation.latitude}
+              longitude={tempPinLocation.longitude}
+              address={tempPinLocation.address}
+            />
+          )}
+
+          {/* Pin Popup */}
+          <PinPopup
+            pin={selectedPin}
+            isOpen={showPinPopup}
+            onClose={handleClosePinPopup}
+            onViewProperty={handleViewProperty}
+          />
+        </>
       )}
 
-      {/* Pin Popup */}
-      <PinPopup
-        pin={selectedPin}
-        isOpen={showPinPopup}
-        onClose={handleClosePinPopup}
-        onViewProperty={handleViewProperty}
-      />
 
     </SharedLayout>
   );

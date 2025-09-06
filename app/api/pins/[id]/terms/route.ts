@@ -24,11 +24,11 @@ export async function PUT(
       return NextResponse.json({ error: 'User not authenticated' }, { status: 401 });
     }
 
-    // Get the user's account ID
+    // Get the user's account ID (now using auth.users.id directly)
     const { data: accountData, error: accountError } = await supabase
       .from('accounts')
       .select('id')
-      .eq('auth_user_id', session.user.id)
+      .eq('id', session.user.id)
       .single();
 
     if (accountError || !accountData) {
@@ -40,7 +40,7 @@ export async function PUT(
       .from('pins')
       .select('id')
       .eq('id', pinId)
-      .eq('user_id', accountData.id)
+      .eq('account_id', accountData.id)
       .single();
 
     if (fetchError || !existingPin) {
@@ -65,7 +65,7 @@ export async function PUT(
       .from('pins')
       .update(updateData)
       .eq('id', pinId)
-      .eq('user_id', accountData.id)
+      .eq('account_id', accountData.id)
       .select()
       .single();
 
@@ -111,11 +111,11 @@ export async function GET(
       return NextResponse.json({ error: 'User not authenticated' }, { status: 401 });
     }
 
-    // Get the user's account ID
+    // Get the user's account ID (now using auth.users.id directly)
     const { data: accountData, error: accountError } = await supabase
       .from('accounts')
       .select('id')
-      .eq('auth_user_id', session.user.id)
+      .eq('id', session.user.id)
       .single();
 
     if (accountError || !accountData) {
@@ -135,7 +135,7 @@ export async function GET(
         updated_at
       `)
       .eq('id', pinId)
-      .eq('user_id', accountData.id)
+      .eq('account_id', accountData.id)
       .single();
 
     if (pinError || !pin) {

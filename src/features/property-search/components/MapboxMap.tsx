@@ -20,7 +20,7 @@ declare global {
 
 interface Pin {
   id: string;
-  user_id: string;
+  account_id: string;
   search_history_id?: string;
   latitude: number;
   longitude: number;
@@ -40,6 +40,40 @@ interface Pin {
   };
 }
 
+interface PublicPin {
+  id: string;
+  name: string;
+  latitude: number;
+  longitude: number;
+  images?: string[];
+  notes?: string;
+  is_public: boolean;
+  share_token?: string;
+  view_count?: number;
+  last_viewed_at?: string;
+  seo_title?: string;
+  seo_description?: string;
+  share_settings?: any;
+  created_at: string;
+  updated_at?: string;
+  // For sale listing fields
+  is_for_sale?: boolean;
+  listing_price?: number;
+  property_type?: string;
+  listing_description?: string;
+  listing_status?: string;
+  for_sale_by?: string;
+  agent_name?: string;
+  agent_company?: string;
+  agent_phone?: string;
+  agent_email?: string;
+  bedrooms?: number;
+  bathrooms?: number;
+  square_feet?: number;
+  lot_size?: number;
+  year_built?: number;
+}
+
 interface MapboxMapProps {
   lat?: number;
   lng?: number;
@@ -50,6 +84,7 @@ interface MapboxMapProps {
   onAddressSelect?: (address: string, lat: number, lng: number) => void;
   onPinCreate?: (lat: number, lng: number) => void;
   onPinClick?: (pin: Pin) => void;
+  onPublicPinClick?: (pin: PublicPin) => void;
   onMapClick?: () => void;
   onViewProperty?: (pin: Pin) => void;
   onSmartSearchUpgrade?: (searchHistoryId: string) => void;
@@ -57,6 +92,7 @@ interface MapboxMapProps {
   onMapReady?: (map: mapboxgl.Map) => void;
   onTempPinCreate?: (lat: number, lng: number, address?: string) => void;
   pins?: Pin[];
+  publicPins?: PublicPin[];
 }
 
 export function MapboxMap({ 
@@ -69,13 +105,15 @@ export function MapboxMap({
   onAddressSelect,
   onPinCreate,
   onPinClick,
+  onPublicPinClick,
   onMapClick,
   onViewProperty,
   onSmartSearchUpgrade,
   onShowSmartSearch,
   onMapReady,
   onTempPinCreate,
-  pins = []
+  pins = [],
+  publicPins = []
 }: MapboxMapProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
@@ -170,6 +208,140 @@ export function MapboxMap({
       console.error('Error clearing existing pins:', error);
     }
   }, []);
+
+  // Method to clear existing public pins
+  const clearExistingPublicPins = useCallback(() => {
+    if (!map.current) return;
+
+    try {
+      // Remove public pin layers
+      const publicPinLayers = ['public-pins-markers', 'public-pins-labels'];
+      publicPinLayers.forEach(layerId => {
+        if (map.current?.getLayer(layerId)) {
+          map.current.removeLayer(layerId);
+        }
+      });
+
+      // Remove public pins source
+      if (map.current.getSource('public-pins')) {
+        map.current.removeSource('public-pins');
+      }
+    } catch (error) {
+      console.error('Error clearing existing public pins:', error);
+    }
+  }, []);
+
+  // Method to render public pins with red markers
+  const renderPublicPins = useCallback((onPublicPinClick?: (pin: PublicPin) => void) => {
+    if (!map.current || !mapLoaded) return;
+
+    // Early return if style not loaded - will be handled by map load event
+    if (!map.current.isStyleLoaded()) return;
+
+    try {
+      // Clear existing public pins efficiently
+      clearExistingPublicPins();
+
+      // Create optimized GeoJSON features for public pins
+      const publicPinFeatures = publicPins.map(pin => ({
+        type: 'Feature' as const,
+        geometry: {
+          type: 'Point' as const,
+          coordinates: [pin.longitude, pin.latitude]
+        },
+        properties: {
+          id: pin.id,
+          name: pin.name,
+          hasNotes: !!pin.notes,
+          hasImages: !!(pin.images && pin.images.length > 0),
+          isForSale: !!pin.is_for_sale,
+          listingPrice: pin.listing_price,
+          propertyType: pin.property_type
+        }
+      }));
+
+      // Add source with optimized data
+      map.current.addSource('public-pins', {
+        type: 'geojson',
+        data: {
+          type: 'FeatureCollection',
+          features: publicPinFeatures
+        }
+      });
+
+      // Add red pin markers for public pins
+      map.current.addLayer({
+        id: 'public-pins-markers',
+        type: 'circle',
+        source: 'public-pins',
+        paint: {
+          'circle-radius': 8,
+          'circle-color': '#EF4444', // Red color for public pins
+          'circle-stroke-color': '#FFFFFF',
+          'circle-stroke-width': 2
+        }
+      });
+
+      // Add labels for public pins (only show on zoom > 12 for performance)
+      map.current.addLayer({
+        id: 'public-pins-labels',
+        type: 'symbol',
+        source: 'public-pins',
+        minzoom: 12,
+        layout: {
+          'text-field': ['get', 'name'],
+          'text-font': ['Open Sans Regular', 'Arial Unicode MS Regular'],
+          'text-size': 12,
+          'text-offset': [0, 1.5],
+          'text-anchor': 'top'
+        },
+        paint: {
+          'text-color': '#1F2937',
+          'text-halo-color': '#FFFFFF',
+          'text-halo-width': 1
+        }
+      });
+
+      // Handle clicks on public pins
+      const handlePublicPinClick = (e: any) => {
+        if (!e.features?.[0]) return;
+        
+        const pin = e.features[0];
+        const coordinates = pin.geometry.coordinates.slice();
+        const fullPin = publicPins.find(p => p.id === pin.properties?.id);
+        
+        if (fullPin && onPublicPinClick) {
+          onPublicPinClick(fullPin);
+        }
+      };
+
+      // Add click handler for public pins
+      map.current.off('click', 'public-pins-markers', handlePublicPinClick);
+      map.current.on('click', 'public-pins-markers', handlePublicPinClick);
+
+      // Add hover effects for public pins
+      const handleMouseEnter = () => {
+        if (map.current) {
+          map.current.getCanvas().style.cursor = 'pointer';
+        }
+      };
+
+      const handleMouseLeave = () => {
+        if (map.current) {
+          map.current.getCanvas().style.cursor = '';
+        }
+      };
+
+      // Add hover handlers
+      map.current.off('mouseenter', 'public-pins-markers', handleMouseEnter);
+      map.current.off('mouseleave', 'public-pins-markers', handleMouseLeave);
+      map.current.on('mouseenter', 'public-pins-markers', handleMouseEnter);
+      map.current.on('mouseleave', 'public-pins-markers', handleMouseLeave);
+
+    } catch (error) {
+      console.error('Error rendering public pins:', error);
+    }
+  }, [mapLoaded, publicPins, clearExistingPublicPins]);
 
   // Optimized method to render existing user pins
   const renderExistingPins = useCallback((onPinClick?: (pin: Pin) => void) => {
@@ -455,9 +627,9 @@ export function MapboxMap({
 
     // Enhanced map click handler with temporary pin functionality
     const handleMapClick = async (e: any) => {
-      // Quick check for pin clicks
+      // Quick check for pin clicks (both user and public pins)
       const features = map.current?.queryRenderedFeatures(e.point, {
-        layers: ['user-pins-markers']
+        layers: ['user-pins-markers', 'public-pins-markers']
       }) || [];
       
       if (features.length > 0) return; // Let pin handler deal with it
@@ -559,6 +731,22 @@ export function MapboxMap({
       renderExistingPins(onPinClick);
     }
   }, [pins, mapLoaded, onPinClick, renderExistingPins]);
+
+  // Handle public pins rendering
+  const prevPublicPinsRef = useRef<string>('');
+  
+  useEffect(() => {
+    if (!mapLoaded || !map.current) return;
+    
+    // Create lightweight hash for change detection
+    const currentPublicPinsHash = publicPins.map(p => `${p.id}-${p.latitude}-${p.longitude}`).join('|');
+    
+    // Only re-render if public pins actually changed
+    if (currentPublicPinsHash !== prevPublicPinsRef.current) {
+      prevPublicPinsRef.current = currentPublicPinsHash;
+      renderPublicPins(onPublicPinClick);
+    }
+  }, [publicPins, mapLoaded, onPublicPinClick, renderPublicPins]);
 
   // Cleanup map on unmount
   useEffect(() => {

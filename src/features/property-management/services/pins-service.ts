@@ -33,11 +33,11 @@ export class PinsService {
 
       console.log('✅ User authenticated:', session.user.id);
 
-      // Get the user's account ID from the accounts table
+      // Get the user's account ID from the accounts table (now using auth.users.id directly)
       const { data: accountData, error: accountError } = await supabase
         .from('accounts')
         .select('id')
-        .eq('auth_user_id', session.user.id)
+        .eq('id', session.user.id)
         .single();
 
       if (accountError || !accountData) {
@@ -76,8 +76,7 @@ export class PinsService {
       
       // Create the pin with properly formatted coordinates
       const pinInsertData = {
-        user_id: accountData.id, // Keep for business logic (credits, profile data)
-        auth_user_id: session.user.id, // Add direct auth relationship for RLS
+        account_id: accountData.id, // Use account_id to match RLS policy
         latitude: formattedLatitude,
         longitude: formattedLongitude,
         name: pinData.name,
@@ -138,11 +137,11 @@ export class PinsService {
         return { success: false, error: 'User not authenticated or account not found' };
       }
 
-      // Get user's pins
+      // Get user's pins using account_id column
       const { data: pins, error: pinsError } = await supabase
         .from('pins')
         .select('*')
-        .eq('user_id', accountId)
+        .eq('account_id', accountId)
         .order('created_at', { ascending: false });
 
       if (pinsError) {
@@ -193,11 +192,11 @@ export class PinsService {
         return { success: false, error: 'User not authenticated' };
       }
 
-      // Get the user's account ID
+      // Get the user's account ID (now using auth.users.id directly)
       const { data: accountData, error: accountError } = await supabase
         .from('accounts')
         .select('id')
-        .eq('auth_user_id', session.user.id)
+        .eq('id', session.user.id)
         .single();
 
       if (accountError || !accountData) {
@@ -212,7 +211,7 @@ export class PinsService {
           updated_at: new Date().toISOString()
         })
         .eq('id', pinId)
-        .eq('user_id', accountData.id) // Ensure user owns the pin
+        .eq('account_id', accountData.id) // Ensure user owns the pin
         .select()
         .single();
 
@@ -240,11 +239,11 @@ export class PinsService {
         return { success: false, error: 'User not authenticated' };
       }
 
-      // Get the user's account ID
+      // Get the user's account ID (now using auth.users.id directly)
       const { data: accountData, error: accountError } = await supabase
         .from('accounts')
         .select('id')
-        .eq('auth_user_id', session.user.id)
+        .eq('id', session.user.id)
         .single();
 
       if (accountError || !accountData) {
@@ -256,7 +255,7 @@ export class PinsService {
         .from('pins')
         .delete()
         .eq('id', pinId)
-        .eq('user_id', accountData.id); // Ensure user owns the pin
+        .eq('account_id', accountData.id); // Ensure user owns the pin
 
       if (deleteError) {
         console.error('Pin deletion error:', deleteError);
@@ -282,11 +281,11 @@ export class PinsService {
         return { success: false, error: 'User not authenticated' };
       }
 
-      // Get the user's account ID
+      // Get the user's account ID (now using auth.users.id directly)
       const { data: accountData, error: accountError } = await supabase
         .from('accounts')
         .select('id')
-        .eq('auth_user_id', session.user.id)
+        .eq('id', session.user.id)
         .single();
 
       if (accountError || !accountData) {
@@ -298,7 +297,7 @@ export class PinsService {
         .from('pins')
         .select('*')
         .eq('id', pinId)
-        .eq('user_id', accountData.id)
+        .eq('account_id', accountData.id)
         .single();
 
       if (pinError) {

@@ -2,18 +2,16 @@ import { supabase } from '@/integrations/supabase/client';
 
 export interface CreditBalance {
   id: string;
-  user_id: string;
-  free_credits: number;
-  paid_credits: number;
-  total_credits: number;
+  account_id: string;
+  available_credits: number;
   created_at: string;
   updated_at: string;
 }
 
 export interface SearchRecord {
   id: string;
-  user_id: string;
-  address: string;
+  account_id: string;
+  search_address: string;
   latitude: number;
   longitude: number;
   search_type: 'basic' | 'smart';
@@ -25,7 +23,8 @@ export interface SearchRecord {
 
 export interface CreditTransaction {
   id: string;
-  user_id: string;
+  account_id: string;
+  auth_user_id: string;
   search_id?: string;
   transaction_type: 'debit' | 'credit' | 'purchase' | 'refund';
   credit_type: 'free' | 'paid';
@@ -47,12 +46,12 @@ export class CreditService {
   /**
    * Get user's current credit balance
    */
-  static async getCreditBalance(userId: string): Promise<CreditBalance | null> {
+  static async getCreditBalance(accountId: string): Promise<CreditBalance | null> {
     try {
       const { data, error } = await supabase
-        .from('user_credits')
+        .from('credits')
         .select('*')
-        .eq('user_id', userId)
+        .eq('account_id', accountId)
         .single();
 
       if (error) {
@@ -70,17 +69,17 @@ export class CreditService {
   /**
    * Record a search and handle credit deduction if smart search
    */
-  static async recordSearch(userId: string, searchRequest: CreditSearchRequest): Promise<SearchRecord | null> {
+  static async recordSearch(accountId: string, searchRequest: CreditSearchRequest): Promise<SearchRecord | null> {
     try {
-      console.log('Recording search for user:', userId, 'Type:', searchRequest.search_type);
+      console.log('Recording search for account:', accountId, 'Type:', searchRequest.search_type);
 
       // Determine credits to use
       const creditsUsed = searchRequest.search_type === 'smart' ? 1 : 0;
 
       // Check if user has enough credits for smart search
       if (searchRequest.search_type === 'smart') {
-        const balance = await this.getCreditBalance(userId);
-        if (!balance || balance.total_credits < 1) {
+        const balance = await this.getCreditBalance(accountId);
+        if (!balance || balance.available_credits < 1) {
           throw new Error('Insufficient credits for smart search');
         }
       }
@@ -89,8 +88,8 @@ export class CreditService {
       const { data: searchRecord, error: searchError } = await supabase
         .from('search_history')
         .insert({
-          user_id: userId,
-          address: searchRequest.address,
+          account_id: accountId,
+          search_address: searchRequest.address,
           latitude: searchRequest.latitude,
           longitude: searchRequest.longitude,
           search_type: searchRequest.search_type,
@@ -107,7 +106,7 @@ export class CreditService {
 
       // If smart search, deduct credits and create transaction
       if (searchRequest.search_type === 'smart') {
-        await this.deductCredits(userId, searchRecord.id, 'Smart search performed');
+        await this.deductCredits(accountId, searchRecord.id, 'Smart search performed');
       }
 
       console.log('Search recorded successfully:', searchRecord.id);
@@ -122,50 +121,37 @@ export class CreditService {
   /**
    * Deduct credits from user (for smart searches)
    */
-  private static async deductCredits(userId: string, searchId: string, description: string): Promise<boolean> {
+  private static async deductCredits(accountId: string, searchId: string, description: string): Promise<boolean> {
     try {
       // Get current balance to determine which credits to use
-      const balance = await this.getCreditBalance(userId);
+      const balance = await this.getCreditBalance(accountId);
       if (!balance) {
         throw new Error('Credit balance not found');
       }
 
-      let creditType: 'free' | 'paid';
-      let amount: number;
-
-      // Use free credits first, then paid credits
-      if (balance.free_credits > 0) {
-        creditType = 'free';
-        amount = -1; // Negative for debit
-      } else if (balance.paid_credits > 0) {
-        creditType = 'paid';
-        amount = -1; // Negative for debit
-      } else {
+      if (balance.available_credits < 1) {
         throw new Error('No credits available');
       }
 
-      // Create transaction record
-      const { error: transactionError } = await supabase
-        .from('credit_transactions')
-        .insert({
-          user_id: userId,
-          search_id: searchId,
-          transaction_type: 'debit',
-          credit_type: creditType,
-          amount: amount,
-          description: description,
-          metadata: {
-            search_type: 'smart',
-            location: 'search_deduction'
-          }
-        });
+      // Use the record_credit_usage RPC function for proper credit management
+      const { error: rpcError } = await supabase.rpc('record_credit_usage', {
+        p_auth_user_id: accountId, // Since accounts.id is now auth.users.id
+        p_amount: 1,
+        p_description: description,
+        p_reference_id: searchId,
+        p_reference_table: 'search_history',
+        p_metadata: {
+          search_type: 'smart',
+          location: 'search_deduction'
+        }
+      });
 
-      if (transactionError) {
-        console.error('Error creating credit transaction:', transactionError);
+      if (rpcError) {
+        console.error('Error creating credit transaction:', rpcError);
         return false;
       }
 
-      console.log('Credits deducted successfully for user:', userId);
+      console.log('Credits deducted successfully for account:', accountId);
       return true;
 
     } catch (error) {
@@ -178,7 +164,7 @@ export class CreditService {
    * Add credits to user (for purchases, bonuses, etc.)
    */
   static async addCredits(
-    userId: string, 
+    accountId: string, 
     amount: number, 
     creditType: 'free' | 'paid', 
     description: string,
@@ -189,24 +175,26 @@ export class CreditService {
         throw new Error('Amount must be positive');
       }
 
-      // Create transaction record
-      const { error: transactionError } = await supabase
-        .from('credit_transactions')
-        .insert({
-          user_id: userId,
-          transaction_type: 'credit',
+      // Use the record_credit_usage RPC function for proper credit management
+      const { error: rpcError } = await supabase.rpc('record_credit_usage', {
+        p_auth_user_id: accountId, // Since accounts.id is now auth.users.id
+        p_amount: amount,
+        p_description: description,
+        p_reference_id: null,
+        p_reference_table: null,
+        p_metadata: {
+          ...metadata,
           credit_type: creditType,
-          amount: amount,
-          description: description,
-          metadata: metadata
-        });
+          transaction_type: 'credit'
+        }
+      });
 
-      if (transactionError) {
-        console.error('Error creating credit transaction:', transactionError);
+      if (rpcError) {
+        console.error('Error creating credit transaction:', rpcError);
         return false;
       }
 
-      console.log('Credits added successfully for user:', userId, 'Amount:', amount, 'Type:', creditType);
+      console.log('Credits added successfully for account:', accountId, 'Amount:', amount, 'Type:', creditType);
       return true;
 
     } catch (error) {
@@ -218,12 +206,12 @@ export class CreditService {
   /**
    * Get user's search history
    */
-  static async getSearchHistory(userId: string, limit: number = 50): Promise<SearchRecord[]> {
+  static async getSearchHistory(accountId: string, limit: number = 50): Promise<SearchRecord[]> {
     try {
       const { data, error } = await supabase
         .from('search_history')
         .select('*')
-        .eq('user_id', userId)
+        .eq('account_id', accountId)
         .order('created_at', { ascending: false })
         .limit(limit);
 
@@ -242,12 +230,12 @@ export class CreditService {
   /**
    * Get user's credit transaction history
    */
-  static async getTransactionHistory(userId: string, limit: number = 50): Promise<CreditTransaction[]> {
+  static async getTransactionHistory(accountId: string, limit: number = 50): Promise<CreditTransaction[]> {
     try {
       const { data, error } = await supabase
         .from('credit_transactions')
         .select('*')
-        .eq('user_id', userId)
+        .eq('account_id', accountId)
         .order('created_at', { ascending: false })
         .limit(limit);
 
@@ -266,16 +254,16 @@ export class CreditService {
   /**
    * Check if user can perform smart search
    */
-  static async canPerformSmartSearch(userId: string): Promise<{ canSearch: boolean; availableCredits: number }> {
+  static async canPerformSmartSearch(accountId: string): Promise<{ canSearch: boolean; availableCredits: number }> {
     try {
-      const balance = await this.getCreditBalance(userId);
+      const balance = await this.getCreditBalance(accountId);
       
       if (!balance) {
         return { canSearch: false, availableCredits: 0 };
       }
 
-      const canSearch = balance.total_credits >= 1;
-      return { canSearch, availableCredits: balance.total_credits };
+      const canSearch = balance.available_credits >= 1;
+      return { canSearch, availableCredits: balance.available_credits };
 
     } catch (error) {
       console.error('Error in canPerformSmartSearch:', error);
@@ -286,7 +274,7 @@ export class CreditService {
   /**
    * Get search statistics for user
    */
-  static async getSearchStats(userId: string): Promise<{
+  static async getSearchStats(accountId: string): Promise<{
     totalSearches: number;
     basicSearches: number;
     smartSearches: number;
@@ -296,7 +284,7 @@ export class CreditService {
       const { data, error } = await supabase
         .from('search_history')
         .select('search_type, credits_used')
-        .eq('user_id', userId);
+        .eq('account_id', accountId);
 
       if (error) {
         console.error('Error fetching search stats:', error);
@@ -332,20 +320,20 @@ export class CreditService {
    * Purchase credits (for future Stripe integration)
    */
   static async purchaseCredits(
-    userId: string, 
+    accountId: string, 
     amount: number, 
     stripePaymentIntentId: string,
     description: string
   ): Promise<boolean> {
     try {
       // Add paid credits
-      const success = await this.addCredits(userId, amount, 'paid', description, {
+      const success = await this.addCredits(accountId, amount, 'paid', description, {
         stripe_payment_intent_id: stripePaymentIntentId,
         purchase_type: 'credit_purchase'
       });
 
       if (success) {
-        console.log('Credits purchased successfully for user:', userId, 'Amount:', amount);
+        console.log('Credits purchased successfully for account:', accountId, 'Amount:', amount);
       }
 
       return success;

@@ -167,6 +167,7 @@ export function PinSharingModal({ pin, onPinUpdated, trigger }: PinSharingModalP
         // Update for sale listing if needed
         if (hasForSaleListing && forSaleData.title && forSaleData.listing_price) {
           await fetch('/api/for-sale', {
+            credentials: 'include',
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({

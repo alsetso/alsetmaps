@@ -173,24 +173,6 @@ export const PAGE_METADATA = {
     keywords: ['dashboard', 'property portfolio', 'market insights', 'real estate management'],
     url: '/dashboard',
   },
-  buy: {
-    title: 'Find Properties to Buy',
-    description: 'Discover properties for sale with AI-powered market analysis, investment potential scoring, and comprehensive property insights.',
-    keywords: ['buy property', 'property search', 'real estate investment', 'market analysis', 'property listings'],
-    url: '/buy',
-  },
-  sell: {
-    title: 'Sell Your Property',
-    description: 'List your property for sale with professional market analysis, pricing insights, and AI-powered marketing tools.',
-    keywords: ['sell property', 'property listing', 'real estate marketing', 'property valuation', 'home selling'],
-    url: '/sell',
-  },
-  loans: {
-    title: 'Property Loans & Financing',
-    description: 'Explore financing options for your property investments with AI-powered loan matching and rate analysis.',
-    keywords: ['property loans', 'real estate financing', 'mortgage', 'investment loans', 'property financing'],
-    url: '/loans',
-  },
   settings: {
     title: 'Account Settings',
     description: 'Manage your account preferences, notification settings, and profile information.',

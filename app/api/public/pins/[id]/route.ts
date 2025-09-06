@@ -63,37 +63,7 @@ export async function GET(
     // Note: View count tracking is handled by /api/shared/property/[id] endpoint
     // This endpoint is for general public access without view tracking
 
-    // Check if this pin has a for_sale listing
-    const { data: forSaleListing, error: listingError } = await supabase
-      .from('for_sale')
-      .select(`
-        id,
-        title,
-        description,
-        property_type,
-        listing_price,
-        timeline,
-        for_sale_by,
-        images,
-        contact_info,
-        agent_name,
-        agent_company,
-        agent_phone,
-        agent_email,
-        status,
-        views_count,
-        inquiries_count,
-        created_at,
-        updated_at
-      `)
-      .eq('pin_id', pinId)
-      .eq('status', 'active') // Only show active listings
-      .single();
-
-    if (listingError && listingError.code !== 'PGRST116') {
-      // PGRST116 is "not found" which is fine - not all pins have listings
-      console.warn('⚠️ Public Pin API: Error fetching for_sale listing:', listingError);
-    }
+    // Note: for_sale table no longer exists, removed for_sale listing query
 
     // Prepare response data
     const responseData = {
@@ -103,7 +73,6 @@ export async function GET(
         user_id: undefined,
         search_history_id: undefined
       },
-      forSaleListing: forSaleListing || null,
       isPublic: true,
       viewCount: pin.view_count,
       lastViewed: pin.last_viewed_at
@@ -158,26 +127,12 @@ export async function POST(
       }, { status: 404 });
     }
 
-    // Check if there's an active for_sale listing
-    const { data: listing, error: listingError } = await supabase
-      .from('for_sale')
-      .select('id, user_id, title')
-      .eq('pin_id', pinId)
-      .eq('status', 'active')
-      .single();
-
-    if (listingError || !listing) {
-      return NextResponse.json({ 
-        error: 'No active listing found for this property' 
-      }, { status: 404 });
-    }
+    // Note: for_sale table no longer exists, removed listing check
 
     // Create inquiry record (you'll need to create an inquiries table)
     // For now, we'll just log the inquiry
     console.log('📧 Public inquiry received:', {
       pinId,
-      listingId: listing.id,
-      listingTitle: listing.title,
       inquiry: {
         name,
         email,

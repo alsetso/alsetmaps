@@ -7,7 +7,7 @@ import { Card, CardContent } from './ui/card';
 
 interface Pin {
   id: string;
-  user_id: string;
+  account_id: string;
   search_history_id?: string;
   latitude: number;
   longitude: number;
