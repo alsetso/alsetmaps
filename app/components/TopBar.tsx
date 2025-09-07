@@ -206,27 +206,29 @@ export function TopBar({ showSearchByDefault = false, showSearchIcon = true }: T
     <>
       <header className="bg-white border-b border-gray-200 fixed top-0 left-0 right-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-[60px]">
+          <div className="flex items-center h-[60px]">
           
           {/* Left - Navigation Buttons */}
-          <div className="flex items-center space-x-4">
-            <Link 
-              href="/buy" 
-              className="text-gray-700 hover:text-gray-900 transition-colors font-medium"
-            >
-              Buy
-            </Link>
-            
-            <Link 
-              href="/sell" 
-              className="text-gray-700 hover:text-gray-900 transition-colors font-medium"
-            >
-              Sell
-            </Link>
+          <div className="flex-1 flex items-center justify-start">
+            <div className="flex items-center space-x-4">
+              <Link 
+                href="/buy" 
+                className="text-gray-700 hover:text-gray-900 transition-colors font-medium"
+              >
+                Buy
+              </Link>
+              
+              <Link 
+                href="/sell" 
+                className="text-gray-700 hover:text-gray-900 transition-colors font-medium"
+              >
+                Sell
+              </Link>
+            </div>
           </div>
 
           {/* Center - Logo */}
-          <div className="flex-1 flex justify-center">
+          <div className="flex-1 flex items-center justify-center">
             <Link href="/" className="flex items-center">
               <img 
                 src="/logo.svg" 
@@ -237,7 +239,8 @@ export function TopBar({ showSearchByDefault = false, showSearchIcon = true }: T
           </div>
 
           {/* Right - Search and User Menu */}
-          <div className="flex items-center space-x-3">
+          <div className="flex-1 flex items-center justify-end">
+            <div className="flex items-center space-x-3">
             {/* Search Icon */}
             {showSearchIcon && (
               <button
@@ -277,21 +280,14 @@ export function TopBar({ showSearchByDefault = false, showSearchIcon = true }: T
                 )}
               </div>
             ) : (
-              <div className="flex items-center space-x-3">
-                <Link 
-                  href="/login"
-                  className="text-gray-700 hover:text-gray-900 font-medium transition-colors"
-                >
-                  Sign In
-                </Link>
-                <Link 
-                  href="/register"
-                  className="bg-gray-900 text-white px-4 py-2 rounded-md font-medium hover:bg-gray-800 transition-colors"
-                >
-                  Get Started
-                </Link>
-              </div>
+              <Link 
+                href="/login"
+                className="text-gray-700 hover:text-gray-900 font-medium transition-colors"
+              >
+                Sign In
+              </Link>
             )}
+            </div>
           </div>
         </div>
       </div>

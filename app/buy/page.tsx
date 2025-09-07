@@ -1,14 +1,17 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useAuth } from '../components/AuthProvider';
 import { TopBar } from '../components/TopBar';
+import { CitySelector } from '../components/CitySelector';
 import { supabase } from '@/integrations/supabase/client';
 
 interface Box {
   id: string;
   description: string | null;
   price: number | null;
+  budget_max?: number | null;
   state: string | null;
   city: string | null;
   status: 'active' | 'paused' | 'completed' | 'cancelled';
@@ -19,16 +22,18 @@ interface Box {
 
 export default function BuyPage() {
   const { user } = useAuth();
+  const searchParams = useSearchParams();
   const [boxes, setBoxes] = useState<Box[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingBox, setEditingBox] = useState<Box | null>(null);
+  const [autoOpenModal, setAutoOpenModal] = useState(false);
   const [formData, setFormData] = useState({
     // Step 1 - Basic Info (Required)
     description: '',
     budget_max: '',
-    state: '',
-    city: '',
+    state: searchParams?.get('state') || 'MN', // Pre-populate from URL parameter or default to Minnesota
+    city: searchParams?.get('city') || '', // Pre-populate from URL parameter
     
     // Step 2 - Property Details
     property_type: '',
@@ -46,10 +51,21 @@ export default function BuyPage() {
     seller_flexibility: '',
     notes: '',
     
-    status: 'active' as const
+    status: 'active' as 'active' | 'paused' | 'completed' | 'cancelled'
   });
   
   const [currentStep, setCurrentStep] = useState(1);
+
+  // Auto-open modal if URL parameters contain state or city
+  useEffect(() => {
+    const stateParam = searchParams?.get('state');
+    const cityParam = searchParams?.get('city');
+    
+    if (stateParam || cityParam) {
+      setAutoOpenModal(true);
+      setShowModal(true);
+    }
+  }, [searchParams]);
 
   // Fetch boxes - SIMPLIFIED TEST
   const fetchBoxes = async () => {
@@ -254,7 +270,7 @@ export default function BuyPage() {
             firstName: user.user_metadata?.name || user.user_metadata?.first_name || 'there',
             email: user.email || '',
             boxDescription: boxToDelete.description,
-            boxPrice: boxToDelete.budget_max,
+            boxPrice: (boxToDelete as any).budget_max || boxToDelete.price,
             boxLocation: boxToDelete.city && boxToDelete.state ? `${boxToDelete.city}, ${boxToDelete.state}` : boxToDelete.city || boxToDelete.state,
           };
 
@@ -291,9 +307,21 @@ export default function BuyPage() {
     setEditingBox(box);
     setFormData({
       description: box.description || '',
-      price: box.price?.toString() || '',
+      budget_max: box.price?.toString() || '',
       state: box.state || '',
       city: box.city || '',
+      property_type: '',
+      buyer_type: '',
+      occupant_intent: '',
+      timeline_to_close: '',
+      preferred_condition: '',
+      financing_details: '',
+      hoa_ok: false,
+      lot_size: '',
+      year_built: '',
+      deal_breakers: '',
+      seller_flexibility: '',
+      notes: '',
       status: box.status
     });
     setShowModal(true);
@@ -302,7 +330,14 @@ export default function BuyPage() {
   // Open modal for new box
   const openNewBoxModal = () => {
     setEditingBox(null);
-    setFormData({ description: '', price: '', state: '', city: '', status: 'active' });
+    setFormData({
+      description: '', budget_max: '', state: '', city: '',
+      property_type: '', buyer_type: '', occupant_intent: '', timeline_to_close: '',
+      preferred_condition: '', financing_details: '', hoa_ok: false, lot_size: '', year_built: '',
+      deal_breakers: '', seller_flexibility: '', notes: '',
+      status: 'active'
+    });
+    setCurrentStep(1);
     setShowModal(true);
   };
 
@@ -481,28 +516,32 @@ export default function BuyPage() {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        City *
+                        State *
                       </label>
-                      <input
-                        type="text"
-                        value={formData.city}
-                        onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                        placeholder="City"
+                      <select
+                        value={formData.state}
+                        onChange={(e) => setFormData({ ...formData, state: e.target.value, city: '' })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
                         required
-                      />
+                      >
+                        <option value="">Select state</option>
+                        <option value="MN">Minnesota</option>
+                        <option value="WI">Wisconsin</option>
+                        <option value="IA">Iowa</option>
+                        <option value="ND">North Dakota</option>
+                        <option value="SD">South Dakota</option>
+                      </select>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        State *
+                        City *
                       </label>
-                      <input
-                        type="text"
-                        value={formData.state}
-                        onChange={(e) => setFormData({ ...formData, state: e.target.value })}
-                        placeholder="State"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+                      <CitySelector
+                        value={formData.city}
+                        onChange={(city) => setFormData({ ...formData, city })}
+                        state={formData.state}
                         required
+                        placeholder="Select a city"
                       />
                     </div>
                   </div>

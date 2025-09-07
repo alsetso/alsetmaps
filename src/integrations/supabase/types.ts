@@ -7,48 +7,139 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-  __InternalSupabase: {
-    PostgrestVersion: "13.0.4"
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
   }
   public: {
     Tables: {
       boxes: {
         Row: {
+          budget_max: number | null
+          buyer_type: Database["public"]["Enums"]["buyer_type_enum"] | null
           city: string | null
           created_at: string
+          deal_breakers: string | null
           description: string | null
+          financing_details:
+            | Database["public"]["Enums"]["financing_enum"]
+            | null
+          hoa_ok: boolean | null
           id: string
-          price: number | null
+          lot_size: number | null
+          notes: string | null
+          occupant_intent:
+            | Database["public"]["Enums"]["occupant_intent_enum"]
+            | null
+          preferred_condition:
+            | Database["public"]["Enums"]["condition_enum"]
+            | null
+          property_type:
+            | Database["public"]["Enums"]["property_type_enum"]
+            | null
+          seller_flexibility: string | null
           state: string | null
-          status: Database["public"]["Enums"]["buy_box_status_enum"]
+          status: string
+          timeline_to_close: Database["public"]["Enums"]["timeline_enum"] | null
           updated_at: string
           user_id: string | null
+          year_built: number | null
         }
         Insert: {
+          budget_max?: number | null
+          buyer_type?: Database["public"]["Enums"]["buyer_type_enum"] | null
           city?: string | null
           created_at?: string
+          deal_breakers?: string | null
           description?: string | null
+          financing_details?:
+            | Database["public"]["Enums"]["financing_enum"]
+            | null
+          hoa_ok?: boolean | null
           id?: string
-          price?: number | null
+          lot_size?: number | null
+          notes?: string | null
+          occupant_intent?:
+            | Database["public"]["Enums"]["occupant_intent_enum"]
+            | null
+          preferred_condition?:
+            | Database["public"]["Enums"]["condition_enum"]
+            | null
+          property_type?:
+            | Database["public"]["Enums"]["property_type_enum"]
+            | null
+          seller_flexibility?: string | null
           state?: string | null
-          status?: Database["public"]["Enums"]["buy_box_status_enum"]
+          status?: string
+          timeline_to_close?:
+            | Database["public"]["Enums"]["timeline_enum"]
+            | null
           updated_at?: string
           user_id?: string | null
+          year_built?: number | null
         }
         Update: {
+          budget_max?: number | null
+          buyer_type?: Database["public"]["Enums"]["buyer_type_enum"] | null
           city?: string | null
           created_at?: string
+          deal_breakers?: string | null
           description?: string | null
+          financing_details?:
+            | Database["public"]["Enums"]["financing_enum"]
+            | null
+          hoa_ok?: boolean | null
           id?: string
-          price?: number | null
+          lot_size?: number | null
+          notes?: string | null
+          occupant_intent?:
+            | Database["public"]["Enums"]["occupant_intent_enum"]
+            | null
+          preferred_condition?:
+            | Database["public"]["Enums"]["condition_enum"]
+            | null
+          property_type?:
+            | Database["public"]["Enums"]["property_type_enum"]
+            | null
+          seller_flexibility?: string | null
           state?: string | null
-          status?: Database["public"]["Enums"]["buy_box_status_enum"]
+          status?: string
+          timeline_to_close?:
+            | Database["public"]["Enums"]["timeline_enum"]
+            | null
           updated_at?: string
           user_id?: string | null
+          year_built?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "boxes_city_fkey"
+            columns: ["city"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["name"]
+          },
           {
             foreignKeyName: "boxes_user_id_fkey1"
             columns: ["user_id"]
@@ -57,6 +148,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      cities: {
+        Row: {
+          created_at: string | null
+          id: number
+          latitude: number
+          longitude: number
+          name: string
+          population: number | null
+          state: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          latitude: number
+          longitude: number
+          name: string
+          population?: number | null
+          state: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
+          latitude?: number
+          longitude?: number
+          name?: string
+          population?: number | null
+          state?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       users: {
         Row: {
@@ -90,32 +214,41 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      buy_box_status_enum: "active" | "paused" | "completed" | "cancelled"
       buyer_type_enum:
-        | "individual"
+        | "first_time_buyer"
         | "investor"
-        | "developer"
-        | "corporation"
-        | "any"
-      intent_enum:
+        | "move_up_buyer"
+        | "downsizing"
+        | "relocating"
+      condition_enum: "turnkey" | "good" | "fair" | "needs_work" | "any"
+      financing_enum:
+        | "cash"
+        | "conventional"
+        | "fha"
+        | "va"
+        | "seller_finance"
+        | "hard_money"
+        | "flexible"
+      occupant_intent_enum:
         | "primary_residence"
         | "investment"
+        | "vacation_home"
+        | "rental"
         | "flip"
-        | "development"
-        | "any"
       property_type_enum:
         | "single_family"
         | "condo"
         | "townhouse"
+        | "duplex"
         | "multi_family"
         | "land"
         | "commercial"
-        | "any"
       timeline_enum:
-        | "immediate"
-        | "1-3_months"
-        | "3-6_months"
-        | "6-12_months"
+        | "asap"
+        | "1_month"
+        | "3_months"
+        | "6_months"
+        | "1_year"
         | "flexible"
     }
     CompositeTypes: {
@@ -242,39 +375,53 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
-      buy_box_status_enum: ["active", "paused", "completed", "cancelled"],
       buyer_type_enum: [
-        "individual",
+        "first_time_buyer",
         "investor",
-        "developer",
-        "corporation",
-        "any",
+        "move_up_buyer",
+        "downsizing",
+        "relocating",
       ],
-      intent_enum: [
+      condition_enum: ["turnkey", "good", "fair", "needs_work", "any"],
+      financing_enum: [
+        "cash",
+        "conventional",
+        "fha",
+        "va",
+        "seller_finance",
+        "hard_money",
+        "flexible",
+      ],
+      occupant_intent_enum: [
         "primary_residence",
         "investment",
+        "vacation_home",
+        "rental",
         "flip",
-        "development",
-        "any",
       ],
       property_type_enum: [
         "single_family",
         "condo",
         "townhouse",
+        "duplex",
         "multi_family",
         "land",
         "commercial",
-        "any",
       ],
       timeline_enum: [
-        "immediate",
-        "1-3_months",
-        "3-6_months",
-        "6-12_months",
+        "asap",
+        "1_month",
+        "3_months",
+        "6_months",
+        "1_year",
         "flexible",
       ],
     },
   },
 } as const
+
