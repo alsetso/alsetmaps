@@ -3,13 +3,12 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { getAuthCallbackUrl } from '@/lib/env-utils';
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, firstName: string, lastName: string, phone: string) => Promise<void>;
+  signUp: (email: string, password: string, name: string, lastName: string, phone: string) => Promise<void>;
   signOut: () => Promise<void>;
   signInWithGoogle: () => Promise<void>;
 }
@@ -55,13 +54,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (error) throw error;
   };
 
-  const signUp = async (email: string, password: string, firstName: string, lastName: string, phone: string) => {
+  const signUp = async (email: string, password: string, name: string, lastName: string, phone: string) => {
     const { error } = await supabase.auth.signUp({ 
       email, 
       password,
       options: {
         data: {
-          first_name: firstName,
+          name: name,
+          first_name: name,
           last_name: lastName,
           phone: phone
         }
@@ -80,7 +80,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: getAuthCallbackUrl(),
+        redirectTo: `${window.location.origin}/auth/callback`,
         scopes: 'email profile',
       },
     });
@@ -93,4 +93,3 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     </AuthContext.Provider>
   );
 };
-

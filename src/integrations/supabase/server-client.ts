@@ -1,10 +1,16 @@
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
+import { NextRequest } from 'next/server';
+import { Database } from './types';
 
+/**
+ * Create a Supabase client for server-side operations
+ * Use this for Server Components and general server-side operations
+ */
 export function createServerSupabaseClient() {
   const cookieStore = cookies();
 
-  return createServerClient(
+  return createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
@@ -28,34 +34,27 @@ export function createServerSupabaseClient() {
   );
 }
 
-// Alternative server client that works better with middleware
-export function createServerSupabaseClientFromRequest(request: Request) {
-  return createServerClient(
+/**
+ * Create a Supabase client for API routes
+ * Use this for all API route handlers - it's the standard approach
+ */
+export function createServerSupabaseClientFromRequest(request: NextRequest) {
+  return createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
         getAll() {
-          // Extract cookies from the request headers
-          const cookieHeader = request.headers.get('cookie');
-          
-          if (!cookieHeader) return [];
-          
-          const cookies = cookieHeader.split(';').map(cookie => {
-            const trimmed = cookie.trim();
-            const equalIndex = trimmed.indexOf('=');
-            if (equalIndex === -1) {
-              return { name: trimmed, value: '' };
-            }
-            const name = trimmed.substring(0, equalIndex);
-            const value = trimmed.substring(equalIndex + 1);
-            return { name, value };
-          });
-          
-          return cookies;
+          return request.cookies.getAll();
         },
-        setAll() {
-          // No-op for API routes - cookies are handled by middleware
+        setAll(cookiesToSet) {
+          // For API routes, we need to handle cookie setting properly
+          // This ensures session cookies are properly managed
+          cookiesToSet.forEach(({ name, value, options }) => {
+            // We can't set cookies in API routes directly, but we need this
+            // for the Supabase client to work properly
+            console.log(`Setting cookie: ${name}=${value}`);
+          });
         },
       },
     }

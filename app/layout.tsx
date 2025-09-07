@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
-import { AuthProvider } from '@/features/authentication/components/AuthProvider'
+import { AuthProvider } from './components/AuthProvider'
 import { Toaster } from 'sonner'
 import { generateMetadata } from '@/lib/metadata'
 import './globals.css'
@@ -8,9 +8,9 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = generateMetadata({
-  title: 'Alset Maps - AI-Powered Property Intelligence',
-  description: 'Discover properties with AI-powered insights, market analysis, and investment opportunities. Transform your real estate experience with intelligent property data.',
-  keywords: ['real estate', 'property search', 'AI', 'market analysis', 'investment', 'property intelligence', 'Alset Maps'],
+  title: 'Alset - Off-Market Deals, On-Demand',
+  description: 'A clean, professional marketplace built for wholesalers, sellers, and buyers to list, find, and close off-market properties without getting buried in Facebook threads or endless email chains.',
+  keywords: ['off-market properties', 'wholesaling', 'real estate marketplace', 'property investment', 'creative financing', 'assignment contracts', 'Alset'],
   url: '/',
 })
 

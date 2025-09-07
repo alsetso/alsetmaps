@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Mapbox GL CSS */
+@import 'mapbox-gl/dist/mapbox-gl.css';
+
 @layer base {
   :root {
     /* Compact, Modern Design System */
@@ -82,7 +85,6 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
-    padding-top: 64px; /* Account for fixed topbar (h-16) */
   }
 }
 
@@ -176,6 +178,50 @@
       transform: translateY(0);
     }
   }
+
+  /* Blob animation for hero background */
+  @keyframes blob {
+    0% {
+      transform: translate(0px, 0px) scale(1);
+    }
+    33% {
+      transform: translate(30px, -50px) scale(1.1);
+    }
+    66% {
+      transform: translate(-20px, 20px) scale(0.9);
+    }
+    100% {
+      transform: translate(0px, 0px) scale(1);
+    }
+  }
+
+  .animate-blob {
+    animation: blob 7s infinite;
+  }
+
+  .animation-delay-2000 {
+    animation-delay: 2s;
+  }
+
+  .animation-delay-4000 {
+    animation-delay: 4s;
+  }
+
+  /* Fade in animation for headline */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 1s ease-out;
+  }
 }
 
 /* Custom scrollbar - Compact and modern */
@@ -205,4 +251,231 @@ html {
 /* Ensure topbar is above all other elements */
 .topbar-z {
   z-index: 9999;
+}
+
+/* iOS-style popup styles */
+.ios-popup .mapboxgl-popup-content {
+  padding: 0;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: none;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  max-width: 240px;
+}
+
+.ios-popup-content {
+  background: white;
+  width: 100%;
+}
+
+.ios-popup-header {
+  padding: 12px 16px 8px 16px;
+  border-bottom: 1px solid #e5e5e7;
+  text-align: center;
+}
+
+.ios-popup-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.ios-nav-button {
+  background: none;
+  border: none;
+  padding: 4px 8px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.1s ease;
+}
+
+.ios-nav-button:hover {
+  background-color: #f5f5f7;
+}
+
+.ios-nav-arrow {
+  font-size: 18px;
+  font-weight: 300;
+  color: #007aff;
+}
+
+.ios-nav-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1d1d1f;
+  flex: 1;
+  text-align: center;
+}
+
+.ios-nav-spacer {
+  width: 32px;
+}
+
+.ios-popup-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1d1d1f;
+  margin-bottom: 2px;
+}
+
+.ios-popup-subtitle {
+  font-size: 11px;
+  color: #86868b;
+  line-height: 1.3;
+  max-width: 200px;
+  margin: 0 auto 8px auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ios-response-summary {
+  background: #f5f5f7;
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin-top: 8px;
+}
+
+.ios-response-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.ios-response-item:last-child {
+  margin-bottom: 0;
+}
+
+.ios-response-label {
+  font-size: 11px;
+  color: #86868b;
+  font-weight: 500;
+}
+
+.ios-response-value {
+  font-size: 11px;
+  color: #1d1d1f;
+  font-weight: 600;
+}
+
+.ios-popup-actions {
+  padding: 4px 0;
+}
+
+.ios-action-button {
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.1s ease;
+  text-align: left;
+}
+
+.ios-action-button:hover {
+  background-color: #f5f5f7;
+}
+
+.ios-action-button:active {
+  background-color: #e8e8ed;
+}
+
+.ios-action-icon {
+  font-size: 18px;
+  margin-right: 12px;
+  width: 24px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.ios-action-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.ios-action-title {
+  font-size: 14px;
+  font-weight: 400;
+  color: #007aff;
+  margin-bottom: 1px;
+}
+
+.ios-action-subtitle {
+  font-size: 11px;
+  color: #86868b;
+  line-height: 1.2;
+}
+
+/* Mapbox popup arrow styling */
+.ios-popup .mapboxgl-popup-tip {
+  border-top-color: white;
+}
+
+/* Form styles for property listing */
+.ios-popup-form {
+  padding: 12px 16px 16px 16px;
+}
+
+.ios-form-group {
+  margin-bottom: 12px;
+}
+
+.ios-form-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  color: #1d1d1f;
+  margin-bottom: 4px;
+}
+
+.ios-form-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #d1d1d6;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: white;
+  transition: border-color 0.1s ease;
+}
+
+.ios-form-input:focus {
+  outline: none;
+  border-color: #007aff;
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+}
+
+.ios-form-input::placeholder {
+  color: #86868b;
+}
+
+.ios-form-actions {
+  margin-top: 16px;
+}
+
+.ios-form-button {
+  width: 100%;
+  background: #007aff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  cursor: pointer;
+  transition: background-color 0.1s ease;
+}
+
+.ios-form-button:hover {
+  background: #0056b3;
+}
+
+.ios-form-button:active {
+  background: #004085;
 }

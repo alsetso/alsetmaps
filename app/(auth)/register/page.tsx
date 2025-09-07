@@ -1,277 +1,214 @@
 "use client";
 
-import { useState } from 'react';
-import { useAuth } from '@/features/authentication/components/AuthProvider';
-import { Button } from '@/features/shared/components/ui/button';
-import { Input } from '@/features/shared/components/ui/input';
-import { Label } from '@/features/shared/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/features/shared/components/ui/card';
+import { useState, useEffect } from 'react';
+import { useAuth } from '../../components/AuthProvider';
+import { TopBar } from '../../components/TopBar';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { SharedLayout } from '@/features/shared/components/layout/SharedLayout';
-import { SignupService, SignupData } from '@/features/authentication/services/signup-service';
 
 export default function RegisterPage() {
-  const [loading, setLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState('');
-  const [messageType, setMessageType] = useState<'success' | 'error' | 'info'>('info');
-  const { user } = useAuth();
-  const router = useRouter();
-
-  // Form state for signup
-  const [signupForm, setSignupForm] = useState({
-    first_name: '',
-    last_name: '',
+  const [formData, setFormData] = useState({
+    name: '',
     email: '',
     password: ''
   });
+  const { signUp, signInWithGoogle, user, loading } = useAuth();
+  const router = useRouter();
 
-  // Form validation errors
-  const [errors, setErrors] = useState<Record<string, string>>({});
-
-  // Redirect to home page if already logged in
-  if (user) {
-    router.push('/');
-    return null;
-  }
-
-  const validateForm = (): boolean => {
-    const newErrors: Record<string, string> = {};
-
-    // Required field validation
-    if (!signupForm.first_name.trim()) {
-      newErrors.first_name = 'First name is required';
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      router.push('/');
     }
-    if (!signupForm.last_name.trim()) {
-      newErrors.last_name = 'Last name is required';
-    }
-    if (!signupForm.email.trim()) {
-      newErrors.email = 'Email is required';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(signupForm.email)) {
-      newErrors.email = 'Please enter a valid email address';
-    }
-    if (!signupForm.password) {
-      newErrors.password = 'Password is required';
-    } else if (signupForm.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters long';
-    }
+  }, [user, router]);
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSignupFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setSignupForm({
-      ...signupForm,
-      [name]: value
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
     });
-
-    // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors({
-        ...errors,
-        [name]: ''
-      });
-    }
   };
 
-  const handleSignup = async (e: React.FormEvent) => {
+  const handleEmailSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
-
-    setLoading(true);
+    setIsSubmitting(true);
     setMessage('');
-    setMessageType('info');
     
     try {
-      // Check email availability
-      const isEmailAvailable = await SignupService.checkEmailAvailability(signupForm.email);
-      if (!isEmailAvailable) {
-        setMessage('An account with this email already exists. Please sign in instead.');
-        setMessageType('error');
-        return;
-      }
-
-      // Prepare signup data
-      const signupData: SignupData = {
-        first_name: signupForm.first_name.trim(),
-        last_name: signupForm.last_name.trim(),
-        email: signupForm.email.trim().toLowerCase(),
-        password: signupForm.password
-      };
-
-      // Create account using the new working service
-      const result = await SignupService.createAccount(signupData);
-
-      if (result.success) {
-        setMessage(result.message || 'Account created successfully! Please check your email to verify your account.');
-        setMessageType('success');
-        
-        // Clear form
-        setSignupForm({
-          first_name: '',
-          last_name: '',
-          email: '',
-          password: ''
-        });
-
-        // Redirect to login after a delay
-        setTimeout(() => {
-          router.push('/login');
-        }, 3000);
-      } else {
-        setMessage(result.error || 'Signup failed. Please try again.');
-        setMessageType('error');
-      }
+      await signUp(formData.email, formData.password, formData.name, '', '');
+      setMessage('Account created! Please check your email to verify your account.');
     } catch (error) {
-      console.error('Signup error:', error);
-      setMessage('An unexpected error occurred. Please try again.');
-      setMessageType('error');
+      setMessage(error instanceof Error ? error.message : 'Sign up failed');
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
   };
 
-  const getMessageStyles = () => {
-    switch (messageType) {
-      case 'success':
-        return 'bg-green-50 text-green-800 border border-green-200';
-      case 'error':
-        return 'bg-red-50 text-red-800 border border-red-200';
-      default:
-        return 'bg-blue-50 text-blue-800 border border-blue-200';
+  const handleGoogleSignIn = async () => {
+    setIsSubmitting(true);
+    setMessage('');
+    
+    try {
+      await signInWithGoogle();
+      setMessage('Redirecting to Google...');
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Google sign-in failed');
+    } finally {
+      setIsSubmitting(false);
     }
   };
+
+  // Show loading while checking auth state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white">
+        <TopBar showSearchByDefault={false} showSearchIcon={false} />
+        <div className="flex items-center justify-center h-96 pt-[76px]">
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render form if user is logged in (will redirect)
+  if (user) {
+    return (
+      <div className="min-h-screen bg-white">
+        <TopBar showSearchByDefault={false} showSearchIcon={false} />
+        <div className="flex items-center justify-center h-96 pt-[76px]">
+          <p className="text-gray-600">Redirecting...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <SharedLayout showTopbar={false}>
-      <div className="min-h-screen flex items-center justify-center bg-background py-8 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md w-full space-y-6">
+    <div className="min-h-screen bg-white">
+      <TopBar />
+      
+      <div className="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 pt-[84px]">
+        <div className="max-w-md w-full space-y-8">
           {/* Logo */}
           <div className="text-center">
             <div className="flex justify-center mb-6">
-              <Image
-                src="/logo.svg"
-                alt="Alset"
-                width={120}
-                height={30}
-                className="h-8 w-auto"
-              />
+              <img src="/logo.svg" alt="Alset" className="h-8 w-auto" />
             </div>
-            <h2 className="text-2xl font-bold text-foreground">
+            <h2 className="text-2xl font-bold text-gray-900">
               Create your account
             </h2>
-            <p className="text-muted-foreground mt-2">
-              Join Alset to start your property journey
+            <p className="text-gray-600 mt-2">
+              Join Alset to start making off-market deals
             </p>
           </div>
 
           {/* Message Display */}
           {message && (
-            <div className={`p-3 rounded-md text-sm ${getMessageStyles()}`}>
+            <div className={`p-3 rounded-md text-sm ${
+              message.includes('created') || message.includes('Redirecting')
+                ? 'bg-blue-50 text-blue-800 border border-blue-200' 
+                : 'bg-red-50 text-red-800 border border-red-200'
+            }`}>
               {message}
             </div>
           )}
 
-          {/* Signup Form */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-center text-lg">Create New Account</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSignup} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="first_name">First Name</Label>
-                    <Input
-                      id="first_name"
-                      name="first_name"
-                      type="text"
-                      value={signupForm.first_name}
-                      onChange={handleSignupFormChange}
-                      placeholder="First name"
-                      className={errors.first_name ? 'border-red-500' : ''}
-                      required
-                    />
-                    {errors.first_name && (
-                      <p className="text-red-500 text-xs">{errors.first_name}</p>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="last_name">Last Name</Label>
-                    <Input
-                      id="last_name"
-                      name="last_name"
-                      type="text"
-                      value={signupForm.last_name}
-                      onChange={handleSignupFormChange}
-                      placeholder="Last name"
-                      className={errors.last_name ? 'border-red-500' : ''}
-                      required
-                    />
-                    {errors.last_name && (
-                      <p className="text-red-500 text-xs">{errors.last_name}</p>
-                    )}
-                  </div>
-                </div>
+          {/* Google Sign In */}
+          <div className="bg-white border border-gray-200 rounded-md p-6">
+            <h3 className="text-center text-lg font-medium text-gray-900 mb-4">
+              Continue with Google
+            </h3>
+            <button
+              onClick={handleGoogleSignIn}
+              disabled={isSubmitting}
+              className="w-full bg-white text-gray-900 border border-gray-300 hover:bg-gray-50 flex items-center justify-center gap-2 px-4 py-2 rounded-md font-medium transition-colors disabled:opacity-50"
+            >
+              <div className="w-5 h-5 bg-gradient-to-br from-blue-500 via-green-500 to-yellow-500 rounded-sm flex items-center justify-center text-white text-xs font-bold">
+                G
+              </div>
+              {isSubmitting ? 'Connecting to Google...' : 'Sign up with Google'}
+            </button>
+          </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    value={signupForm.email}
-                    onChange={handleSignupFormChange}
-                    placeholder="Enter your email"
-                    className={errors.email ? 'border-red-500' : ''}
-                    required
-                  />
-                  {errors.email && (
-                    <p className="text-red-500 text-xs">{errors.email}</p>
-                  )}
-                </div>
+          {/* Divider */}
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t border-gray-300" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-white px-2 text-gray-500">Or</span>
+            </div>
+          </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
-                  <Input
-                    id="password"
-                    name="password"
-                    type="password"
-                    value={signupForm.password}
-                    onChange={handleSignupFormChange}
-                    placeholder="Create a password"
-                    className={errors.password ? 'border-red-500' : ''}
-                    required
-                  />
-                  {errors.password && (
-                    <p className="text-red-500 text-xs">{errors.password}</p>
-                  )}
-                </div>
-
-                <Button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full"
-                >
-                  {loading ? 'Creating account...' : 'Create Account'}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
+          {/* Email/Password Sign Up Form */}
+          <div className="bg-white border border-gray-200 rounded-md p-6">
+            <h3 className="text-center text-lg font-medium text-gray-900 mb-4">
+              Sign up with Email
+            </h3>
+            <form onSubmit={handleEmailSignUp} className="space-y-4">
+              <div>
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                  Name
+                </label>
+                <input
+                  id="name"
+                  name="name"
+                  type="text"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  placeholder="Enter your name"
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                  Email
+                </label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  placeholder="Enter your email"
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                  Password
+                </label>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  placeholder="Create a password"
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full bg-gray-900 text-white px-4 py-2 rounded-md font-medium hover:bg-gray-800 transition-colors disabled:opacity-50"
+              >
+                {isSubmitting ? 'Creating account...' : 'Create Account'}
+              </button>
+            </form>
+          </div>
 
           <div className="text-center">
-            <Link href="/login" className="text-primary hover:text-primary/80 text-sm">
+            <Link href="/login" className="text-gray-900 hover:text-gray-700 text-sm font-medium">
               Already have an account? Sign in
             </Link>
           </div>
         </div>
       </div>
-    </SharedLayout>
+    </div>
   );
 }
