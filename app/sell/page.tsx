@@ -75,11 +75,13 @@ export default function SellPage() {
         marker.current.setPopup(popup);
         
         // Add global function to handle property type selection
-        (window as any).handlePropertyType = (type: string) => {
-          console.log('Property type selected:', type, 'at address:', address);
-          // Show step 2: Owner/Contract question
-          showOwnerContractStep(type, address, lng, lat);
-        };
+        if (typeof window !== 'undefined') {
+          (window as any).handlePropertyType = (type: string) => {
+            console.log('Property type selected:', type, 'at address:', address);
+            // Show step 2: Owner/Contract question
+            showOwnerContractStep(type, address, lng, lat);
+          };
+        }
       }
     }
   };
@@ -306,7 +308,7 @@ export default function SellPage() {
   };
 
   // Navigation functions
-  (window as any).goBackToStep1 = (address: string, lng: number, lat: number) => {
+  const goBackToStep1 = (address: string, lng: number, lat: number) => {
     if (marker.current && marker.current.getPopup()) {
       const popup = marker.current.getPopup();
       popup.setHTML(`
@@ -336,38 +338,38 @@ export default function SellPage() {
     }
   };
 
-  (window as any).goBackToStep2 = (propertyType: string, address: string, lng: number, lat: number) => {
+  const goBackToStep2 = (propertyType: string, address: string, lng: number, lat: number) => {
     showOwnerContractStep(propertyType, address, lng, lat);
   };
 
-  (window as any).goBackToStep3 = (propertyType: string, ownership: string, address: string, lng: number, lat: number) => {
+  const goBackToStep3 = (propertyType: string, ownership: string, address: string, lng: number, lat: number) => {
     showConditionStep(propertyType, ownership, address, lng, lat);
   };
 
-  (window as any).goBackToStep4 = (propertyType: string, ownership: string, condition: string, address: string, lng: number, lat: number) => {
+  const goBackToStep4 = (propertyType: string, ownership: string, condition: string, address: string, lng: number, lat: number) => {
     showTimelineStep(propertyType, ownership, condition, address, lng, lat);
   };
 
   // Handle owner/contract selection
-  (window as any).handleOwnerContract = (ownership: string, propertyType: string, address: string, lng: number, lat: number) => {
+  const handleOwnerContract = (ownership: string, propertyType: string, address: string, lng: number, lat: number) => {
     console.log('Ownership selected:', ownership, 'Property type:', propertyType);
     showConditionStep(propertyType, ownership, address, lng, lat);
   };
 
   // Handle condition selection
-  (window as any).handleCondition = (condition: string, propertyType: string, ownership: string, address: string, lng: number, lat: number) => {
+  const handleCondition = (condition: string, propertyType: string, ownership: string, address: string, lng: number, lat: number) => {
     console.log('Condition selected:', condition);
     showTimelineStep(propertyType, ownership, condition, address, lng, lat);
   };
 
   // Handle timeline selection
-  (window as any).handleTimeline = (timeline: string, propertyType: string, ownership: string, condition: string, address: string, lng: number, lat: number) => {
+  const handleTimeline = (timeline: string, propertyType: string, ownership: string, condition: string, address: string, lng: number, lat: number) => {
     console.log('Timeline selected:', timeline);
     showPropertyDetailsStep(propertyType, ownership, condition, timeline, address, lng, lat);
   };
 
   // Handle final property submission
-  (window as any).handlePropertySubmit = (propertyType: string, ownership: string, condition: string, timeline: string, address: string, lng: number, lat: number) => {
+  const handlePropertySubmit = (propertyType: string, ownership: string, condition: string, timeline: string, address: string, lng: number, lat: number) => {
     const askingPrice = (document.getElementById('askingPrice') as HTMLInputElement)?.value;
     const contactEmail = (document.getElementById('contactEmail') as HTMLInputElement)?.value;
     
@@ -426,6 +428,20 @@ export default function SellPage() {
       console.error('Map is not initialized');
     }
   };
+
+  // Assign functions to window object for popup callbacks
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      (window as any).goBackToStep1 = goBackToStep1;
+      (window as any).goBackToStep2 = goBackToStep2;
+      (window as any).goBackToStep3 = goBackToStep3;
+      (window as any).goBackToStep4 = goBackToStep4;
+      (window as any).handleOwnerContract = handleOwnerContract;
+      (window as any).handleCondition = handleCondition;
+      (window as any).handleTimeline = handleTimeline;
+      (window as any).handlePropertySubmit = handlePropertySubmit;
+    }
+  }, []);
 
   useEffect(() => {
     if (map.current) return; // initialize map only once
